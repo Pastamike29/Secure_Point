@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, CircularProgress, Typography, Snackbar, TextField } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, CircularProgress, Snackbar, TextField, Typography } from '@mui/material';
 import { Upload, ArrowBack, ArrowForward } from '@mui/icons-material';
 import axios from 'axios';
 import AdminDashboardLayout from '../../Component/AdminDashboardLayout';
@@ -48,7 +48,6 @@ const FindingIssue: React.FC = () => {
         setError(null);
         try {
             const response = await axios.get(`http://localhost:5000/findingIssue?page=${page}&limit=${limit}`);
-            console.log(response.data); // Add this log to check the response
             setIssues(response.data.finding_issues);
             setTotalPages(response.data.total_pages);
         } catch (err: any) {
@@ -113,47 +112,63 @@ const FindingIssue: React.FC = () => {
     };
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const query = event.target.value;
-        console.log('Search Query:', query);
-        setSearchQuery(query);
+        setSearchQuery(event.target.value);
     };
 
-    console.log('Search Query:', searchQuery);
-    console.log('Raw Issues:', issues);
-
     const filteredIssues = issues.filter((issue) => {
-        // Use a fallback for null or undefined values
         const matchesFindingIssue = (issue.findingIssue || '').toLowerCase().includes(searchQuery.toLowerCase());
         const matchesApplicationName = (issue.applicationName || '').toLowerCase().includes(searchQuery.toLowerCase());
-
-        console.log('Filtering issue:', issue);
-        console.log('Matches Finding Issue:', matchesFindingIssue);
-        console.log('Matches Application Name:', matchesApplicationName);
-
         return matchesFindingIssue || matchesApplicationName;
     });
 
     return (
-        <>
-            <AdminDashboardLayout title='Finding Issue Management'>
-                <TextField
-                    label="Search"
-                    variant="outlined"
-                    fullWidth
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    sx={{ marginBottom: '16px' }}
-                />
-                <DynamicTable issues={filteredIssues} />
+        <AdminDashboardLayout title='Finding Issue Management'>
+            <TextField
+                label="Search"
+                variant="outlined"
+                fullWidth
+                value={searchQuery}
+                onChange={handleSearchChange}
+                sx={{ marginBottom: '16px' }}
+            />
 
-                <Snackbar
-                    open={toastOpen}
-                    autoHideDuration={6000}
-                    onClose={handleToastClose}
-                    message={toastMessage}
-                />
-            </AdminDashboardLayout>
-        </>
+            {loading ? (
+                <CircularProgress />
+            ) : error ? (
+                <Typography color="error">{error}</Typography>
+            ) : (
+                <DynamicTable issues={filteredIssues} />
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={page === 1}
+                    onClick={handlePreviousPage}
+                    startIcon={<ArrowBack />}
+                >
+                    Previous
+                </Button>
+                <Typography variant="body1">{`Page ${page} of ${totalPages}`}</Typography>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={page === totalPages}
+                    onClick={handleNextPage}
+                    endIcon={<ArrowForward />}
+                >
+                    Next
+                </Button>
+            </div>
+
+            <Snackbar
+                open={toastOpen}
+                autoHideDuration={6000}
+                onClose={handleToastClose}
+                message={toastMessage}
+            />
+        </AdminDashboardLayout>
     );
 };
 
