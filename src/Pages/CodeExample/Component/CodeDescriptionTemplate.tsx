@@ -82,7 +82,12 @@ export default function CodeDescriptionTemplate({
             <Typography variant='h5' sx={{ mb: 2 }}>
                 {sub_issueName || 'No issue name available'}
             </Typography>
-            <Typography variant="body1">{description || 'No description available'}</Typography>
+            <Typography 
+                variant="body1" 
+                sx={{ whiteSpace: 'pre-line' }} // Preserve line breaks in description
+            >
+                {description || 'No description available'}
+            </Typography>
 
             {Object.keys(issueCodeSnippets).length > 0 && (
                 <>
@@ -96,7 +101,12 @@ export default function CodeDescriptionTemplate({
             <Typography variant='h5' sx={{ mb: 2 }}>
                 Recommendation
             </Typography>
-            <Typography variant="body1">{recommendation || 'No recommendation available'}</Typography>
+            <Typography 
+                variant="body1" 
+                sx={{ whiteSpace: 'pre-line' }} // Preserve line breaks in recommendation
+            >
+                {recommendation || 'No recommendation available'}
+            </Typography>
 
             {Object.keys(solveCodeSnippets).length > 0 && (
                 <>

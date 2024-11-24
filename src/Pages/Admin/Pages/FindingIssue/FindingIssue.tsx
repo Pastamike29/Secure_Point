@@ -1,54 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, IconButton, CircularProgress, Snackbar, TextField, Typography, Select, MenuItem, SelectChangeEvent } from '@mui/material';
-import { Upload, ArrowBack, ArrowForward } from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import { Button, CircularProgress, Snackbar, Typography, Box, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import { ArrowBack, ArrowForward, Close } from '@mui/icons-material';
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
 import AdminDashboardLayout from '../../Component/AdminDashboardLayout';
 import DynamicTable from './DynamicTable';
 
-interface FindingIssue {
-    _id: string;
-    applicationNumber: string;
-    applicationName: string;
-    scope?: string;
-    applicationContact?: string;
-    department?: string;
-    chief?: string;
-    riskRating?: string;
-    status?: string;
-    findingIssue?: string;
-    description?: string;
-    recommendation?: string;
-    foundDate?: string;
-    overdueStatus?: string;
-    fixedCriteria?: string;
-    overdueDate?: string;
-    pentester?: string;
-    testingScope?: string;
-    remark?: string;
-    noOpenOfGRC?: string;
-    remarkGRC?: string;
-    updated_at?: string;
-}
-
 const FindingIssue: React.FC = () => {
-    const [issues, setIssues] = useState<FindingIssue[]>([]);
+    const [issues, setIssues] = useState<any[]>([]); // Define your data structure
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [toastOpen, setToastOpen] = useState<boolean>(false);
+    const [inputValue, setInputValue] = useState<string>("1");  // Input field value
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10); // Default rows per page
+    const [uploading, setUploading] = useState<boolean>(false);
+    const [fileList, setFileList] = useState<File[]>([]); // Manage selected files
     const [toastMessage, setToastMessage] = useState<string>('');
-    const [uploadProgress, setUploadProgress] = useState<number>(0);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchField, setSearchField] = useState('applicationNumber');
-    const [lastUploadedFile, setLastUploadedFile] = useState<File | null>(null);
-    const limit = 10;
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false); // Modal state
+    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+    const [uploadSuccess, setUploadSuccess] = useState<boolean>(false); // New state for upload success status
+    const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
 
-    const fetchFindingIssues = async (page: number) => {
+    const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+    const maxFileSize = 50 * 1024 * 1024; // 50 MB
+
+    const limit = 100; // Limit to 100 rows
+
+    const fetchFindingIssues = async (page: number, query: string) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get(`http://localhost:5000/findingIssue?page=${page}&limit=${limit}`);
+            const response = await axios.get(`http://localhost:5000/findingIssue?page=${page}&limit=${limit}&search=${query}`);
             setIssues(response.data.finding_issues);
             setTotalPages(response.data.total_pages);
         } catch (err: any) {
@@ -60,165 +45,259 @@ const FindingIssue: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchFindingIssues(page);
-    }, [page]);
-
-    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!event.target.files || event.target.files.length === 0) {
-            return;
-        }
-        const file = event.target.files[0];
-
-        if (lastUploadedFile && lastUploadedFile.name === file.name && lastUploadedFile.size === file.size) {
-            setToastMessage('You have already uploaded this file. Please select a different file.');
-            setToastOpen(true);
-            return;
+        if (timeoutId) {
+            clearTimeout(timeoutId); // Clear previous timeout if any
         }
 
+        const delayTimeout = setTimeout(() => {
+            fetchFindingIssues(page, searchTerm); // Fetch issues after delay
+        }, 500); 
+
+        setTimeoutId(delayTimeout); // Store the timeout ID
+
+        return () => clearTimeout(delayTimeout); // Cleanup timeout when the component unmounts or searchTerm changes
+    }, [page, searchTerm]); // Run this effect when either page or searchTerm changes
+
+
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files ? Array.from(event.target.files) : [];
+        if (files.length === 0) {
+            toast.info('No files selected.');
+            return;
+        }
+        setFileList((prev) => [...prev, ...files]);
+        setSelectedFile(files[0]); // Update for single-file handling
+    };
+
+    // Handle file removal
+    const handleFileDelete = (file: File) => {
+        setFileList(prevFiles => prevFiles.filter(f => f !== file));
+    };
+
+    const handleConfirmUpload = async (file: File) => {
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append("file", file);
 
         try {
-            setUploadProgress(0);
-            await axios.post('http://localhost:5000/uploadFindingIssues', formData, {
+            const response = await axios.post("http://127.0.0.1:5000/uploadFindingIssues", formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                onUploadProgress: (progressEvent) => {
-                    const progress = progressEvent?.total
-                        ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                        : 0;
-                    setUploadProgress(progress);
+                    "Content-Type": "multipart/form-data",
                 },
             });
-            setLastUploadedFile(file);
-            setToastMessage('File uploaded successfully!');
-            setToastOpen(true);
+            console.log("Upload success:", response.data);
+            // Trigger a success toast after uploading the file
+            toast.success(`Successfully uploaded: ${file.name}`);
         } catch (error) {
-            setToastMessage('Error uploading file');
-            setToastOpen(true);
+            console.error("Upload error:", error);
+            toast.error(`Error uploading file: ${file.name}`);
         }
     };
 
-    const handleToastClose = () => {
-        setToastOpen(false);
+    const handleButtonClick = async () => {
+        if (fileList.length === 0) {
+            toast.error('Please select at least one file.');
+            return;
+        }
+
+        setUploading(true);
+        setUploadSuccess(false); // Reset upload success status
+
+        for (const file of fileList) {
+            await handleConfirmUpload(file); // Upload each file
+        }
+
+        setUploading(false);
+
+        // After all files are uploaded, show success toast and set upload success status
+        setUploadSuccess(true);
+        setDialogOpen(false);  // Close the modal after upload is complete
     };
 
-    const handleNextPage = () => {
-        if (page < totalPages) setPage(prevPage => prevPage + 1);
+    const uploadFile = (file: File, retries = 0) => {
+        const MAX_RETRIES = 3; // Define a maximum number of retries
+        if (retries > MAX_RETRIES) {
+            console.error('Exceeded maximum retries');
+            return;
+        }
+
+        try {
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const csvContent = reader.result as string;
+                const rows = csvContent.trim().split('\n').filter(row => row.trim() !== ''); // Remove empty rows
+                const headers = rows[0].split(',').map(header => header.trim());
+
+                console.log('CSV Headers:', headers); // Log headers for inspection
+
+                const validRows: string[][] = [];
+                rows.slice(1).forEach((row) => {
+                    const columns = row.split(',').map(col => col.trim());
+                    const isRowEmpty = columns.every(col => col === '');
+                    if (!isRowEmpty) {
+                        validRows.push(columns);
+                    }
+                });
+
+                if (validRows.length > 0) {
+                    const formData = new FormData();
+                    formData.append('file', file); // Original file if needed on the backend
+                    formData.append('headers', JSON.stringify(headers)); // Headers as JSON
+                    formData.append('data', JSON.stringify(validRows)); // Valid rows as JSON
+
+                    try {
+                        const response = await axios.post(
+                            'http://127.0.0.1:5000/uploadFindingIssues',
+                            formData,
+                            { headers: { 'Content-Type': 'multipart/form-data' } }
+                        );
+                        toast.success('File uploaded successfully!');
+                        console.log('Server response:', response.data);
+                    } catch (error) {
+                        toast.error('Error uploading file.');
+                        console.error('Upload error:', error);
+                    }
+                } else {
+                    toast.info('No valid rows to upload.');
+                }
+            };
+
+            reader.readAsText(file);
+        } catch (error) {
+            console.error('Upload failed, retrying...', error);
+            uploadFile(file, retries + 1); // Retry with an incremented counter
+        }
     };
 
-    const handlePreviousPage = () => {
-        if (page > 1) setPage(prevPage => prevPage - 1);
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setPage(newPage); // Update page immediately
+            fetchFindingIssues(newPage, searchTerm); // Fetch new data after page change
+        }
     };
 
-    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(event.target.value);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const inputValue = e.target.value;
+
+        // Allow only numeric input and empty string
+        if (inputValue === "" || /^[0-9]*$/.test(inputValue)) {
+            setInputValue(inputValue);  // Update input value
+
+            // Only update page if the value is a valid number (or empty string)
+            if (inputValue === "") {
+                setPage(1); // Default to page 1 if empty
+            } else {
+                const pageNumber = parseInt(inputValue, 10);
+                if (!isNaN(pageNumber) && pageNumber > 0) {
+                    setPage(pageNumber); // Update page number state
+                }
+            }
+        }
     };
 
-    const handleSelectChange = (event: SelectChangeEvent<string>) => {
-        const selectedValue = event.target.value;
-        setSearchField(selectedValue); // Update the searchField with the selected value
+    const handleBlur = () => {
+        const pageNumber = parseInt(inputValue, 10);
+
+        // Reset to page 1 if invalid input (empty, negative or non-numeric)
+        if (isNaN(pageNumber) || pageNumber <= 0) {
+            setPage(1); // Reset to page 1
+            setInputValue("1"); // Reset input value to "1"
+        } else {
+            setPage(pageNumber); // Set valid page number
+        }
+
+        // Fetch issues for the updated or valid page
+        fetchFindingIssues(page, searchTerm);
     };
-
-    const filteredIssues = issues.filter((issue) => {
-        const fieldValue = issue[searchField as keyof FindingIssue] || ''; // Get the field's value
-
-        // Perform case-insensitive matching based on the selected field
-        return fieldValue.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-
 
 
     return (
-        <AdminDashboardLayout title='Finding Issue Management'>
+        <AdminDashboardLayout title="Finding Issue Management">
+            <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Button variant="contained" color="secondary" onClick={() => setDialogOpen(true)}>
+                    Upload CSV
+                </Button>
 
-
-            <Select
-                value={searchField}
-                onChange={handleSelectChange} // Use the corrected handler here
-                sx={{ marginBottom: '16px', marginLeft: '16px' }}
-            >
-                <MenuItem value="applicationNumber">Application Number</MenuItem>
-                <MenuItem value="applicationName">Application Name</MenuItem>
-                <MenuItem value="applicationContact">Application Contact</MenuItem>
-                <MenuItem value="department">Department</MenuItem>
-                <MenuItem value="chief">Chief</MenuItem>
-                <MenuItem value="riskRating">Risk Rating</MenuItem>
-                <MenuItem value="status">Status</MenuItem>
-                <MenuItem value="findingIssue">Finding Issue</MenuItem>
-                <MenuItem value="description">Description</MenuItem>
-                <MenuItem value="recommendation">Recommendation</MenuItem>
-                <MenuItem value="foundDate">Found Date</MenuItem>
-                <MenuItem value="pentester">Pentester</MenuItem>
-                <MenuItem value="testingScope">Testing Scope</MenuItem>
-            </Select>
-
-            <TextField
-                label="Search"
-                variant="outlined"
-                fullWidth
-                value={searchQuery}
-                onChange={handleSearchChange}
-                sx={{ marginBottom: '16px' }}
-            />
-
-            <Select
-                value={searchField}
-                onChange={handleSelectChange}
-                sx={{ marginBottom: '16px', marginLeft: '16px' }}
-            >
-                <MenuItem value="applicationNumber">Application Number</MenuItem>
-                <MenuItem value="applicationName">Application Name</MenuItem>
-                <MenuItem value="applicationContact">Application Contact</MenuItem>
-                <MenuItem value="department">Department</MenuItem>
-                <MenuItem value="chief">Chief</MenuItem>
-                <MenuItem value="riskRating">Risk Rating</MenuItem>
-                <MenuItem value="status">Status</MenuItem>
-                <MenuItem value="findingIssue">Finding Issue</MenuItem>
-                <MenuItem value="description">Description</MenuItem>
-                <MenuItem value="recommendation">Recommendation</MenuItem>
-                <MenuItem value="foundDate">Found Date</MenuItem>
-                <MenuItem value="pentester">Pentester</MenuItem>
-                <MenuItem value="testingScope">Testing Scope</MenuItem>
-            </Select>
+                <TextField
+                    label="Page Number"
+                    type="text"
+                    value={inputValue}  // Ensure page is a string to be displayed in the TextField
+                    onChange={handleInputChange}  // Handle input change separately
+                    onBlur={handleBlur}
+                    sx={{
+                        width: '100px',
+                        marginLeft: 2,
+                    }}
+                    inputProps={{
+                        pattern: '[0-9]*',
+                    }}
+                />
+            </Box>
 
             {loading ? (
                 <CircularProgress />
             ) : error ? (
                 <Typography color="error">{error}</Typography>
             ) : (
-                <DynamicTable issues={filteredIssues} />
+                <DynamicTable issues={issues} />
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={page === 1}
-                    onClick={handlePreviousPage}
-                    startIcon={<ArrowBack />}
-                >
-                    Previous
-                </Button>
-                <Typography variant="body1">{`Page ${page} of ${totalPages}`}</Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={page === totalPages}
-                    onClick={handleNextPage}
-                    endIcon={<ArrowForward />}
-                >
-                    Next
-                </Button>
-            </div>
+            <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}>
+                <IconButton onClick={() => handlePageChange(page - 1)} disabled={page <= 1}>
+                    <ArrowBack />
+                </IconButton>
+                <Typography variant="body1" sx={{ alignSelf: 'center' }}>
+                    Page {page} of {totalPages}
+                </Typography>
+                <IconButton onClick={() => handlePageChange(page + 1)} disabled={page >= totalPages}>
+                    <ArrowForward />
+                </IconButton>
+            </Box>
 
-            <Snackbar
-                open={toastOpen}
-                autoHideDuration={6000}
-                onClose={handleToastClose}
-                message={toastMessage}
-            />
+
+            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+                <DialogTitle>Upload Finding Issues</DialogTitle>
+                <DialogContent>
+                    <input
+                        type="file"
+                        accept=".csv"
+                        ref={fileInputRef}
+                        onChange={handleFileSelect}
+                        style={{ display: 'none' }}
+                    />
+                    <Button
+                        variant="contained"
+                        component="span"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        Choose File
+                    </Button>
+                    <Box sx={{ marginTop: 2 }}>
+                        {fileList.map((file, index) => (
+                            <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 1 }}>
+                                <Typography variant="body2">{file.name}</Typography>
+                                <IconButton onClick={() => handleFileDelete(file)}>
+                                    <Close />
+                                </IconButton>
+                            </Box>
+                        ))}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDialogOpen(false)} color="primary">
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleButtonClick}
+                        color="primary"
+                        disabled={uploading}
+                    >
+                        {uploading ? 'Uploading...' : 'Upload'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <ToastContainer />
         </AdminDashboardLayout>
     );
 };
