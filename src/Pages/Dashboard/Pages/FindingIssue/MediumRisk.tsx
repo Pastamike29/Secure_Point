@@ -19,16 +19,18 @@ interface ApplicationDetails {
     "Application Contact": string;
     Department: string;
     Chief: string;
-    "Total Vulnerabilities": number;
   };
+  "Finding Issues Count": number;
 }
 
 interface RiskRatingGroup {
-  _id: string; // Add _id to represent the risk rating (Critical, High, etc.)
+  _id: string; // Risk Rating
   applications: ApplicationDetails[];
+  "Total Applications Scanned": number;
+  "Total Findings": number;
 }
 
-export default function ApplicationRiskTable() {
+export default function MediumRisk() {
   const [riskRatings, setRiskRatings] = useState<RiskRatingGroup[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,8 +40,8 @@ export default function ApplicationRiskTable() {
       const response = await fetch('http://localhost:5000/getApplicationByRiskRating');
       if (!response.ok) throw new Error('Failed to fetch data');
       const data = await response.json();
-      console.log("API Response:", data); // Log API response
-      setRiskRatings(data.data || []);
+      const mediumRiskData = data.data.filter((item: RiskRatingGroup) => item._id === 'Medium');
+      setRiskRatings(mediumRiskData);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
     } finally {
@@ -52,23 +54,34 @@ export default function ApplicationRiskTable() {
   }, []);
 
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return (
+      <Typography align="center" variant="h6" sx={{ marginTop: '20px' }}>
+        Loading...
+      </Typography>
+    );
   }
 
   if (error) {
-    return <Typography color="error">Error: {error}</Typography>;
+    return (
+      <Typography align="center" color="error" variant="h6" sx={{ marginTop: '20px' }}>
+        Error: {error}
+      </Typography>
+    );
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Finding Issues">
       <Box sx={{ padding: '16px' }}>
-        <Typography variant="h4" gutterBottom>
-          Applications by Risk Rating
-        </Typography>
         {riskRatings.map((group) => (
           <Box key={group._id} sx={{ marginBottom: '24px' }}>
             <Typography variant="h5" sx={{ marginBottom: '12px', fontWeight: 'bold' }}>
-              {group._id || 'Unknown Risk Rating'}
+              {group._id || 'Unknown Risk Rating'} Risk Applications
+            </Typography>
+            <Typography sx={{ marginBottom: '8px' }}>
+              <strong>Total Applications Scanned:</strong> {group["Total Applications Scanned"] || 'N/A'}
+            </Typography>
+            <Typography sx={{ marginBottom: '16px' }}>
+              <strong>Total Findings:</strong> {group["Total Findings"] || 'N/A'}
             </Typography>
             {group.applications.length === 0 ? (
               <Typography>No applications available for this risk rating.</Typography>
@@ -77,44 +90,25 @@ export default function ApplicationRiskTable() {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Application Name</TableCell>
-                      <TableCell>Application Number</TableCell>
-                      <TableCell>Application Contact</TableCell>
-                      <TableCell>Department</TableCell>
-                      <TableCell>Chief</TableCell>
-                      <TableCell>Total Vulnerabilities</TableCell>
+                      <TableCell><strong>Application Name</strong></TableCell>
+                      <TableCell><strong>Application Number</strong></TableCell>
+                      <TableCell><strong>Application Contact</strong></TableCell>
+                      <TableCell><strong>Department</strong></TableCell>
+                      <TableCell><strong>Chief</strong></TableCell>
+                      <TableCell><strong>Total Finding Issues</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {group.applications
-                      .sort((a, b) => b.Details["Total Vulnerabilities"] - a.Details["Total Vulnerabilities"])
+                      .sort((a, b) => b["Finding Issues Count"] - a["Finding Issues Count"])
                       .map((app, index) => (
-                        <TableRow
-                          key={index}
-                          hover
-                          sx={{
-                            cursor: 'pointer',
-                            opacity: 1,
-                            transition: 'opacity 0.3s ease',
-                            '&:hover': {
-                              backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                              opacity: 0.7,
-                            },
-                          }}
-                        >
+                        <TableRow key={index}>
                           <TableCell>{app["Application Name"] || 'N/A'}</TableCell>
                           <TableCell>{app.Details["Application Number"] || 'N/A'}</TableCell>
                           <TableCell>{app.Details["Application Contact"] || 'N/A'}</TableCell>
                           <TableCell>{app.Details.Department || 'N/A'}</TableCell>
                           <TableCell>{app.Details.Chief || 'N/A'}</TableCell>
-                          <TableCell
-                            sx={{
-                              fontWeight: 'bold',
-                              color: app["Total Vulnerabilities"] > 10 ? 'red' : 'inherit',
-                            }}
-                          >
-                            {app["Total Vulnerabilities"] ?? 'N/A'}
-                          </TableCell>
+                          <TableCell>{app["Finding Issues Count"] || 'N/A'}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>

@@ -29,6 +29,14 @@ import ServerSideRequestForgery from './Pages/lessons/Owasp_10/ServerSideRequest
 
 import RegisterPage from './Login/ReigisterPage'
 import Overview from './Pages/Dashboard/Pages/Overview'
+import CriticalRisk from './Pages/Dashboard/Pages/FindingIssue/CriticalRisk'
+import HighRisk from './Pages/Dashboard/Pages/FindingIssue/HighRisk'
+import MediumRisk from './Pages/Dashboard/Pages/FindingIssue/MediumRisk'
+import LowRisk from './Pages/Dashboard/Pages/FindingIssue/LowRisk'
+import InformativeRisk from './Pages/Dashboard/Pages/FindingIssue/InformativeRisk'
+
+
+
 import ApplicationIssues from './Pages/Dashboard/Pages/FindingIssue/ApplicationIssues'
 import Issue1 from './Pages/Dashboard/Pages/FindingIssue/Vulnerabilities/issue1'
 import FeedbackModal from './Pages/User/page/Page/FeedbackModal'
@@ -107,8 +115,13 @@ export default function App() {
 
 
         <Route path="/Overview" element={<Overview />} />
-        <Route path="/applicationIssues" element={<ApplicationIssues />} />
-        <Route path="/applicationIssues/issue1" element={<Issue1 />} />
+        <Route path="/ApplicationIssues" element={<ApplicationIssues />} />
+        <Route path="/ApplicationIssues/CriticalRisk" element={<CriticalRisk />} />
+        <Route path="/ApplicationIssues/HighRisk" element={<HighRisk />} />
+        <Route path="/ApplicationIssues/MediumRisk" element={<MediumRisk />} />
+        <Route path="/ApplicationIssues/LowRisk" element={<LowRisk />} />
+        <Route path="/ApplicationIssues/InformativeRisk" element={<InformativeRisk />} />
+        <Route path="/ApplicationIssues/issue1" element={<Issue1 />} />
 
       </Routes>
       </ToggleColorMode>

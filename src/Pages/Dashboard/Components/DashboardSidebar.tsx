@@ -1,27 +1,19 @@
-import { Avatar, Box, Container, Divider, Drawer, IconButton, List, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
+import { Avatar, Box, Container, Divider, Drawer, List, ListItemButton, ListItemText, Typography } from "@mui/material";
 import React, { useState } from "react";
 import AdbIcon from '@mui/icons-material/Adb';
 import { useNavigate } from "react-router-dom";
-import { useColorMode } from "../../../assets/Themes/ThemeContext";
 
 export default function DashboardSidebar() {
   const navigate = useNavigate();
 
-  const [open, setOpen] = useState<string | null>(null);
-  const settings = ['Profile', 'Dashboard', 'Logout'];
-  const { toggleTheme, mode } = useColorMode();
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const [open, setOpen] = useState<boolean>(false); // Set state as a boolean for simplicity
+  
+  const handleToggleSublist = () => {
+    setOpen(!open); 
+  };
 
   const handleNavigation = (path: string) => {
     navigate(path);
-  };
-
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
   };
 
   return (
@@ -103,10 +95,31 @@ export default function DashboardSidebar() {
                     opacity: 0.7,
                   },
                 }}
-                onClick={() => handleNavigation('/applicationIssues')}
+                onClick={handleToggleSublist} // Toggle sublist visibility
               >
                 FINDING ISSUES
               </Typography>
+
+              {/* Submenu: Only visible when 'open' is true */}
+              {open && (
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/CriticalRisk')}>
+                    <ListItemText primary="Critical Risk" />
+                  </ListItemButton>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/HighRisk')}>
+                    <ListItemText primary="High Risk" />
+                  </ListItemButton>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/MediumRisk')}>
+                    <ListItemText primary="Medium Risk" />
+                  </ListItemButton>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/LowRisk')}>
+                    <ListItemText primary="Low Risk" />
+                  </ListItemButton>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/InformativeRisk')}>
+                    <ListItemText primary="Informative Risk" />
+                  </ListItemButton>
+                </List>
+              )}
             </Box>
           </List>
 
