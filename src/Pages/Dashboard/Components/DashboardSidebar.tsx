@@ -103,19 +103,22 @@ export default function DashboardSidebar() {
               {/* Submenu: Only visible when 'open' is true */}
               {open && (
                 <List component="div" disablePadding>
-                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/CriticalRisk')}>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/Overview/ApplicationIssues')}>
+                    <ListItemText primary="All Applications" />
+                  </ListItemButton>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/Overview/ApplicationIssues/CriticalRisk')}>
                     <ListItemText primary="Critical Risk" />
                   </ListItemButton>
-                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/HighRisk')}>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/Overview/ApplicationIssues/HighRisk')}>
                     <ListItemText primary="High Risk" />
                   </ListItemButton>
-                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/MediumRisk')}>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/Overview/ApplicationIssues/MediumRisk')}>
                     <ListItemText primary="Medium Risk" />
                   </ListItemButton>
-                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/LowRisk')}>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/Overview/ApplicationIssues/LowRisk')}>
                     <ListItemText primary="Low Risk" />
                   </ListItemButton>
-                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/ApplicationIssues/InformativeRisk')}>
+                  <ListItemButton sx={{ pl: 5 }} onClick={() => handleNavigation('/Overview/ApplicationIssues/InformativeRisk')}>
                     <ListItemText primary="Informative Risk" />
                   </ListItemButton>
                 </List>

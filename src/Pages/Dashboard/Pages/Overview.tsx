@@ -22,12 +22,12 @@ import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel,
 } from '@mui/material';
 import DashboardLayout from '../Components/DashboardLayout';
 import BarCharts from '../Components/BarCharts';
 import LineCharts from '../Components/LineCharts';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 
 
@@ -42,6 +42,7 @@ interface Vulnerability {
 }
 
 
+
 // Define the structure of the data returned by the API
 
 interface VulnerabilitiesData {
@@ -49,14 +50,23 @@ interface VulnerabilitiesData {
   status: string;
 }
 
+interface RiskRatingSummary {
+  Critical: number;
+  High: number;
+  Medium: number;
+  Low: number;
+  Informative: number;
+}
+
+
 
 export default function Overview() {
-  const [riskRatings, setRiskRatings] = useState({
-    total: 0,
-    critical: 0,
-    high: 0,
-    medium: 0,
-    low: 0,
+  const [riskRatings, setRiskRatings] = useState<RiskRatingSummary>({
+    Critical: 0,
+    High: 0,
+    Medium: 0,
+    Low: 0,
+    Informative: 0,
   });
 
   const [selectedOption, setSelectedOption] = useState('Critical');
@@ -64,51 +74,44 @@ export default function Overview() {
   const [totalVulnerabilities, setTotalVulnerabilities] = useState(0);
 
   const [vulnerabilitiesData, setVulnerabilitiesData] = useState<VulnerabilitiesData | null>(null);
-
   useEffect(() => {
-    async function fetchRiskRatings() {
+    async function fetchTotalApplicationsScanned() {
       try {
-        const response = await axios.get("http://localhost:5000/getRiskRating");
-
-        // Assuming response.data looks like:
-        // { "Critical": 1, "High": 31, "Medium": 187, "Low": 140 }
-
-        const riskData = response.data;
-        const total =
-          riskData.Critical + riskData.High + riskData.Medium + riskData.Low;
-
-        // Set the state with the calculated total and other risk levels
-        setRiskRatings({
-          total: total,
-          critical: riskData.Critical,
-          high: riskData.High,
-          medium: riskData.Medium,
-          low: riskData.Low,
-        });
+        const response = await axios.get("http://localhost:5000/getTotalApplicationsScanned");
+        setTotalApplicationsScanned(response.data.totalApplicationsScanned || 0);
       } catch (error) {
-        console.error("Error fetching risk ratings:", error);
+        console.error("Error fetching total applications scanned:", error);
       }
     }
+
 
     async function fetchTotalVulnerabilities() {
       try {
-        const response = await axios.get("http://localhost:5000/getTotalFindings");
+        const response = await axios.get('http://localhost:5000/getTotalFindings');
+        console.log('Total Findings API Response:', response.data);
 
-        // The response from getTotalFindings should look like:
-        // { "totalFindings": 1103 }
-
-        if (response.data && response.data.totalFindings !== undefined) {
-          console.log("Total Vulnerabilities:", response.data.totalFindings);
-          setTotalVulnerabilities(response.data.totalFindings); // Set the total vulnerabilities
-        }
+        const { totalFindings, riskRatingSummary } = response.data;
+        setRiskRatings(riskRatingSummary);
+        setTotalVulnerabilities(totalFindings);
       } catch (error) {
-        console.error("Error fetching total vulnerabilities:", error);
+        console.error('Error fetching total findings:', error);
+        // Set default values if the fetch fails
+        setRiskRatings({
+          Critical: 0,
+          High: 0,
+          Medium: 0,
+          Low: 0,
+          Informative: 0,
+        });
+        setTotalVulnerabilities(0);
       }
     }
+
+
     async function fetchVulnerabilities() {
       try {
         const response = await axios.get("http://localhost:5000/getTop5FindingIssuesByRiskRating");
-        console.log("Vulnerabilities Data Response:", response.data); // Log response
+        console.log("Vulnerabilities Data Response:", response.data); // Log the response
         const data: VulnerabilitiesData = response.data;
         setVulnerabilitiesData(data);
       } catch (error) {
@@ -119,38 +122,21 @@ export default function Overview() {
 
     console.log("vulnerabilitiesData:", vulnerabilitiesData);
 
-    fetchRiskRatings();
+    fetchTotalApplicationsScanned();
     fetchVulnerabilities();
     fetchTotalVulnerabilities();  // Fetch total vulnerabilities from getTotalFindings
   }, []);
+
   const getPieData = (rating: string) => {
-    const ratingLower = rating.toLowerCase();
-    console.log(`Fetching data for: ${ratingLower}`);
-
-    // Check if vulnerabilitiesData is not null
-    if (!vulnerabilitiesData) {
-      console.error("No vulnerabilities data available");
-      return [{ name: "No Data", value: 0 }];
-    }
-
-    // Now TypeScript knows that vulnerabilitiesData is not null, so it's safe to access its properties
-    const ratingData = vulnerabilitiesData.data.find(
-      (data) => data.riskRating.toLowerCase() === ratingLower
+    const ratingData = vulnerabilitiesData?.data.find(
+      (data) => data.riskRating.toLowerCase() === rating.toLowerCase()
     );
-
-    console.log("Rating Data:", ratingData);
-
-    // Check if the ratingData exists and contains topIssues
-    if (ratingData && ratingData.topIssues && ratingData.topIssues.length > 0) {
-      return ratingData.topIssues.map((vul) => ({
-        name: vul.findingIssue,
-        value: vul.findingCount,
-      }));
-    }
-
-    // Return a fallback "No Data" entry if no data found
-    return [{ name: "No Data", value: 0 }];
+    return ratingData?.topIssues.map((vul) => ({
+      name: vul.findingIssue,
+      value: vul.findingCount,
+    })) || [{ name: "No Data", value: 0 }];
   };
+
 
 
 
@@ -167,7 +153,7 @@ export default function Overview() {
                     Total Application Scanned
                   </Typography>
                   <Typography variant="h4">
-                    {riskRatings.total || "Loading..."}
+                    {totalApplicationsScanned || "Loading..."}
                   </Typography>
                 </CardContent>
               </Card>
@@ -186,7 +172,7 @@ export default function Overview() {
             </Grid>
           </Grid>
 
-          {/* Second row */}
+          {/* Second row: Pie Chart for Vulnerabilities */}
           <Grid item xs={12} sx={{ marginTop: 3.5 }}>
             <Grid container spacing={3.5}>
               <Grid item xs={12}>
@@ -231,8 +217,6 @@ export default function Overview() {
                         <Legend />
                       </PieChart>
                     </ResponsiveContainer>
-
-
                   </CardContent>
                 </Card>
               </Grid>
@@ -240,35 +224,22 @@ export default function Overview() {
           </Grid>
         </Grid>
 
-        {/* Right side: Critical, High, Medium, Low */}
+        {/* Right side: Critical, High, Medium, Low, Informative */}
         <Grid item xs={12} md={4}>
-          <Card sx={{ height: "100%" }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Critical
-              </Typography>
-              <Typography variant="h4">{riskRatings.critical}</Typography>
-            </CardContent>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                High
-              </Typography>
-              <Typography variant="h4">{riskRatings.high}</Typography>
-            </CardContent>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Medium
-              </Typography>
-              <Typography variant="h4">{riskRatings.medium}</Typography>
-            </CardContent>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Low
-              </Typography>
-              <Typography variant="h4">{riskRatings.low}</Typography>
-            </CardContent>
+          <Card sx={{ height: '100%' }}>
+            {['Critical', 'High', 'Medium', 'Low', 'Informative'].map((label, index) => (
+              <CardContent key={index}>
+                <Link to={`ApplicationIssues/${label}Risk`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <Typography variant="h6" gutterBottom>
+                    {label}
+                  </Typography>
+                  <Typography variant="h4">{riskRatings[label as keyof RiskRatingSummary] || 0}</Typography>
+                </Link>
+              </CardContent>
+            ))}
           </Card>
         </Grid>
+
       </Grid>
 
       {/* Charts */}
@@ -280,6 +251,6 @@ export default function Overview() {
           <BarCharts />
         </Grid>
       </Grid>
-    </DashboardLayout>
+    </DashboardLayout >
   );
 }

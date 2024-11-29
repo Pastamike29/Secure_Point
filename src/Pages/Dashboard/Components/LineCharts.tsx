@@ -91,7 +91,10 @@ const LineCharts: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
+                        <XAxis 
+                            dataKey="name" 
+                            tick={{ fill: "white" }}  // Change the font color of month names to white
+                        />
                         <YAxis />
                         <Tooltip />
                         <Legend />

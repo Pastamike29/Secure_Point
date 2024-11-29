@@ -29,6 +29,7 @@ import ServerSideRequestForgery from './Pages/lessons/Owasp_10/ServerSideRequest
 
 import RegisterPage from './Login/ReigisterPage'
 import Overview from './Pages/Dashboard/Pages/Overview'
+import DynamicFindingIssues from './Pages/Dashboard/Pages/FindingIssue/Vulnerabilities/DynamicFindingIssues'
 import CriticalRisk from './Pages/Dashboard/Pages/FindingIssue/CriticalRisk'
 import HighRisk from './Pages/Dashboard/Pages/FindingIssue/HighRisk'
 import MediumRisk from './Pages/Dashboard/Pages/FindingIssue/MediumRisk'
@@ -38,7 +39,6 @@ import InformativeRisk from './Pages/Dashboard/Pages/FindingIssue/InformativeRis
 
 
 import ApplicationIssues from './Pages/Dashboard/Pages/FindingIssue/ApplicationIssues'
-import Issue1 from './Pages/Dashboard/Pages/FindingIssue/Vulnerabilities/issue1'
 import FeedbackModal from './Pages/User/page/Page/FeedbackModal'
 import QuizPage from './Pages/Quiz/Page/QuizPage'
 import ScoreBoard from './Pages/Quiz/Page/ScoreBoard'
@@ -115,13 +115,14 @@ export default function App() {
 
 
         <Route path="/Overview" element={<Overview />} />
-        <Route path="/ApplicationIssues" element={<ApplicationIssues />} />
-        <Route path="/ApplicationIssues/CriticalRisk" element={<CriticalRisk />} />
-        <Route path="/ApplicationIssues/HighRisk" element={<HighRisk />} />
-        <Route path="/ApplicationIssues/MediumRisk" element={<MediumRisk />} />
-        <Route path="/ApplicationIssues/LowRisk" element={<LowRisk />} />
-        <Route path="/ApplicationIssues/InformativeRisk" element={<InformativeRisk />} />
-        <Route path="/ApplicationIssues/issue1" element={<Issue1 />} />
+        <Route path="/Overview/ApplicationIssues" element={<ApplicationIssues />} />
+        <Route path="/Overview/ApplicationIssues/CriticalRisk" element={<CriticalRisk />} />
+        <Route path="/Overview/ApplicationIssues/HighRisk" element={<HighRisk />} />
+        <Route path="/Overview/ApplicationIssues/MediumRisk" element={<MediumRisk />} />
+        <Route path="/Overview/ApplicationIssues/LowRisk" element={<LowRisk />} />
+        <Route path="/Overview/ApplicationIssues/InformativeRisk" element={<InformativeRisk />} />
+        <Route path="/Overview/ApplicationIssues/:applicationName" element={<DynamicFindingIssues />} />
+
 
       </Routes>
       </ToggleColorMode>
