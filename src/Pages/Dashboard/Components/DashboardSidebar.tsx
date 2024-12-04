@@ -7,9 +7,9 @@ export default function DashboardSidebar() {
   const navigate = useNavigate();
 
   const [open, setOpen] = useState<boolean>(false); // Set state as a boolean for simplicity
-  
+
   const handleToggleSublist = () => {
-    setOpen(!open); 
+    setOpen(!open);
   };
 
   const handleNavigation = (path: string) => {
@@ -47,7 +47,14 @@ export default function DashboardSidebar() {
             }}
             onClick={() => handleNavigation('/')}
           >
-            <AdbIcon sx={{ display: { xs: 'flex', md: 'flex' }, mr: 1 }} />
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Flogo_SecureP.png?alt=media&token=349d0a70-d898-44f0-a92d-5ce252448c6a"
+              alt="Logo"
+              style={{
+                height: '40px',
+                marginRight: '10px',
+              }}
+            />
             <Typography
               variant="h6"
               noWrap

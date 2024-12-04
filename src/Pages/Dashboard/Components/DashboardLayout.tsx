@@ -1,113 +1,89 @@
-import React, { Children, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  Box, Toolbar, CssBaseline, Tooltip, IconButton, Avatar, Menu, MenuItem, Typography
+  Box,
+  CssBaseline,
+  Toolbar,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  Typography,
+  Tooltip,
 } from '@mui/material';
+import FeedbackModal from '../../../Pages/User/page/Page/FeedbackModal';
+import LoginModal from '../../../Login/LoginModal';
 import DashboardSidebar from './DashboardSidebar';
 import { useNavigate } from 'react-router-dom';
-import { useColorMode } from '../../../assets/Themes/ThemeContext';
-import FeedbackModal from '../../../Pages/User/page/Page/FeedbackModal';
+import Chatbot from '../../../Components/Chatbot';
 
+export default function DashboardLayout({ children, title }: { children?: React.ReactNode; title?: string }) {
+  const navigate = useNavigate();
 
-interface DashboardProps {
-  children?: React.ReactNode;
-  title?: string;
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
-
-}
-
-export default function DashboardLayout({children,title}:DashboardProps) {
+  const settings = ['Profile', 'Feedback', 'Logout'];
 
   const handleSetting = (setting: string) => {
     switch (setting) {
       case 'Profile':
-        navigate('/Profile');
+        navigate('/ProfilePage');
         break;
       case 'Feedback':
         setIsFeedbackOpen(true);
         break;
       case 'Logout':
-        navigate('/Logout');
+        localStorage.removeItem('token');
+        setIsLoggedIn(false);
+        navigate('/');
+        break;
+      default:
         break;
     }
+    handleCloseUserMenu();
   };
-  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const navigate = useNavigate();
-  const settings = ['Profile', 'Feedback', 'Logout'];
-  const { toggleTheme, mode } = useColorMode();
-  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
+    if (!isLoggedIn) {
+      setIsLoginOpen(true); // Open LoginModal if not logged in
+    } else {
+      setAnchorElUser(event.currentTarget);
+    }
   };
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
+  const handleCloseUserMenu = () => setAnchorElUser(null);
+
+  const handleLoginClose = (success: boolean) => {
+    setIsLoginOpen(false);
+    if (success) {
+      setIsLoggedIn(true);
+      localStorage.setItem('token', 'your-auth-token'); // Store a token for session persistence
+    }
   };
 
-  const handleFeedbackClose = () => {
-    setIsFeedbackOpen(false);
-  };
+  const handleFeedbackClose = () => setIsFeedbackOpen(false);
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
 
-      {/* Sidebar */}
       <Box sx={{ width: '20%' }}>
         <DashboardSidebar />
       </Box>
 
-      {/* Main Content Area */}
-      <Box component="main" sx={{ width: '74%', padding: '16px' }}>
+      <Box component="main" sx={{ width: '80%', padding: '16px' }}>
         <Toolbar />
 
-        {/* Header with Dashboard Text and User Menu */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 3
-          }}
-        >
-          {/* Dashboard Title */}
-          <Typography variant="h4" component="div">
-            {title}
-          </Typography>
+        <Typography variant="h4" component="div" sx={{ mb: 3 }}>
+          {title}
+        </Typography>
 
-          {/* User Menu */}
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu}>
-                <Avatar alt="Mike" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-              keepMounted
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={() => handleSetting(setting)}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-        </Box>
-
-        {/* Rest of the Content */}
         {children}
       </Box>
 
-      <FeedbackModal open={isFeedbackOpen} onClose={handleFeedbackClose} />
-
+      <Chatbot />
     </Box>
-    
   );
 }

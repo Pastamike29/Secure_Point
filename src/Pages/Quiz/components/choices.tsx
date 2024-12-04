@@ -9,7 +9,7 @@ const choices = [
          'Server crash',
        ],
        answer: 'User session hijacking',
-       image: 'https://secnhack.in/wp-content/uploads/2020/09/2-9.png',
+       image: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Fquiz_1.png?alt=media&token=85d87547-3467-4189-9c64-8ab9ed25d28b',
      },
      {
        question: 'What does a typical SQL injection exploit target?',
@@ -21,7 +21,7 @@ const choices = [
          'Network security',
        ],
        answer: 'Query manipulation',
-       image: 'https://i.imgur.com/SovymJL.png',
+       image: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Fquiz_2.png?alt=media&token=aef875cf-e25a-456d-a80d-12cbbf6a2abb',
      },
      {
        question: 'Which one related to OWASP A06:2021 - Vulnerable and Outdated Components',
@@ -33,7 +33,7 @@ const choices = [
          'Does not using strong password',
        ],
        answer: 'Does not use new patch library',
-       image: 'https://www.vaadata.com/blog/wp-content/uploads/2024/01/burp-send-group-1024x605.png ',
+       image: 'https://www.vaadata.com/blog/wp-content/uploads/2024/01/burp-send-group-1024x605.png',
      },
      {
        question: 'Which one is the best method to protect SQL Injection',
@@ -45,7 +45,7 @@ const choices = [
          'Always updated the database',
        ],
        answer: 'Using Prepared statement or Parameterized Queries',
-       image: 'https://www.vaadata.com/blog/wp-content/uploads/2024/01/burp-send-group-1024x605.png ',
+       image: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Fquiz_4.png?alt=media&token=a7fcd833-e93c-4fd1-99c0-4a52997ed1d0',
      },
      {
        question: 'Which one does not related to OWASP A04:2021 - Insecure Design',
@@ -57,7 +57,7 @@ const choices = [
          'Incorporate security into each phase of the software development lifecycle (SDLC)',
        ],
        answer: 'Stored confidential information by unencryption',
-       image: 'https://www.vaadata.com/blog/wp-content/uploads/2024/01/burp-send-group-1024x605.png ',
+       image: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Fquiz_5.png?alt=media&token=9fb2b05f-2dcb-4483-93fa-352a07c5695b',
      },
      {
        question: 'Which choice is the best describe Privilege Escalation attack',
@@ -81,7 +81,7 @@ const choices = [
          'Using user authentication',
        ],
        answer: 'Using input Sanitization',
-       image: 'https://www.vaadata.com/blog/wp-content/uploads/2024/01/burp-send-group-1024x605.png ',
+       image: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Fquiz_6.png?alt=media&token=e10e2b9a-1f34-40c1-89d3-93cee96c37cf',
      },
      {
        question: 'What is Cross-Site Request Forgery(CSRF) attack',
@@ -105,7 +105,7 @@ const choices = [
          'Using Encryption in Transit',
        ],
        answer: 'Using Role-Based Access Control(RBAC)',
-       image: 'https://www.vaadata.com/blog/wp-content/uploads/2024/01/burp-send-group-1024x605.png ',
+       image: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Fquiz_9.png?alt=media&token=e30bd61e-192b-40c6-a6c5-1d223b993118',
      },
      {
        question: 'From http://127.0.0.1/accounts.php?user=bob If you can change the username from bob to alice and access someone else data, this is a failure of which OWASP',

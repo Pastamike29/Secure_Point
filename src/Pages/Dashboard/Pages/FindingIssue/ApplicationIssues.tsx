@@ -9,6 +9,7 @@ import {
   TableRow,
   Typography,
   Paper,
+  TextField,
 } from '@mui/material';
 import DashboardLayout from '../../Components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +29,7 @@ export default function ApplicationRiskTable() {
   const [applications, setApplications] = useState<ApplicationDetails[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>(''); // Search query state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,8 +41,7 @@ export default function ApplicationRiskTable() {
         }
 
         const data = await response.json();
-
-        // Group the data by application name and aggregate vulnerabilities
+        
         const groupedData = data.data.map((item: any) => ({
           "Application Name": item.applicationName || 'N/A',
           Details: {
@@ -62,7 +63,7 @@ export default function ApplicationRiskTable() {
     };
 
     fetchData();
-  }, []); // Empty dependency array ensures the effect runs once when the component mounts
+  }, []);
 
   if (loading) {
     return <Typography>Loading...</Typography>;
@@ -74,28 +75,55 @@ export default function ApplicationRiskTable() {
 
   const handleRowClick = (applicationName: string) => {
     const encodedAppName = encodeURIComponent(applicationName); // Encode the application name
-    navigate(`/ApplicationIssues/${encodedAppName}`);
+    navigate(`/Overview/ApplicationIssues/${encodedAppName}`);
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value.toLowerCase());
+  };
+
+  // Filtered applications based on search query
+  const filteredApplications = applications.filter((app) => {
+    const { "Application Name": appName, Details } = app;
+    return (
+      appName.toLowerCase().includes(searchQuery) ||
+      Details["Application Number"].toLowerCase().includes(searchQuery) ||
+      Details["Application Contact"].toLowerCase().includes(searchQuery) ||
+      Details.Department.toLowerCase().includes(searchQuery) ||
+      Details.Chief.toLowerCase().includes(searchQuery)
+    );
+  });
+
   // Calculate Total Applications Scanned and Total Findings
-  const totalApplicationsScanned = applications.length;
-  const totalFindings = applications.reduce((total, app) => total + app.Details["Total Vulnerabilities"], 0);
+  const totalApplicationsScanned = filteredApplications.length;
+  const totalFindings = filteredApplications.reduce(
+    (total, app) => total + app.Details["Total Vulnerabilities"],
+    0
+  );
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title='Finding Issue Applications'>
       <Box sx={{ padding: '16px' }}>
-        <Typography variant="h4" gutterBottom>
-          Finding Issue Applications
-        </Typography>
-
         {/* Total Applications Scanned and Total Findings */}
-        <Box sx={{ marginBottom: '16px' }}>
-          <Typography variant="h6">Total Applications Scanned: {totalApplicationsScanned}</Typography>
-          <Typography variant="h6">Total Findings: {totalFindings}</Typography>
+        <Box sx={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h6">Total Applications Scanned: {totalApplicationsScanned}</Typography>
+            <Typography variant="h6">Total Findings: {totalFindings}</Typography>
+          </Box>
+
+          {/* Search Bar */}
+          <TextField
+            label="Search Applications"
+            variant="outlined"
+            size="small"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            sx={{ width: '300px' }}
+          />
         </Box>
 
-        {applications.length === 0 ? (
-          <Typography>No applications available.</Typography>
+        {filteredApplications.length === 0 ? (
+          <Typography>No applications match your search.</Typography>
         ) : (
           <TableContainer component={Paper}>
             <Table>
@@ -110,7 +138,7 @@ export default function ApplicationRiskTable() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {applications
+                {filteredApplications
                   .sort((a, b) =>
                     (a["Application Name"] || '').toLowerCase().localeCompare((b["Application Name"] || '').toLowerCase()) // Safely handle null/undefined
                   )

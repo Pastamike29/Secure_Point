@@ -106,15 +106,15 @@ export default function LessonPage() {
                     mx: 4
                   }}
                 >
-                  <GridCard2 src='https://i.ytimg.com/vi/_jz5qFWhLcg/maxresdefault.jpg'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F2(BrokenAccControl).png?alt=media&token=fa9abdfe-8992-444e-821d-e6da82954bdf'
                     onClick={() => handleNavigate('/LessonPage/BrokenAccControl')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
-                  <GridCard2 src='https://escape.tech/blog/content/images/2022/06/file-inclusion-and-directory-traversal.png'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F3(DirectoryTraversal).png?alt=media&token=08e9e96d-b2f3-44fb-83b6-d4c8e518f964'
                     onClick={() => handleNavigate('/LessonPage/DirectoryTraversal')}>
                     <Typography variant='h4'> </Typography>
                   </GridCard2>
-                  <GridCard2 src='https://escape.tech/blog/content/images/2022/06/csrf.png'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F1(csrf).png?alt=media&token=6317ea73-fbae-4445-b0a3-67f347ebbcbc'
                     onClick={() => handleNavigate('/LessonPage/CrossSiteRequestForgery')}>
                     <Typography variant='h4'> </Typography>
                   </GridCard2>
@@ -146,7 +146,7 @@ export default function LessonPage() {
                     mx: 4
                   }}
                 >
-                  <GridCard2 src='https://s30131.pcdn.co/wp-content/uploads/Secure-Internal-Communication-Hero.png'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F4(UnencryptCommu).png?alt=media&token=54247f20-92c3-4d94-b522-f1c17179f3f7'
                     onClick={() => handleNavigate('/LessonPage/UnencryptedCommunication')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
@@ -175,11 +175,11 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://miro.medium.com/v2/resize:fit:1066/1*6YoaC40Xt8n2ASMldhijWg.jpeg'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F6(SQLInjection).png?alt=media&token=19f98ffa-d1fd-4db5-834e-6921b628385c'
                     onClick={() => handleNavigate('/LessonPage/SQLInjection')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
-                  <GridCard2 src='https://i.ytimg.com/vi/UBWMLFbjPBc/maxresdefault.jpg'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F5(CommandInjection).png?alt=media&token=89118588-a77e-49f9-a747-fcce6bf280af'
                     onClick={() => handleNavigate('/LessonPage/CommandExecution')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
@@ -210,15 +210,15 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://testingmint.com/wp-content/uploads/2023/12/Insecure-Design-in-Security-Testing-1024x576.png.webp'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F5(CommandInjection).png?alt=media&token=89118588-a77e-49f9-a747-fcce6bf280af'
                     onClick={() => handleNavigate('/LessonPage/InsecureDesign')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
-                  <GridCard2 src='https://www.datasunrise.com/wp-content/uploads/2019/06/Data-and-Information-leakage-04-05-min.jpg'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F8(InformationLeak).png?alt=media&token=c4188c58-a137-4f62-b13c-2291a71d5adb'
                     onClick={() => handleNavigate('/LessonPage/InformationLeakage')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
-                  <GridCard2 src='https://secnhack.in/wp-content/uploads/2020/09/1-11.png'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F7(FileUploadVul).png?alt=media&token=f6b9ec0c-e896-41be-9c23-5d7b1d275635'
                     onClick={() => handleNavigate('/LessonPage/FileUploadVulnerabilities')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
@@ -249,8 +249,8 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://assets.esecurityplanet.com/uploads/2023/09/esp_09202023-cloud-security-best-practices.png'
-                    onClick={() => handleNavigate('/LessonPage/LaxSecuritySetting')}>
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F10(LaxSecureSetting).png?alt=media&token=9af1fe65-efc7-4ad0-8105-ef705d605b04'
+                    onClick={() => handleNavigate('/LessonPage/LaxSecuritySettings')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
 
@@ -276,7 +276,7 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://panaseer.com/wp-content/uploads/2021/01/Toxic-combinations-featured-image-e1655913543780.png'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F11(ToxicDepen).png?alt=media&token=56fc37a3-49af-4d8c-b2b3-541cb7dd67a8'
                     onClick={() => handleNavigate('/LessonPage/ToxicDependencies')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
@@ -307,8 +307,24 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://panaseer.com/wp-content/uploads/2021/01/Toxic-combinations-featured-image-e1655913543780.png'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F11(ToxicDepen).png?alt=media&token=56fc37a3-49af-4d8c-b2b3-541cb7dd67a8'
                     onClick={() => handleNavigate('/LessonPage/PasswordMismanagement')}>
+                    <Typography variant='h4'></Typography>
+                  </GridCard2>
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F13(PrivilegeEs).png?alt=media&token=1fd7b9ee-86b3-42b0-bd07-887315efed67'
+                    onClick={() => handleNavigate('/LessonPage/PrivilegeEscalation')}>
+                    <Typography variant='h4'></Typography>
+                  </GridCard2>
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F14(SessionFix).png?alt=media&token=2407e99d-7d64-4eac-803f-676bd74493d1'
+                    onClick={() => handleNavigate('/LessonPage/SessionFixation')}>
+                    <Typography variant='h4'></Typography>
+                  </GridCard2>
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F15(UserEnum).png?alt=media&token=c62264b3-62c6-4e18-99cd-ceaa9eb35a00'
+                    onClick={() => handleNavigate('/LessonPage/UserEnumeration')}>
+                    <Typography variant='h4'></Typography>
+                  </GridCard2>
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F16(WeakSession).png?alt=media&token=77c60e8c-ede1-4b1a-8cf4-37dbd3052fb9'
+                    onClick={() => handleNavigate('/LessonPage/WeakSessionIds')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
 
@@ -336,7 +352,7 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://panaseer.com/wp-content/uploads/2021/01/Toxic-combinations-featured-image-e1655913543780.png'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F17(SoftwareAndDataFail).png?alt=media&token=632cc98c-6e2c-4ff3-aae9-4e6206e391b2'
                     onClick={() => handleNavigate('/LessonPage/SoftwareAndDataIntegrity')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
@@ -361,7 +377,7 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://panaseer.com/wp-content/uploads/2021/01/Toxic-combinations-featured-image-e1655913543780.png'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F17(SoftwareAndDataFail).png?alt=media&token=632cc98c-6e2c-4ff3-aae9-4e6206e391b2'
                     onClick={() => handleNavigate('/LessonPage/LoggingAndMonitoringFailures')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
@@ -391,7 +407,7 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://panaseer.com/wp-content/uploads/2021/01/Toxic-combinations-featured-image-e1655913543780.png'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F18(SecurityLoggingAndMonit).png?alt=media&token=7f6c9cab-23b0-4de3-8026-857b0fd45d34'
                     onClick={() => handleNavigate('/LessonPage/ServerSideRequestForgery')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>

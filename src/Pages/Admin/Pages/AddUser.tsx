@@ -125,7 +125,7 @@ const AddUser: React.FC = () => {
 
 
   const validateEmail = (email: string) => {
-    const regex = /^[a-zA-Z0-9._%+-]+@TTBBANK\.COM$/i;
+    const regex = /^[a-zA-Z0-9._%+-]+@ttbbank\.com$/i;
     return regex.test(email);
   };
 

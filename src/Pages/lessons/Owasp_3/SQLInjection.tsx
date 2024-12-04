@@ -8,13 +8,13 @@ import PageNavigation from '../../../Components/PageNavigation'
 import CodeWindow from '../../../Components/Code/CodeWindow'
 import { getSQLICodeSnippets } from '../../../Components/Code/Owasp3_Code/SQLInjection'
 import CodeDescriptionTemplate from '../../CodeExample/Component/CodeDescriptionTemplate'
+import FitImage from '../../../Components/FitImage'
 
 export default function SQLInjection() {
 
      const codeSnippet1 = getSQLICodeSnippets('Lesson1')
      const codeSnippet2 = getSQLICodeSnippets('Lesson2')
      const codeSnippet3 = getSQLICodeSnippets('Lesson3')
-     const ExampleCode = getSQLICodeSnippets('ExampleCode')
      useEffect(() => {
           window.scrollTo(0, 0);
         }, []);
@@ -81,7 +81,7 @@ export default function SQLInjection() {
                                                        <Box sx={{
                                                             py: 3
                                                        }}>
-                                                            <img src="https://learn.g2.com/hubfs/G2CM_FI694_Learn_Article_Images-%5BSQL_Injection%5D_V1a.png" alt="" />
+                                                            <FitImage src="https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F4(UnencryptCommu).png?alt=media&token=54247f20-92c3-4d94-b522-f1c17179f3f7" />
 
                                                        </Box>
 

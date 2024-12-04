@@ -9,7 +9,6 @@ import { getDirectoryTraversalCodeSnippets } from '../../../Components/Code/Owas
 export default function DirectoryTraversal() {
 
      const codeSnippet1 = getDirectoryTraversalCodeSnippets('Lesson1')
-     const ExampleCode = getDirectoryTraversalCodeSnippets('ExampleCode')
      useEffect(() => {
           window.scrollTo(0, 0);
         }, []);
@@ -71,7 +70,7 @@ export default function DirectoryTraversal() {
                                                        my: 5,
                                                   }}>
 
-                                                       <FitImage src='https://miro.medium.com/v2/resize:fit:1400/1*2d6B4Kn2BlQ-fJsxhBgdWQ.png' />
+                                                       <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F3(DirectoryTraversal).png?alt=media&token=08e9e96d-b2f3-44fb-83b6-d4c8e518f964' />
 
                                                        <Typography sx={{
                                                             pt: 3,

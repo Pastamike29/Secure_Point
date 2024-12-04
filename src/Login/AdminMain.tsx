@@ -26,9 +26,10 @@ export default function AdminLogin() {
       // Get user role from response (assuming it's in the response data)
      //  const userRole = response.data.user.role; // Adjust this line based on your backend response structure
       toast.success('Login success', {
+        autoClose:2000,
         onClose: () => {
           // login(userRole); // Call login function with user role
-          navigate('/admin/AddVulnerability'); // Redirect to the Add Vulnerability page
+          navigate('/admin/AddUser'); // Redirect to the Add Vulnerability page
         },
       });
     } catch (error) {
@@ -37,7 +38,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <Box
+    <Box  
       display="flex"
       flexDirection="column"
       justifyContent="center"

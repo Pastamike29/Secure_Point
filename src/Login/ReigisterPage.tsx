@@ -30,13 +30,12 @@ const RegisterPage = () => {
 
         // Check if email ends with @TTBBANK.COM (case insensitive)
         if (!inputEmail.toLowerCase().endsWith('@ttbbank.com')) {
-            setEmailError('Please use only your @TTBBANK.COM email');
+            setEmailError('Please use only your @ttbbank.com email');
         } else {
             setEmailError('');
         }
     };
 
-    // Registration handler
     const handleRegister = async () => {
         if (password !== confirmPassword) {
             setErrorMessage('Passwords do not match');
@@ -56,13 +55,20 @@ const RegisterPage = () => {
             setTimeout(() => { navigate('/LoginPage'); }, 3000);
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                toast.error(error.response?.data.message || 'Registration failed');
+                const errorMessage = error.response?.data.message || 'Registration failed';
+
+                if (errorMessage.toLowerCase().includes('email already exists')) {
+                    setEmailError('Please use another email');
+                } else {
+                    toast.error(errorMessage);
+                }
             } else {
                 console.error('Error registering user:', error);
                 toast.error('Something went wrong: ' + error.message);
             }
         }
     };
+
 
     // Add keypress event listener for Enter key
     useEffect(() => {

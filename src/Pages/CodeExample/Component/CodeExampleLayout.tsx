@@ -2,7 +2,6 @@ import React, { ReactNode } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import Navbar from '../../../Components/Navbar';
 import DynamicSidebar from '../Component/DynamicSidebar';
-import PageNavigation from '../../../Components/PageNavigation';
 
 interface SidebarLayoutProps {
      children: ReactNode;
@@ -36,9 +35,7 @@ export default function CodeExampleLayout({ children, title }: SidebarLayoutProp
                          </Box>
                     </Box>
 
-                    <Box sx={{ textAlign: 'center', py: 10, pl: 6 }}>
-                         <PageNavigation />
-                    </Box>
+               
                </Box>
           </Container>
      );

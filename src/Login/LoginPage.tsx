@@ -19,11 +19,11 @@ interface JwtPayload {
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userRole, setUserRole] = useState('');
-    const [usernameError, setUsernameError] = useState(''); // New state for username validation error
+    const [emailError, setEmailError] = useState(''); // New state for email validation error
     const { setUser } = useUser(); // Get setUser from useUser hook
 
     useEffect(() => {
@@ -47,11 +47,11 @@ const LoginPage = () => {
     }, [setUser]);
 
     const handleLogin = async () => {
-        // Prevent login if username validation fails
-        if (usernameError) return;
+        // Prevent login if email validation fails
+        if (emailError) return;
 
         try {
-            const userData = { username, password };
+            const userData = { email, password }; // Send email instead of username
             const response = await axios.post('http://localhost:5000/login', userData);
             const result = response.data;
 
@@ -77,13 +77,13 @@ const LoginPage = () => {
             });
 
             if (decoded.role === 'admin') {
-                navigate('/AdminPanel');
+                navigate('/admin');
             } else {
                 navigate('/');
             }
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                toast.error('Invalid username or password', {
+                toast.error('Invalid email or password', {
                     position: 'top-right',
                     autoClose: 3000,
                 });
@@ -96,16 +96,16 @@ const LoginPage = () => {
         }
     };
 
-    // Handle username validation
-    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Handle email validation
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setUsername(value);
+        setEmail(value);
 
-        // Check if username ends with @ttbbank.com
+        // Check if email ends with @ttbbank.com
         if (!value.endsWith('@ttbbank.com')) {
-            setUsernameError('Username must end with @ttbbank.com');
+            setEmailError('Email must end with @ttbbank.com');
         } else {
-            setUsernameError('');
+            setEmailError('');
         }
     };
 
@@ -122,7 +122,7 @@ const LoginPage = () => {
         return () => {
             document.removeEventListener('keydown', handleKeyPress);
         };
-    }, [username, password]);
+    }, [email, password]);
 
     return (
         <Box
@@ -154,10 +154,10 @@ const LoginPage = () => {
                     <TextField
                         label="TTB Email"
                         variant="outlined"
-                        value={username}
-                        onChange={handleUsernameChange}
-                        error={Boolean(usernameError)} // Display error if validation fails
-                        helperText={usernameError} // Show validation message
+                        value={email}
+                        onChange={handleEmailChange}
+                        error={Boolean(emailError)} // Display error if validation fails
+                        helperText={emailError} // Show validation message
                         sx={{ mb: 2, width: '100%' }}
                     />
                     <TextField

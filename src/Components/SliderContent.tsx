@@ -1,6 +1,6 @@
 import { Box, CardMedia, Container, SxProps, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-
+import { useNavigate } from 'react-router-dom';
 
 
 interface SliderContentProps {
@@ -13,54 +13,76 @@ interface SliderContentProps {
 
 }
 
-const slides: SliderContentProps[] = [
-  {
-    src: 'https://escape.tech/blog/content/images/2022/06/csrf.png',
-    description:'<h1 style=" font-family: Wotfard, serif; ">Cross-Site Request Forgery (CSRF): The Invisible Attack</h1>' +
-                '<p style=" font-size: 18px; font-family: Wotfard, serif; ">Imagine you logged into your online bank account, feeling secure as you manage your finances. Now, imagine a sneaky attacker who tricks your browser into doing something you didn’t want—like transferring money—without you even realizing it. This is what happens with a Cross-Site Request Forgery (CSRF) attack.</p>'
-  },
-  {
-    src: 'https://miro.medium.com/v2/resize:fit:1066/1*6YoaC40Xt8n2ASMldhijWg.jpeg',
-    description: '<h1 style=" font-family: Wotfard, serif;">SQL Injection</h1>'+
-                  '<p style="font-size: 18px; font-family: Wotfard, serif;">Imagine ordering pizza. You tell the pizza delivery person your address. Now, what if someone were to listen in on your conversation and change your address to their own? The pizza would end up at the wrong place. </p>'
-  },
-  {
-    src: 'https://i.ytimg.com/vi/_jz5qFWhLcg/maxresdefault.jpg',
-    description: '<h1 stlye="font-family: Wotfard, serif;">Broken Access Control</h1>'+
-                 '<p style="font-size: 18px; font-family: Wotfard, serif;">Broken access control occurs when a website or application does not properly restrict who can access certain features or data. It like leaving the kitchen door unlocked. Anyone can walk in and do whatever they want. </p>'
-  },
-  {
-    src: 'https://escape.tech/blog/content/images/2022/06/file-inclusion-and-directory-traversal.png',
-    description: '<h1 style= "font-family: Wotfard, serif;">Directory Traversal<h1>'+
-                  '<p style="font-size: 18px; font-family: Wotfard, serif;">Directory traversal is similar. It when someone tricks a website into revealing files or directories that are normally hidden. It like someone finding a secret passageway in the library and accessing books that are not meant for the public. </p>'
-  },
-  {
-    src: 'https://resources.appsealing.com/4-svc/wp-content/uploads/2022/12/01143516/insecure-c-ommu.png',
-    description: '<h1 syle= "font-family: Wotfard, serif;">Insecure Communication</h1>'+
-                  '<p style="font-size: 18px; font-family: Wotfard, serif;">Insecure communication is when data is transmitted over the internet without proper encryption. It like sending a message in plain text, where anyone can read it if they intercept it. </p>'
-  },
 
-];
+export default function SliderContent({ sx }: SliderContentProps) {
+  const navigate = useNavigate();
 
-
-export default function SliderContent({ children, sx, description, onClick }: SliderContentProps) {
+  const handleImageClick = () => {
+    const targetPath = slides[currentSlide].link;
+    if (targetPath) {
+      navigate(targetPath);
+    }
+  };
 
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const slides: SliderContentProps[] = [
+    {
+      src: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F1(csrf).png?alt=media&token=6317ea73-fbae-4445-b0a3-67f347ebbcbc',
+      description:
+        '<h1 style="color: red; display: inline;">Cross-Site</h1>' +
+        '\t<h1 style="display: inline;">Request Forgery (CSRF): The Invisible Attack</h1>' +
+        '<p style=" font-size: 18px;">ลองจินตนาการว่าคุณล็อกอินเข้าสู่บัญชีธนาคารผ่านเว็บไซต์หรือแอปพลิเคชันของคุณด้วยความมั่นใจ ในขณะเดียวกันลองจินตนาการถึงผู้โจมตีที่มีเล่ห์เหลี่ยมแอบหลอกให้เบราว์เซอร์ของคุณทำสิ่งที่คุณไม่ได้ตั้งใจ เช่น โอนเงินออกไปโดยที่คุณไม่รู้ตัวเลย เหตุการณ์นี้คือสิ่งที่เรียกว่า การโจมตีแบบ Cross-Site Request Forgery (CSRF) นั่นเอง</p>'
+      , link: '/LessonPage/CrossSiteRequestForgery'
+    },
+    {
+      src: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F6(SQLInjection).png?alt=media&token=19f98ffa-d1fd-4db5-834e-6921b628385c',
+      description:
+        '<h1 style="color: red; display: inline;">SQL</h1>' +
+        '\t<h1 style="display: inline;">Injection : The Query Invader</h1>' +
+        '<p style="font-size: 18px;">ลองจินตนาการว่าคุณกำลังสั่งพิซซ่า คุณบอกที่อยู่ของคุณให้พนักงานส่งพิซซ่าทราบ แต่ถ้ามีใครบางคนแอบฟังการสนทนาของคุณแล้วเปลี่ยนที่อยู่เป็นของเขาเอง คุณก็จะเสียพิซซ่าไปฟรี ๆ</p>'
+      , link: '/LessonPage/SQLInjection'
+    },
+    {
+      src: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F2(BrokenAccControl).png?alt=media&token=fa9abdfe-8992-444e-821d-e6da82954bdf',
+      description:
+        '<h1 style="color: red; display: inline;">Broken</h1>' +
+        '\t<h1 style="display: inline;">Access Control : The Invisible Key</h1>' +
+        '<p style="font-size: 18px;">Broken Access Control เกิดขึ้นเมื่อเว็บไซต์หรือแอปพลิเคชันไม่ได้จำกัดสิทธิ์การเข้าถึงฟีเจอร์หรือข้อมูลบางอย่างอย่างถูกต้อง เปรียบเสมือนการเปิดประตูบ้านไว้โล่ง ๆ ใครก็สามารถเดินเข้าไปและทำอะไรก็ได้ตามใจชอบ</p>'
+      , link: '/LessonPage/BrokenAccControl'
+    },
+    {
+      src: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F3(DirectoryTraversal).png?alt=media&token=08e9e96d-b2f3-44fb-83b6-d4c8e518f964',
+      description:
+        '<h1 style="color: red; display: inline;">Directory</h1>' +
+        '\t<h1 style="display: inline;">Traversal : The Path Explorer</h1>' +
+        '<p style="font-size: 18px;">Directory Traversal คือการที่มีคนหลอกเว็บไซต์ให้เปิดเผยไฟล์หรือไดเรกทอรีที่ปกติจะถูกซ่อนอยู่ เปรียบเสมือนมีคนค้นพบทางลับในห้องสมุดและสามารถเข้าถึงหนังสือที่ไม่ได้มีไว้ให้คนทั่วไปอ่านได้ง่าย ๆ</p>'
+      , link: '/LessonPage/DirectoryTraversal'
+
+    },
+    {
+      src: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F4(UnencryptCommu).png?alt=media&token=54247f20-92c3-4d94-b522-f1c17179f3f7',
+      description:
+        '<h1 style="color: red; display: inline;">Unencrypted</h1>' +
+        '\t<h1 style="display: inline;">Communication : The Naked Message</h1>' +
+        '<p style="font-size: 18px;">ลองจินตนาการถึงหนังสายลับ ที่มีสายลับคอยดักฟังบทสนทนาของคุณโดยที่คุณไม่รู้ตัว นั่นคือสิ่งที่เกิดขึ้นเมื่อข้อมูลถูกส่งผ่านอินเทอร์เน็ตโดยไม่มีการเข้ารหัส ใครก็ตามที่ดักข้อมูลได้ก็สามารถอ่านข้อมูลของคุณได้เช่นกัน</p>'
+      , link: '/LessonPage/UnencryptedCommunication'
+    },
+  ];
+
 
   // Automatically change slide every 3 seconds
   useEffect(() => {
     const intervalId = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
-    }, 3000); // Change slide every 3 seconds
+    }, 7000); // Change slide every 3 seconds
 
     // Cleanup the interval when component unmounts
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleClick = () => {
-    // You can add any onClick logic here if needed
-    console.log('Box clicked');
-  };
+
+
   return (
     <Container
       maxWidth={false}
@@ -84,8 +106,9 @@ export default function SliderContent({ children, sx, description, onClick }: Sl
             height: '70vh',
             width: '140vh',
             alignItems: 'center',
+            cursor: 'pointer',
           }}
-          onClick={handleClick}
+          onClick={handleImageClick}
         >
           <CardMedia
             component="img"

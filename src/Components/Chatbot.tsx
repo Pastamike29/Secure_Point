@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Box,
     TextField,
@@ -6,7 +6,6 @@ import {
     Typography,
     IconButton,
     Dialog,
-    DialogActions,
     DialogContent,
     CircularProgress,
 } from '@mui/material';
@@ -23,32 +22,78 @@ const Chatbot = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const messagesEndRef = useRef<HTMLDivElement | null>(null); // Reference for the chat container
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom(); // Scroll to the bottom whenever messages change
+    }, [messages]);
+
+    const simulateTyping = (fullText: string) => {
+        const sanitizedText = fullText.replace(/[^\w\s.,!?'-]/g, '').trim(); // Basic sanitization
+        setIsLoading(true);
+    
+        // Start with an empty bot message
+        setMessages((prev) => [...prev, { sender: 'Bot', text: '' }]);
+    
+        let currentIndex = 0;
+    
+        const interval = setInterval(() => {
+            setMessages((prev) => {
+                // Ensure we are updating the last bot message
+                const lastMessageIndex = prev.length - 1;
+                const lastMessage = prev[lastMessageIndex];
+    
+                if (lastMessage?.sender === 'Bot') {
+                    const updatedMessages = [...prev];
+                    updatedMessages[lastMessageIndex] = {
+                        ...lastMessage,
+                        text: lastMessage.text + sanitizedText[currentIndex], // Append the next character
+                    };
+                    return updatedMessages;
+                }
+                return prev;
+            });
+    
+            currentIndex++;
+    
+            if (currentIndex >= sanitizedText.length) {
+                clearInterval(interval);
+                setIsLoading(false); // Stop the loading indicator
+            }
+        }, 50); // Adjust the typing speed
+    };
+    
+
+ 
     const handleSend = async () => {
         if (input.trim()) {
             setMessages((prev) => [...prev, { sender: 'User', text: input }]);
+            setInput('');
             setIsLoading(true);
             setError(null);
-
+    
             try {
                 const response = await fetch(
                     'http://localhost:3000/api/v1/prediction/63a7d545-be0e-4021-958b-5e1617f299a0',
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ question: input }),
+                        body: JSON.stringify({ question: input.trim() }),
                     }
                 );
-
+    
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-
+    
                 const data = await response.json();
-                console.log(data); // Debugging line to see the response
-
-                // Check if the response contains an answer
-                const botResponse = data.text && data.text.trim() ? data.text : 'Sorry, I didn’t get that. Can you please clarify?';
-
+                const botResponse = (data.text?.trim() || 'Sorry, I didn’t get that.');
+    
+                // Directly display sanitized text without typing animation
                 setMessages((prev) => [...prev, { sender: 'Bot', text: botResponse }]);
             } catch (error) {
                 setMessages((prev) => [
@@ -60,96 +105,102 @@ const Chatbot = () => {
             } finally {
                 setIsLoading(false);
             }
-
-            setInput('');
         }
     };
-
+    
 
 
     const handleReset = () => {
         setMessages([]);
-        setError(null); // Clear error on reset
+        setError(null);
     };
 
     const toggleModal = () => {
         setIsModalOpen((prev) => !prev);
+        setIsChatOpen(false); // Close the small chat box when modal is open
     };
 
     const handleKeyPress = (event: React.KeyboardEvent) => {
-        if (event.key === 'Enter') {
-            handleSend();
+        if (event.key === 'Enter' && event.shiftKey) {
+            event.preventDefault(); // Prevent default behavior of submitting the form
+            setInput((prevInput) => prevInput + '\n'); // Add a new line to the input
+        } else if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent default newline
+            handleSend(); // Send the message
         }
     };
 
     return (
         <>
-            {/* Floating Icon to Toggle Chat */}
-            {!isChatOpen && (
+            {!isChatOpen && !isModalOpen && (
                 <IconButton
                     onClick={() => setIsChatOpen(true)}
                     sx={{
                         position: 'fixed',
                         bottom: 20,
                         right: 20,
-                        bgcolor: 'primary.main',
+                        bgcolor: 'linear-gradient(135deg, #ff7eb3 30%, #ff758c 90%)',
                         color: 'white',
-                        '&:hover': { bgcolor: 'primary.dark' },
+                        width: 60,
+                        height: 60,
+                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+                        '&:hover': { bgcolor: 'linear-gradient(135deg, #ff758c 30%, #ff7eb3 90%)' },
+                        borderRadius: '50%',
                     }}
                 >
-                    <ChatIcon />
+                    <ChatIcon sx={{ fontSize: 30 }} />
                 </IconButton>
             )}
 
-            {/* Chat Box (small version) */}
             {isChatOpen && !isModalOpen && (
                 <Box
                     sx={{
                         position: 'fixed',
                         bottom: 20,
                         right: 20,
-                        width: 460,
-                        height: 650,
-                        bgcolor: 'rgba(50, 50, 50, .85)',
-                        boxShadow: 3,
-                        borderRadius: 2,
+                        width: 400,
+                        height: 550,
+                        bgcolor: 'white',
+                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.2)',
+                        borderRadius: '16px',
                         overflow: 'hidden',
                         display: 'flex',
                         flexDirection: 'column',
                     }}
                 >
-                    {/* Chat Header */}
                     <Box
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            bgcolor: 'primary.main',
+                            bgcolor: 'linear-gradient(135deg, #ff7eb3 30%, #ff758c 90%)',
                             color: 'white',
-                            p: 1,
+                            p: 2,
                         }}
                     >
-                        <Typography variant="h6" sx={{ fontSize: '1rem' }}>
-                            Chat
-                        </Typography>
+                        <Typography variant="h6">Chat</Typography>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                            {/* Reset Button */}
-                            <IconButton onClick={handleReset} sx={{ color: 'white', p: 0.5 }}>
+                            <IconButton
+                                sx={{ color: 'black', '& svg': { color: 'black !important' } }}
+                                onClick={handleReset}
+                            >
                                 <ReplayIcon />
                             </IconButton>
-                            {/* Expand Button */}
-                            <IconButton onClick={toggleModal} sx={{ color: 'white', p: 0.5 }}>
+                            <IconButton
+                                sx={{ color: 'black', '& svg': { color: 'black !important' } }}
+                                onClick={toggleModal}
+                            >
                                 <OpenInFullIcon />
                             </IconButton>
-                            {/* Close Button */}
-                            <IconButton onClick={() => setIsChatOpen(false)} sx={{ color: 'white', p: 0.5 }}>
+                            <IconButton
+                                sx={{ color: 'black', '& svg': { color: 'black !important' } }}
+                                onClick={() => setIsChatOpen(false)}
+                            >
                                 <CloseIcon />
                             </IconButton>
                         </Box>
                     </Box>
-
-                    {/* Chat Messages */}
-                    <Box sx={{ flex: 1, p: 1, overflowY: 'auto' }}>
+                    <Box sx={{ flex: 1, p: 2, overflowY: 'auto' }}>
                         {messages.map((msg, index) => (
                             <Box
                                 key={index}
@@ -161,38 +212,29 @@ const Chatbot = () => {
                             >
                                 <Box
                                     sx={{
-                                        maxWidth: '70%',
-                                        p: 1,
-                                        borderRadius: 2,
-                                        bgcolor: msg.sender === 'User' ? 'primary.main' : 'grey.300',
+                                        maxWidth: '75%',
+                                        p: 1.5,
+                                        borderRadius: 4,
+                                        bgcolor: msg.sender === 'User' ? '#ff758c' : '#f1f0f0',
                                         color: msg.sender === 'User' ? 'white' : 'black',
-                                        fontSize: '16px',
-                                        lineHeight: '28px',
+                                        fontSize: '14px',
+                                        lineHeight: '20px',
+                                        boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
                                     }}
                                 >
-                                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                        {msg.text}
-                                    </Typography>
+                                    <Typography>{msg.text}</Typography>
                                 </Box>
                             </Box>
                         ))}
-                        {isLoading && (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-                                <CircularProgress size={24} />
-                            </Box>
-                        )}
-                        {error && <Typography color="error">{error}</Typography>}
+                        <div ref={messagesEndRef} />
                     </Box>
-
-                    {/* Chat Input */}
                     <Box
                         sx={{
-                            p: 1,
+                            p: 2,
                             borderTop: '1px solid #ddd',
                             display: 'flex',
+                            alignItems: 'center',
                             gap: 1,
-                            fontSize: '16px',
-                            lineHeight: '28px',
                         }}
                     >
                         <TextField
@@ -202,76 +244,80 @@ const Chatbot = () => {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyPress}
-                            placeholder="Type a message..."
+                            placeholder="Type your message..."
                             multiline
                             sx={{
                                 '& .MuiInputBase-root': {
-                                    height: 'auto', // Allow dynamic height based on content
-                                    minHeight: 40,  // Set a minimum height for the text area
-                                    maxHeight: 170, // Set a maximum height to control the area
-                                    overflowY: 'auto', // Enable vertical scrolling when content overflows
+                                    color: 'black',
+                                    bgcolor: 'white',
+                                    borderRadius: '16px',
                                 },
                                 '& .MuiOutlinedInput-root': {
+                                    borderRadius: 4,
                                     '& fieldset': {
-                                        border: 'none', // Remove the border in all states
+                                        borderColor: '#ddd',
                                     },
                                     '&:hover fieldset': {
-                                        border: 'none', // Remove the border on hover
+                                        borderColor: '#bbb',
                                     },
-                                    '&:focus-within fieldset': {
-                                        border: 'none', // Remove the border on focus
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: '#888',
                                     },
                                 },
                             }}
                         />
-                        <Button variant="contained" onClick={handleSend}>
+                        <Button
+                            variant="contained"
+                            sx={{
+                                bgcolor: 'linear-gradient(135deg, #ff7eb3 30%, #ff758c 90%)',
+                                color: 'white',
+                                '&:hover': { bgcolor: 'linear-gradient(135deg, #ff758c 30%, #ff7eb3 90%)' },
+                            }}
+                            onClick={handleSend}
+                        >
                             Send
                         </Button>
                     </Box>
-
                 </Box>
             )}
 
-
-            {/* Modal (Expanded Chat) */}
-            <Dialog open={isModalOpen} onClose={toggleModal} fullWidth maxWidth="lg">
+            <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} fullWidth maxWidth="md">
                 <DialogContent
                     sx={{
-                        bgcolor: 'rgba(50, 50, 50, .85)',
                         display: 'flex',
                         flexDirection: 'column',
-                        height: 750,
+                        height: 700,
                         p: 2,
+                        bgcolor: '#f9f9f9',
                     }}
                 >
-                    {/* Chat Header */}
                     <Box
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            bgcolor: 'primary.main',
+                            bgcolor: 'linear-gradient(135deg, #ff7eb3 30%, #ff758c 90%)',
                             color: 'white',
-                            p: 1,
+                            p: 2,
                         }}
                     >
-                        <Typography variant="h6" sx={{ fontSize: '1rem' }}>
-                            Chat
-                        </Typography>
+                        <Typography variant="h6">Chat</Typography>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                            {/* Reset Button */}
-                            <IconButton onClick={handleReset} sx={{ color: 'white', p: 0.5 }}>
+                            <IconButton
+                                sx={{ color: 'black', '& svg': { color: 'black' } }}
+                                onClick={handleReset}
+                            >
                                 <ReplayIcon />
                             </IconButton>
-                            {/* Close Button */}
-                            <IconButton onClick={toggleModal} sx={{ color: 'white', p: 0.5 }}>
+                            <IconButton
+                                sx={{ color: 'black', '& svg': { color: 'black' } }}
+                                onClick={() => setIsModalOpen(false)}
+                            >
                                 <CloseIcon />
                             </IconButton>
                         </Box>
                     </Box>
-
-                    {/* Chat Messages */}
-                    <Box sx={{ flex: 1, p: 1, overflowY: 'auto' }}>
+                    <Box sx={{ flex: 1, p: 2, overflowY: 'auto' }}>
                         {messages.map((msg, index) => (
                             <Box
                                 key={index}
@@ -283,31 +329,28 @@ const Chatbot = () => {
                             >
                                 <Box
                                     sx={{
-                                        maxWidth: '60%',
-                                        p: 1,
-                                        borderRadius: 2,
-                                        bgcolor: msg.sender === 'User' ? 'rgba(50,50,50,0.)' : 'grey.300',
+                                        maxWidth: '75%',
+                                        p: 1.5,
+                                        borderRadius: 16,
+                                        bgcolor: msg.sender === 'User' ? '#ff758c' : '#f1f0f0',
                                         color: msg.sender === 'User' ? 'white' : 'black',
+                                        fontSize: '14px',
+                                        lineHeight: '20px',
+                                        boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
                                     }}
                                 >
-                                    <Typography variant="body2">{msg.text}</Typography>
+                                    <Typography>{msg.text}</Typography>
                                 </Box>
                             </Box>
                         ))}
-                        {isLoading && (
-                            <Box sx={{ display: 'flex', justifyContent: 'start', alignItems: 'start', mt: 2 }}>
-                                <CircularProgress size={24} />
-                            </Box>
-                        )}
-                        {error && <Typography color="error">{error}</Typography>}
+                        <div ref={messagesEndRef} />
                     </Box>
-
-                    {/* Chat Input */}
                     <Box
                         sx={{
-                            p: 1,
+                            p: 2,
                             borderTop: '1px solid #ddd',
                             display: 'flex',
+                            alignItems: 'center',
                             gap: 1,
                         }}
                     >
@@ -318,30 +361,37 @@ const Chatbot = () => {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyPress}
-                            placeholder="Type a message..."
+                            placeholder="Type your message..."
                             multiline
                             sx={{
                                 '& .MuiInputBase-root': {
-                                    height: 'auto',
-                                    minHeight: 40,
-                                    maxHeight: 170,
-                                    overflowY: 'auto',
+                                    color: 'black',
+                                    bgcolor: 'white',
+                                    borderRadius: '16px',
                                 },
                                 '& .MuiOutlinedInput-root': {
+                                    borderRadius: 4,
                                     '& fieldset': {
-                                        border: 'none', // Removes the border in all states
+                                        borderColor: '#ddd',
                                     },
                                     '&:hover fieldset': {
-                                        border: 'none', // Removes the border on hover
+                                        borderColor: '#bbb',
                                     },
-                                    '&:focus-within fieldset': {
-                                        border: 'none', // Removes the border on focus
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: '#888',
                                     },
                                 },
                             }}
                         />
-
-                        <Button variant="contained" onClick={handleSend}>
+                        <Button
+                            variant="contained"
+                            sx={{
+                                bgcolor: 'linear-gradient(135deg, #ff7eb3 30%, #ff758c 90%)',
+                                color: 'white',
+                                '&:hover': { bgcolor: 'linear-gradient(135deg, #ff758c 30%, #ff7eb3 90%)' },
+                            }}
+                            onClick={handleSend}
+                        >
                             Send
                         </Button>
                     </Box>

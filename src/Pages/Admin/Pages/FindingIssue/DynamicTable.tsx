@@ -14,7 +14,6 @@ import {
   FormControl,
   Box,
   Typography,
-  SelectChangeEvent,
 } from '@mui/material';
 
 interface FindingIssue {
@@ -102,10 +101,8 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
     try {
       const response = await fetch('http://localhost:5000/findingIssue'); // Replace with your actual API endpoint
       const data = await response.json();
-      console.log('Fetched data:', data);
       setLocalIssues(Array.isArray(data.finding_issues) ? data.finding_issues : []); // Set the correct key for issues
     } catch (error) {
-      console.error('Error fetching issues:', error);
       setLocalIssues([]); // Fallback to empty array if fetch fails
     }
   };
@@ -123,12 +120,6 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
     )
     : [];
 
-  console.log('Column order:', columnOrder); // Check the column names you expect
-  console.log('Issues data structure:', issues); // Check the issue data fields
-
-
-
-  console.log('Valid columns:', validColumns); // Check columns to be displayed
 
 
   useEffect(() => {
@@ -145,7 +136,6 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
       );
     });
 
-    console.log('After Search Term Filter:', filtered);
 
     if (applicationNumberFilter) {
       filtered = filtered.filter((issue) => {
@@ -266,7 +256,6 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
     }));
 
   const currentPageIssues = filteredIssues.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  console.log('Current page issues:', currentPageIssues); // Check the current page issues
 
   return (
     <div>

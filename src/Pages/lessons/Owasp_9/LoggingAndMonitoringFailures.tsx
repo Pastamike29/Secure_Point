@@ -72,7 +72,7 @@ export default function LoggingAndMonitoringFailures() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://i.ytimg.com/vi/_jz5qFWhLcg/sddefault.jpg' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F18(SecurityLoggingAndMonit).png?alt=media&token=7f6c9cab-23b0-4de3-8026-857b0fd45d34' />
 
                       <Typography sx={{
                         pt: 3,

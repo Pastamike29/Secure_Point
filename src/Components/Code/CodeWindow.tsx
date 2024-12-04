@@ -6,26 +6,35 @@ import 'prismjs/components/prism-python';
 import { Box, IconButton, MenuItem, Select, FormControl, SxProps } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { SelectChangeEvent } from '@mui/material'; // Import SelectChangeEvent
+import { SelectChangeEvent } from '@mui/material';
 
 interface CodeWindowProps {
-  codeSnippets: Record<string, string>; // Object with code snippets for different languages
-  initialLanguage?: string; // Optional prop for initial language
-  sx?: SxProps; // Optional style prop
+  codeSnippets: Record<string, string>;
+  initialLanguage?: string;
+  sx?: SxProps;
 }
 
-export default function CodeWindow({ codeSnippets, initialLanguage = 'javascript', sx }: CodeWindowProps) {
-  const [language, setLanguage] = useState(initialLanguage); // Default to initialLanguage
+export default function CodeWindow({ codeSnippets, sx }: CodeWindowProps) {
+  const [language, setLanguage] = useState('');
   const [copied, setCopied] = useState(false);
 
   // Filter out languages that have 'N/A' as their code snippet
-  const languageOptions = Object.keys(codeSnippets).filter(lang => codeSnippets[lang] !== 'N/A'); // Exclude "N/A"
+  const languageOptions = Object.keys(codeSnippets).filter(
+    (lang) => codeSnippets[lang]?.trim().toUpperCase() !== 'N/A'
+  );
+
+  // Set default language when languageOptions are determined
+  useEffect(() => {
+    if (languageOptions.length > 0) {
+      setLanguage(languageOptions.includes('javascript') ? 'javascript' : languageOptions[0]);
+    }
+  }, [languageOptions]);
 
   useEffect(() => {
-    if (codeSnippets[language] && Prism.languages[language]) {
+    if (language && codeSnippets[language] && Prism.languages[language]) {
       Prism.highlightAll();
     }
-  }, [codeSnippets, language]);
+  }, [language, codeSnippets]);
 
   const handleLanguageChange = (event: SelectChangeEvent<string>) => {
     setLanguage(event.target.value as string);
@@ -33,7 +42,7 @@ export default function CodeWindow({ codeSnippets, initialLanguage = 'javascript
 
   const handleCopy = () => {
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000); // Show "copied" state for 2 seconds
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const currentCode = codeSnippets[language] || 'No code available for this language.';
@@ -57,12 +66,12 @@ export default function CodeWindow({ codeSnippets, initialLanguage = 'javascript
       </FormControl>
 
       {/* Code block */}
-      {currentCode ? (
+      {language ? (
         <pre className={`language-${language}`}>
           <code className={`language-${language}`}>{currentCode}</code>
         </pre>
       ) : (
-        <p>No code provided</p>
+        <p>Loading code...</p>
       )}
 
       {/* Copy Button */}
@@ -76,3 +85,4 @@ export default function CodeWindow({ codeSnippets, initialLanguage = 'javascript
     </Box>
   );
 }
+  

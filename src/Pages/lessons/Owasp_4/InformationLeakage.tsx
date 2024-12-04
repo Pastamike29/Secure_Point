@@ -72,7 +72,7 @@ export default function InformationLeakage() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://i.ytimg.com/vi/_jz5qFWhLcg/sddefault.jpg' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F8(InformationLeak).png?alt=media&token=c4188c58-a137-4f62-b13c-2291a71d5adb' />
 
                       <Typography sx={{
                         pt: 3,

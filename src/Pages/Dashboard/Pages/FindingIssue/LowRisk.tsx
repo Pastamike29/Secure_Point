@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField } from '@mui/material';
 import DashboardLayout from '../../Components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface ApplicationDetails {
   "Application Name": string;
@@ -28,6 +29,9 @@ export default function LowRisk() {
   const [riskRatings, setRiskRatings] = useState<RiskRatingGroup[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filteredApplications, setFilteredApplications] = useState<RiskRatingGroup[]>([]);
+
   const navigate = useNavigate();
 
   // Fetch data from the backend
@@ -42,6 +46,7 @@ export default function LowRisk() {
       // Ensure that the response contains the expected structure
       const lowRiskData = data.data.filter((item: RiskRatingGroup) => item._id.toLowerCase() === 'low');
       setRiskRatings(lowRiskData);
+      setFilteredApplications(lowRiskData);  // Set the initial state for filtered applications
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
     } finally {
@@ -77,16 +82,53 @@ export default function LowRisk() {
     navigate(`/Overview/ApplicationIssues/${encodedAppName}`);
   };
 
+  // Handle search functionality
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value.toLowerCase(); // Define 'query'
+    setSearchQuery(query);
+
+    // Filter applications based on the search query
+    const filtered = riskRatings.map((group) => ({
+      ...group,
+      applications: group.applications.filter((app) => {
+        return (
+          (app.applicationName && app.applicationName.toLowerCase().includes(query)) ||
+          (app.applicationDetails["Application Number"] && app.applicationDetails["Application Number"].toLowerCase().includes(query)) ||
+          (app.applicationDetails["Application Contact"] && app.applicationDetails["Application Contact"].toLowerCase().includes(query)) ||
+          (app.applicationDetails["Department"] && app.applicationDetails["Department"].toLowerCase().includes(query)) ||
+          (app.applicationDetails["Chief"] && app.applicationDetails["Chief"].toLowerCase().includes(query))
+        );
+      }),
+    }));
+
+    setFilteredApplications(filtered);
+  };
+
   return (
     <DashboardLayout title="Finding Issues">
       <Box sx={{ padding: '16px' }}>
-        {riskRatings.map((group) => (
-          <Box key={group._id} sx={{ marginBottom: '24px' }}>
-            <Typography variant="h5" sx={{ marginBottom: '12px', fontWeight: 'bold' }}>
-              {group._id || 'Unknown Risk Rating'} Risk Applications
-            </Typography>
+        {/* Flex container for the title and search bar */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+            Low Risk Applications
+          </Typography>
 
-            {/* Display total applications scanned and findings */}
+          {/* Search bar on the right */}
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: <SearchIcon />,
+            }}
+            sx={{ width: '250px' }}
+          />
+        </Box>
+
+        {(searchQuery ? filteredApplications : riskRatings).map((group) => (
+          <Box key={group._id} sx={{ marginBottom: '24px' }}>
             <Typography sx={{ marginBottom: '16px' }}>
               <strong>Total Applications Scanned:</strong> {group.applications.length || 'N/A'}
             </Typography>
@@ -114,16 +156,11 @@ export default function LowRisk() {
                     {group.applications
                       .sort((a, b) => b.totalFindings - a.totalFindings)
                       .map((app, index) => {
-                        console.log(app); // Log each application to inspect its structure
-
-                        // Access applicationDetails (since it's nested in applications)
                         const applicationDetails = app.applicationDetails;
 
                         return (
                           <TableRow
-                            sx={{
-                              cursor: 'pointer',
-                            }}
+                            sx={{ cursor: 'pointer' }}
                             key={app.applicationName + index}
                             onClick={() => handleRowClick(app.applicationName)}
                           >

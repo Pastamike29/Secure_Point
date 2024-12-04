@@ -27,7 +27,7 @@ import DashboardLayout from '../Components/DashboardLayout';
 import BarCharts from '../Components/BarCharts';
 import LineCharts from '../Components/LineCharts';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 
@@ -72,6 +72,7 @@ export default function Overview() {
   const [selectedOption, setSelectedOption] = useState('Critical');
   const [totalApplicationsScanned, setTotalApplicationsScanned] = useState(0);
   const [totalVulnerabilities, setTotalVulnerabilities] = useState(0);
+  const navigate = useNavigate();
 
   const [vulnerabilitiesData, setVulnerabilitiesData] = useState<VulnerabilitiesData | null>(null);
   useEffect(() => {
@@ -141,7 +142,7 @@ export default function Overview() {
 
 
   return (
-    <DashboardLayout title="Dashboard Overview">
+    <DashboardLayout title="Finding Issues Overview">
       <Grid container spacing={3.5}>
         {/* First row: Total Application Scanned */}
         <Grid item xs={12} md={8}>
@@ -159,7 +160,15 @@ export default function Overview() {
               </Card>
             </Grid>
             <Grid item xs={6}>
-              <Card>
+              <Card
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                    boxShadow: 6,
+                  },
+                }}
+                onClick={() => navigate('/Overview/ApplicationIssues')}
+              >
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     Total Vulnerabilities
@@ -227,18 +236,53 @@ export default function Overview() {
         {/* Right side: Critical, High, Medium, Low, Informative */}
         <Grid item xs={12} md={4}>
           <Card sx={{ height: '100%' }}>
-            {['Critical', 'High', 'Medium', 'Low', 'Informative'].map((label, index) => (
-              <CardContent key={index}>
-                <Link to={`ApplicationIssues/${label}Risk`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <Typography variant="h6" gutterBottom>
-                    {label}
-                  </Typography>
-                  <Typography variant="h4">{riskRatings[label as keyof RiskRatingSummary] || 0}</Typography>
-                </Link>
-              </CardContent>
-            ))}
+            {['Critical', 'High', 'Medium', 'Low', 'Informative'].map((label, index) => {
+              const bgColor = {
+                Critical: 'rgba(255, 0, 0, 0.1)',
+                High: 'rgba(255, 69, 0, 0.1)',
+                Medium: 'rgba(255, 165, 0, 0.1)',
+                Low: 'rgba(0, 255, 0, 0.1)',
+                Informative: 'rgba(128, 128, 128, 0.1)',
+              }[label];
+
+              const hoverBgColor = {
+                Critical: 'rgba(255, 0, 0, 0.2)',
+                High: 'rgba(255, 69, 0, 0.2)',
+                Medium: 'rgba(255, 165, 0, 0.2)',
+                Low: 'rgba(0, 255, 0, 0.2)',
+                Informative: 'rgba(128, 128, 128, 0.2)',
+              }[label];
+
+              return (
+                <CardContent
+                  key={index}
+                  sx={{
+                    backgroundColor: bgColor,
+                    borderRadius: '4px',
+                    marginBottom: 1,
+                    transition: 'background-color 0.3s ease',
+                    '&:hover': {
+                      backgroundColor: hoverBgColor,
+                    },
+                  }}
+                >
+                  <Link
+                    to={`ApplicationIssues/${label}Risk`}
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                  >
+                    <Typography variant="h6" gutterBottom>
+                      {label}
+                    </Typography>
+                    <Typography variant="h4">
+                      {riskRatings[label as keyof RiskRatingSummary] || 0}
+                    </Typography>
+                  </Link>
+                </CardContent>
+              );
+            })}
           </Card>
         </Grid>
+
 
       </Grid>
 

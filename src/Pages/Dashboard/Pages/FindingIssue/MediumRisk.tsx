@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, IconButton } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import DashboardLayout from '../../Components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,7 +19,7 @@ interface RiskRatingGroup {
     applicationName: string;
     applicationDetails: ApplicationDetails;
     totalFindings: number;
-  }[];
+  }[]; 
   totalFindings: number;
   "Total Findings": number;
   "Total Applications Scanned": number;
@@ -28,6 +29,9 @@ export default function MediumRisk() {
   const [riskRatings, setRiskRatings] = useState<RiskRatingGroup[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filteredApplications, setFilteredApplications] = useState<RiskRatingGroup[]>([]);
+
   const navigate = useNavigate();
 
   // Fetch data from the backend
@@ -53,6 +57,32 @@ export default function MediumRisk() {
   useEffect(() => {
     fetchApplicationsByRisk();
   }, []);
+
+  // Handle search filtering
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredApplications(riskRatings);
+    } else {
+      setFilteredApplications(
+        riskRatings.map((group) => ({
+          ...group,
+          applications: group.applications.filter((app) => {
+            const applicationDetails = app.applicationDetails;
+            const query = searchQuery.toLowerCase();
+
+            // Check each field for matching query, safely handle null or undefined values
+            return (
+              (applicationDetails["Application Name"]?.toLowerCase().includes(query) ?? false) ||
+              (applicationDetails["Application Number"]?.toLowerCase().includes(query) ?? false) ||
+              (applicationDetails["Application Contact"]?.toLowerCase().includes(query) ?? false) ||
+              (applicationDetails["Department"]?.toLowerCase().includes(query) ?? false) ||
+              (applicationDetails["Chief"]?.toLowerCase().includes(query) ?? false)
+            );
+          }),
+        }))
+      );
+    }
+  }, [searchQuery, riskRatings]);
 
   // Loading or error state handling
   if (loading) {
@@ -80,12 +110,27 @@ export default function MediumRisk() {
   return (
     <DashboardLayout title="Finding Issues">
       <Box sx={{ padding: '16px' }}>
-        {riskRatings.map((group) => (
-          <Box key={group._id} sx={{ marginBottom: '24px' }}>
-            <Typography variant="h5" sx={{ marginBottom: '12px', fontWeight: 'bold' }}>
-              {group._id || 'Unknown Risk Rating'} Risk Applications
-            </Typography>
+        {/* Title and Search Bar on the Same Line */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+            Medium Risk Applications
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <TextField
+              label="Search"
+              variant="outlined"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{ marginRight: '8px' }}
+            />
+            <IconButton color="primary">
+              <SearchIcon />
+            </IconButton>
+          </Box>
+        </Box>
 
+        {filteredApplications.map((group) => (
+          <Box key={group._id} sx={{ marginBottom: '24px' }}>
             {/* Display total applications scanned and findings */}
             <Typography sx={{ marginBottom: '16px' }}>
               <strong>Total Applications Scanned:</strong> {group.applications.length || 'N/A'}

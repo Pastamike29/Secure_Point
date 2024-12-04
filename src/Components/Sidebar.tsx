@@ -1,93 +1,73 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
-
-import { Collapse, colors, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, SxProps, Typography } from '@mui/material';
+import { Box, Collapse, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
-import TitleMenu from './TitleMenu'
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+import TitleMenu from './TitleMenu';
 
 interface DropdownTitleProps {
-  children?: React.ReactDOM;  
-  sx?: SxProps;
+  children?: React.ReactNode;
+  sx?: React.CSSProperties;
   list?: string;
   listName?: string;
   path?: string;
-  onClick?: () => void;
 }
 
-
-
 export default function Sidebar() {
-
   const navigate = useNavigate();
-  const location = useLocation(); // Get the current path
+  const location = useLocation();
   const [open, setOpen] = useState<string | null>(null);
-
 
   const handleClick = (listname: string) => {
     setOpen(open === listname ? null : listname);
   };
 
-
   useEffect(() => {
-    // Set the initial open state based on the path only on mount
     const pathParts = location.pathname.split('/');
     const currentList = pathParts.length > 2 ? pathParts[2] : null;
     if (currentList) {
       setOpen((prevOpen) => (prevOpen === currentList ? prevOpen : currentList));
     }
-  }, [location.pathname]); // Run whenever the path changes
-
+  }, [location.pathname]);
 
   const handleNavigation = (path: string, listName: string) => {
-    setOpen(listName); // Keep the dropdown open when navigating within it
+    setOpen(listName);
     navigate(path);
-  }
+  };
 
-  function DropdownTitle({ list, listName }: DropdownTitleProps) {
-    return (
-      <Typography
-        onClick={() => handleClick(list!)}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
-        <ListItemText>
-          <TitleMenu
-            sx={{
-              fontSize: '14px',
-              fontWeight: '650',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            {open === list ? (
-              <ExpandMoreIcon sx={{ fontSize: '1.2rem', mx: '6px', color: 'rgb(51, 153, 255)' }} />
-            ) : (
-              <ExpandMoreIcon
-                sx={{
-                  transform: 'rotate(270deg)',
-                  fontSize: '1.2rem',
-                  color: 'rgb(51, 153, 255)',
-                  mx: '6px',
-                  transition: 'transform 0.3s',
-                }}
-              />
-            )}
-            {listName}
-          </TitleMenu>
-        </ListItemText>
-      </Typography>
-    );
-  }
+  const DropdownTitle = ({ list, listName }: DropdownTitleProps) => (
+    <Typography
+      onClick={() => handleClick(list!)}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        cursor: 'pointer',
+        padding: '8px 16px',
+        fontWeight: 600,
+        color: open === list ? 'primary.main' : 'text.primary',
+        ':hover': {
+          backgroundColor: 'rgba(51, 153, 255, 0.1)',
+        },
+      }}
+    >
+      {open === list ? (
+        <ExpandMoreIcon sx={{ fontSize: '1.2rem', marginRight: '8px' }} />
+      ) : (
+        <ExpandMoreIcon
+          sx={{
+            transform: 'rotate(270deg)',
+            fontSize: '1.2rem',
+            marginRight: '8px',
+            transition: 'transform 0.3s',
+          }}
+        />
+      )}
+      {listName}
+    </Typography>
+  );
 
-
-  function DropdownList({ sx, list, listName, path }: DropdownTitleProps) {
-    const isActive = location.pathname === path; // Check if the path is active
+  const DropdownList = ({ sx, list, listName, path }: DropdownTitleProps) => {
+    const isActive = location.pathname === path;
 
     return (
       <Collapse in={open === list} timeout="auto" unmountOnExit>
@@ -97,52 +77,35 @@ export default function Sidebar() {
               onClick={() => handleNavigation(path!, listName!)}
               sx={{
                 pl: 4,
-                my: -0.5,
                 ...sx,
-                backgroundColor: isActive ? 'rgba(51, 153, 255, 0.1)' : 'transparent', // Highlight active item
-                color: isActive ? 'rgb(102, 179, 255)' : 'inherit', // Change text color for active item
+                backgroundColor: isActive ? 'rgba(51, 153, 255, 0.1)' : 'transparent',
+                color: isActive ? 'primary.main' : 'text.primary',
                 ':hover': {
-                  backgroundColor: 'rgba(51, 153, 255, 0.2)', // Brighter background on hover
-                  color: 'rgb(102, 179, 255)', // Brighter text color on hover
-                },
-                ':active': {
-                  backgroundColor: 'rgba(51, 153, 255, 0.3)', // Even brighter background when active
-                  color: 'rgb(102, 179, 255)', // Maintain active text color
+                  backgroundColor: 'rgba(51, 153, 255, 0.2)',
+                  color: 'primary.main',
                 },
               }}
             >
               <ListItemText
-                primary={
-                  <Typography
-                    sx={{
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: isActive ? 'rgb(102, 179, 255)' : 'rgba(255,255,255,0.8)', // Active text color
-                      ':active': {
-                        color: 'rgb(102, 179, 255)', // Active text color when clicked
-                      },
-                    }}
-                  >
-                    {listName}
-                  </Typography>
-                }
+                primary={listName}
+                sx={{
+                  fontWeight: isActive ? 700 : 500,
+                  color: isActive ? 'primary.main' : 'inherit',
+                }}
               />
             </ListItemButton>
           </ListItem>
         </List>
       </Collapse>
     );
-  }
-
-
+  };
 
   return (
     <Drawer
       variant="permanent"
       sx={{
-        display: 'flex',
         '& .MuiDrawer-paper': {
-          width: '37vh',
+          width: '280px',
           boxSizing: 'border-box',
           position: 'fixed',
           top: 0,
@@ -153,12 +116,19 @@ export default function Sidebar() {
       <Box
         sx={{
           mt: 8,
-          bgcolor: 'background.paper',
+          overflowY: 'auto',
           height: '100%',
-          overflowY: 'auto', // Enables vertical scroll
+          '::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(51, 153, 255, 0.5)',
+            borderRadius: '4px',
+          },
+        
         }}
       >
-        <List>
+       <List>
           <DropdownTitle
             list='list1'
             listName='Broken Access Control'
@@ -342,11 +312,7 @@ export default function Sidebar() {
           />
 
         </List>
-
-
-
-
       </Box>
     </Drawer>
   );
-};
+}

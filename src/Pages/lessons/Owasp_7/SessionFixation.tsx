@@ -72,7 +72,7 @@ export default function SessionFixation() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://i.ytimg.com/vi/_jz5qFWhLcg/sddefault.jpg' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F14(SessionFix).png?alt=media&token=2407e99d-7d64-4eac-803f-676bd74493d1' />
 
                       <Typography sx={{
                         pt: 3,

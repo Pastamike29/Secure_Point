@@ -15,7 +15,6 @@ export default function UnencryptedCommunication() {
 
   const codeSnippet1 = getUnencryptedCodeSnippets('Lesson1');
   const codeSnippet2 = getUnencryptedCodeSnippets('Lesson2');
-  const ExampleCode = getUnencryptedCodeSnippets('ExampleCode')
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -78,7 +77,7 @@ export default function UnencryptedCommunication() {
                       my: 5,
                     }}>
 
-                      <FitImage src='https://www.paubox.com/hubfs/What%20happens%20if%20an%20email%20is%20not%20encrypted.jpg' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F4(UnencryptCommu).png?alt=media&token=54247f20-92c3-4d94-b522-f1c17179f3f7' />
 
                       <Typography sx={{
                         pt: 3,

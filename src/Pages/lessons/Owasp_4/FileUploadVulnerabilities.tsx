@@ -72,7 +72,7 @@ export default function FileUploadVulnerabilities() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://i.ytimg.com/vi/_jz5qFWhLcg/sddefault.jpg' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F4(UnencryptCommu).png?alt=media&token=54247f20-92c3-4d94-b522-f1c17179f3f7' />
 
                       <Typography sx={{
                         pt: 3,

@@ -110,8 +110,15 @@ export default function ResponsiveAppBar() {
       <AppBar position="fixed" sx={{ maxHeight: '7.5vh' }}>
         <Container maxWidth={false} sx={{ maxWidth: '190vh' }}>
           <Toolbar disableGutters>
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Flogo_SecureP.png?alt=media&token=349d0a70-d898-44f0-a92d-5ce252448c6a" 
+              alt="Logo"
+              style={{
+                height: '40px', 
+                marginRight: '10px', 
+              }}
+            />
             <Box sx={{ display: 'flex', cursor: 'pointer', mr: 'auto' }} onClick={() => navigate('/')}>
-              <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
               <Typography
                 variant="h6"
                 noWrap

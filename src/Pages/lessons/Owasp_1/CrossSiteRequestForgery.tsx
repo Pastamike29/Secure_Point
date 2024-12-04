@@ -12,7 +12,7 @@ export default function CrossSiteRequestForgery() {
   const codeSnippet1 = getCrossSiteCodeSnippets('Lesson1');
   const codeSnippet2 = getCrossSiteCodeSnippets('Lesson2');
   const codeSnippet3 = getCrossSiteCodeSnippets('Lesson3');
-  const ExampleCode = getCrossSiteCodeSnippets('ExampleCode');
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -76,7 +76,7 @@ export default function CrossSiteRequestForgery() {
                       my: 5,
                     }}>
 
-                      <FitImage src='https://i.ytimg.com/vi/7bTNMSqCMI0/maxresdefault.jpg' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F1(csrf).png?alt=media&token=6317ea73-fbae-4445-b0a3-67f347ebbcbc' />
 
                       <Typography sx={{
                         pt: 3,

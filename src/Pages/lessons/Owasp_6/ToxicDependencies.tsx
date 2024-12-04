@@ -71,7 +71,7 @@ export default function ToxicDependencies() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://i.ytimg.com/vi/_jz5qFWhLcg/sddefault.jpg' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F11(ToxicDepen).png?alt=media&token=56fc37a3-49af-4d8c-b2b3-541cb7dd67a8' />
 
                       <Typography sx={{
                         pt: 3,

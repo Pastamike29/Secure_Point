@@ -18,6 +18,7 @@
     "@toolpad/core": "^0.6.0",
     "axios": "^1.7.7",
     "botframework-webchat": "^4.18.0",
+    "date-fns": "^4.1.0",
     "emailjs-com": "^3.2.0",
     "flowise-embed-react": "^1.0.6",
     "jwt-decode": "^4.0.0",
