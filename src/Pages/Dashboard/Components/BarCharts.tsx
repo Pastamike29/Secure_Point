@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Card, CardContent, Typography, Select, MenuItem, FormControl, InputLabel, Box, SelectChangeEvent } from '@mui/material';
+import { Card, CardContent, Typography, Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
 import axios from 'axios';
+import { SelectChangeEvent } from '@mui/material';
+
 
 interface VulnerabilityData {
     month: string;
@@ -10,63 +12,54 @@ interface VulnerabilityData {
 }
 
 const BarCharts: React.FC = () => {
-    // State to hold the selected year
     const [selectedYear, setSelectedYear] = useState<number>(2023);
-    // State to hold the chart data
     const [chartData, setChartData] = useState<any[]>([]);
 
-    // Array of month names in order for sorting purposes
     const monthNames = [
-        "January", "February", "March", "April", "May", "June", 
+        "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
-    
-    // Handle the year change from the dropdown
-    const handleYearChange = (event: SelectChangeEvent<string | number>) => {
+
+    const handleYearChange = (event: SelectChangeEvent<number>) => {
         setSelectedYear(Number(event.target.value));
     };
 
-    // Fetch data from backend when component mounts or when year changes
+
     useEffect(() => {
         const fetchData = async () => {
-            try {
                 const response = await axios.get('http://localhost:5000/getApplicationsByMonthYear');
                 const data = response.data.data;
 
-                // Filter data based on the selected year
                 const filteredData = data
                     .filter((item: VulnerabilityData) => item.year === selectedYear)
                     .map((item: VulnerabilityData) => ({
-                        name: item.month, // Keep month name as is
+                        name: item.month,
                         vulnerabilities: item.totalFindings,
                     }));
 
-                // Sort data by month in chronological order
+                // Ensure chronological order by sorting
                 filteredData.sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
 
                 setChartData(filteredData);
-            } catch (error) {
-                console.error("Error fetching data", error);
-            }
+          
         };
 
         fetchData();
-    }, [selectedYear]); // Run fetch whenever selected year changes
+    }, [selectedYear]);
 
     return (
-        <Card sx={{ ml: 3.9 }}>
+        <Card>
             <CardContent>
                 <Typography variant="h6" gutterBottom>
                     Total Vulnerabilities
                 </Typography>
 
-                {/* Dropdown menu for selecting year */}
                 <Box sx={{ mb: 2 }}>
                     <FormControl fullWidth>
                         <InputLabel id="select-year-label">Year</InputLabel>
                         <Select
                             labelId="select-year-label"
-                            value={selectedYear}
+                            value={selectedYear} // Ensure this is a number
                             onChange={handleYearChange}
                             label="Year"
                         >
@@ -76,14 +69,10 @@ const BarCharts: React.FC = () => {
                     </FormControl>
                 </Box>
 
-                {/* Chart to display vulnerabilities based on selected year */}
                 <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
-                            dataKey="name" 
-                            tick={{ fill: "white" }}  // Change the font color of month names to white
-                        />
+                        <XAxis dataKey="name" tick={{ fill: "white" }} />
                         <YAxis />
                         <Tooltip />
                         <Legend />

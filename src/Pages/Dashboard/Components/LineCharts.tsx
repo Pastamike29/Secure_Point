@@ -33,7 +33,6 @@ const LineCharts: React.FC = () => {
     // Fetch data from the backend based on selected year
     useEffect(() => {
         const fetchData = async () => {
-            try {
                 // Fetch data from the backend API
                 const response = await axios.get('http://localhost:5000/getApplicationsByMonthYear');
                 const data = response.data.data;
@@ -50,9 +49,7 @@ const LineCharts: React.FC = () => {
                 const sortedData = filteredData.sort((a, b) => monthOrder[a.name] - monthOrder[b.name]);
 
                 setChartData(sortedData);
-            } catch (error) {
-                console.error("Error fetching data", error);
-            }
+           
         };
 
         fetchData();
@@ -65,7 +62,7 @@ const LineCharts: React.FC = () => {
     };
 
     return (
-        <Card sx={{ ml: 3.9 }}>
+        <Card>
             <CardContent>
                 <Typography variant="h6" gutterBottom>
                     Total Application Scanned

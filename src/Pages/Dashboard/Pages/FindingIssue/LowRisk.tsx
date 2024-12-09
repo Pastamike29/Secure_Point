@@ -110,7 +110,7 @@ export default function LowRisk() {
         {/* Flex container for the title and search bar */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            Low Risk Applications
+              LOW RISK APPLICATIONS
           </Typography>
 
           {/* Search bar on the right */}

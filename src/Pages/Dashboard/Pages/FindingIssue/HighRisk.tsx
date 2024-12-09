@@ -113,7 +113,7 @@ export default function HighRisk() {
           <Box key={group._id} sx={{ marginBottom: '24px' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                {group._id || 'Unknown Risk Rating'} Risk Applications
+                {(group._id || 'Unknown Risk Rating').toUpperCase()} RISK APPLICATIONS
               </Typography>
 
               <TextField

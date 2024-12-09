@@ -15,6 +15,8 @@ import {
   Box,
   Typography,
 } from '@mui/material';
+import { parse, format, isValid } from 'date-fns';
+
 
 interface FindingIssue {
   _id: string;
@@ -43,11 +45,11 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
   const [yearFilter, setYearFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
   const [riskRatingFilter, setRiskRatingFilter] = useState('');
+  const normalizeKey = (key: string) => key.toLowerCase().replace(/\s+/g, '');
 
   const columnOrder = [
     'Application Number',
-    'Sub Application No.',
-    'Application Name', 
+    'Application Name',
     'Scope',
     'Application Contact',
     'Department',
@@ -108,7 +110,6 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
   };
 
 
-
   useEffect(() => {
     fetchIssues();
   }, []);
@@ -122,6 +123,26 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
 
 
 
+  const getNormalizedValue = (issue: FindingIssue, column: string) => {
+    const normalizedKey = normalizeKey(column);
+    const matchingKey = Object.keys(issue).find(
+      (key) => normalizeKey(key) === normalizedKey
+    );
+    console.log(`Matching key for column "${column}":`, matchingKey); // Debug log
+    return matchingKey ? issue[matchingKey] : 'N/A';
+  };
+
+  const formatDate = (date: string | null) => {
+    if (!date) return 'N/A';
+    try {
+      // Parse the date with the expected format
+      const parsedDate = parse(date, 'dd-MMM-yyyy', new Date());
+      return isValid(parsedDate) ? format(parsedDate, 'dd/MM/yyyy') : 'N/A';
+    } catch {
+      return 'N/A';
+    }
+  };
+  
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -144,7 +165,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
         return isMatch;
       });
     }
-    
+
     if (foundDateFilter) {
       filtered = filtered.filter((issue) => {
         const foundDate = new Date(issue['Found Date']);
@@ -200,7 +221,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
     });
 
     setFilteredIssues(sortedIssues);
-  }, [issues, sortConfig, debouncedSearchTerm,applicationNumberFilter, foundDateFilter, yearFilter, monthFilter, riskRatingFilter]);
+  }, [issues, sortConfig, debouncedSearchTerm, applicationNumberFilter, foundDateFilter, yearFilter, monthFilter, riskRatingFilter]);
 
 
   const columns = filteredIssues.length > 0
@@ -350,23 +371,25 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
       </Box>
 
 
+      return (
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              {validColumns.map((column, index) => (
-                <TableCell key={index} onClick={() => handleSort(column)}>
-                  {column}
-                </TableCell>
+              {validColumns.map((column) => (
+                <TableCell key={column}>{column}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
             {currentPageIssues.map((issue) => (
               <TableRow key={issue._id}>
-                {validColumns.map((column) => (
-                  <TableCell key={column}>{issue[column] ?? 'N/A'}</TableCell>
-                ))}
+                {validColumns.map((column) => {
+                  const value = getNormalizedValue(issue, column);
+                  const isDateColumn = ['Found Date', 'Overdue Date'].includes(column);
+                  const displayValue = isDateColumn ? formatDate(value) : value;
+                  return <TableCell key={column}>{displayValue}</TableCell>;
+                })}
               </TableRow>
             ))}
           </TableBody>

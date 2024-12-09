@@ -27,6 +27,8 @@ interface RiskRatingGroup {
 export default function InformativeRisk() {
   const [riskRatings, setRiskRatings] = useState<RiskRatingGroup[]>([]);
   const [filteredApplications, setFilteredApplications] = useState<ApplicationDetails[]>([]);
+  const [totalApplications, setTotalApplications] = useState<number>(0);
+  const [totalFindings, setTotalFindings] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -45,9 +47,18 @@ export default function InformativeRisk() {
       const informativeRiskData = data.data.filter((item: RiskRatingGroup) => item._id.toLowerCase() === 'informative');
       setRiskRatings(informativeRiskData);
 
+      // Calculate totals
+      const totalApps = informativeRiskData.reduce((acc, group) => acc + group.applications.length, 0);
+      const totalFinds = informativeRiskData.reduce((acc, group) => acc + group.totalFindings, 0);
+      setTotalApplications(totalApps);
+      setTotalFindings(totalFinds);
+
       // Flatten the applications for easier search
       const allApplications = informativeRiskData.flatMap((group) =>
-        group.applications.map((app) => app.applicationDetails)
+        group.applications.map((app) => ({
+          ...app.applicationDetails,
+          "Finding Issues Count": app.totalFindings || 0, // Add totalFindings if missing
+        }))
       );
       setFilteredApplications(allApplications);
     } catch (error) {
@@ -109,7 +120,7 @@ export default function InformativeRisk() {
         {/* Title and Search Bar */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            Informative Risk Applications
+            INFORMATIVE RISK APPLICATIONS
           </Typography>
           <TextField
             label="Search"
@@ -118,6 +129,16 @@ export default function InformativeRisk() {
             onChange={handleSearchChange}
             sx={{ width: '300px' }}
           />
+        </Box>
+
+        {/* Totals Section */}
+        <Box sx={{alignItems: 'center', mt: 3, mb: 2 }}>
+          <Typography variant="h6">
+            <strong>Total Applications Scanned:</strong> {totalApplications}
+          </Typography>
+          <Typography variant="h6">
+            <strong>Total Finding Issues:</strong> {totalFindings}
+          </Typography>
         </Box>
 
         {/* Results Table */}
@@ -139,20 +160,26 @@ export default function InformativeRisk() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredApplications.map((app, index) => (
-                  <TableRow
-                    key={index}
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => handleRowClick(app["Application Name"])}
-                  >
-                    <TableCell>{app["Application Name"] || 'N/A'}</TableCell>
-                    <TableCell>{app["Application Number"] || 'N/A'}</TableCell>
-                    <TableCell>{app["Application Contact"] || 'N/A'}</TableCell>
-                    <TableCell>{app.Department || 'N/A'}</TableCell>
-                    <TableCell>{app.Chief || 'N/A'}</TableCell>
-                    <TableCell>{app["Finding Issues Count"] || '0'}</TableCell>
-                  </TableRow>
-                ))}
+                {filteredApplications.map((app, index) => {
+                  console.log(`App ${index} Data:`, app); // Debug log for each application
+
+                  return (
+                    <TableRow
+                      key={index}
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => handleRowClick(app["Application Name"])}
+                    >
+                      <TableCell>{app["Application Name"] || 'N/A'}</TableCell>
+                      <TableCell>{app["Application Number"] || 'N/A'}</TableCell>
+                      <TableCell>{app["Application Contact"] || 'N/A'}</TableCell>
+                      <TableCell>{app.Department || 'N/A'}</TableCell>
+                      <TableCell>{app.Chief || 'N/A'}</TableCell>
+                      <TableCell>
+                        {app["Finding Issues Count"] != null ? app["Finding Issues Count"] : '0'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>

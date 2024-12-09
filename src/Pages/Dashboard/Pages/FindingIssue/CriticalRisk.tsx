@@ -19,7 +19,7 @@ interface RiskRatingGroup {
     applicationName: string;
     applicationDetails: ApplicationDetails;
     totalFindings: number;
-  }[]; 
+  }[];
   totalFindings: number;
   "Total Findings": number;
   "Total Applications Scanned": number;
@@ -73,16 +73,15 @@ export default function CriticalRisk() {
     applications: group.applications.filter(app => {
       const { applicationDetails } = app;
       return (
-        applicationDetails["Application Name"].toLowerCase().includes(searchQuery) ||
-        applicationDetails["Application Number"].toLowerCase().includes(searchQuery) ||
-        applicationDetails["Application Contact"].toLowerCase().includes(searchQuery) ||
-        applicationDetails["Department"].toLowerCase().includes(searchQuery) ||
-        applicationDetails["Chief"].toLowerCase().includes(searchQuery)
+        (applicationDetails["Application Name"]?.toLowerCase() || '').includes(searchQuery) ||
+        (applicationDetails["Application Number"]?.toLowerCase() || '').includes(searchQuery) ||
+        (applicationDetails["Application Contact"]?.toLowerCase() || '').includes(searchQuery) ||
+        (applicationDetails["Department"]?.toLowerCase() || '').includes(searchQuery) ||
+        (applicationDetails["Chief"]?.toLowerCase() || '').includes(searchQuery)
       );
     })
   }));
 
-  // Loading or error state handling
   if (loading) {
     return (
       <Typography align="center" variant="h6" sx={{ marginTop: '20px' }}>
@@ -122,18 +121,19 @@ export default function CriticalRisk() {
 
         {filteredApplications.map((group) => (
           <Box key={group._id} sx={{ marginBottom: '24px' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ alignItems: 'center', mb: '24px' }}>
               <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                {group._id || 'Unknown Risk Rating'} Risk Applications
+                {(group._id || 'Unknown Risk Rating').toUpperCase()} RISK APPLICATIONS
               </Typography>
 
-              <Typography sx={{ marginBottom: '16px' }}>
-                <strong>Total Applications Scanned:</strong> {group.applications.length || 'N/A'}
-              </Typography>
-
-              <Typography sx={{ marginBottom: '16px' }}>
-                <strong>Total Findings:</strong> {group.totalFindings || 'N/A'}
-              </Typography>
+              <Box sx={{ mt: 3, gap: '16px', alignItems: 'center' }}>
+                <Typography>
+                  <strong>Total Applications Scanned:</strong> {group.applications.length || 'N/A'}
+                </Typography>
+                <Typography>
+                  <strong>Total Findings:</strong> {group.totalFindings || 'N/A'}
+                </Typography>
+              </Box>
             </Box>
 
             {group.applications.length === 0 ? (

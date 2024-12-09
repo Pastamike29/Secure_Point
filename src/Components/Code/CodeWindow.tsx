@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism.css';
 import 'prismjs/components/prism-java';
@@ -18,17 +18,16 @@ export default function CodeWindow({ codeSnippets, sx }: CodeWindowProps) {
   const [language, setLanguage] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Filter out languages that have 'N/A' as their code snippet
-  const languageOptions = Object.keys(codeSnippets).filter(
-    (lang) => codeSnippets[lang]?.trim().toUpperCase() !== 'N/A'
+  const languageOptions = useMemo(
+    () => Object.keys(codeSnippets).filter((lang) => codeSnippets[lang]?.trim().toUpperCase() !== 'N/A'),
+    [codeSnippets]
   );
 
-  // Set default language when languageOptions are determined
   useEffect(() => {
-    if (languageOptions.length > 0) {
+    if (languageOptions.length > 0 && !language) {
       setLanguage(languageOptions.includes('javascript') ? 'javascript' : languageOptions[0]);
     }
-  }, [languageOptions]);
+  }, [languageOptions, language]);
 
   useEffect(() => {
     if (language && codeSnippets[language] && Prism.languages[language]) {
@@ -49,7 +48,6 @@ export default function CodeWindow({ codeSnippets, sx }: CodeWindowProps) {
 
   return (
     <Box sx={{ position: 'relative', maxWidth: '100%', mb: 4, textAlign: 'left', overflowY: 'auto', ...sx }}>
-      {/* Language Selector */}
       <FormControl variant="outlined" sx={{ mb: 2, minWidth: 120 }}>
         <Select
           value={language}
@@ -65,7 +63,6 @@ export default function CodeWindow({ codeSnippets, sx }: CodeWindowProps) {
         </Select>
       </FormControl>
 
-      {/* Code block */}
       {language ? (
         <pre className={`language-${language}`}>
           <code className={`language-${language}`}>{currentCode}</code>
@@ -74,7 +71,6 @@ export default function CodeWindow({ codeSnippets, sx }: CodeWindowProps) {
         <p>Loading code...</p>
       )}
 
-      {/* Copy Button */}
       <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
         <CopyToClipboard text={currentCode} onCopy={handleCopy}>
           <IconButton color="primary">
@@ -85,4 +81,3 @@ export default function CodeWindow({ codeSnippets, sx }: CodeWindowProps) {
     </Box>
   );
 }
-  

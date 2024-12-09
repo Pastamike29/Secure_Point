@@ -19,7 +19,7 @@ interface RiskRatingGroup {
     applicationName: string;
     applicationDetails: ApplicationDetails;
     totalFindings: number;
-  }[]; 
+  }[];
   totalFindings: number;
   "Total Findings": number;
   "Total Applications Scanned": number;
@@ -113,7 +113,7 @@ export default function MediumRisk() {
         {/* Title and Search Bar on the Same Line */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            Medium Risk Applications
+            MEDIUM RISK APPLICATIONS
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <TextField

@@ -203,7 +203,7 @@ export default function Overview() {
                         <MenuItem value="Low">Low</MenuItem>
                       </Select>
                     </FormControl>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={320}>
                       <PieChart>
                         <Pie
                           data={getPieData(selectedOption)} // Ensure this returns the correct data
@@ -259,7 +259,7 @@ export default function Overview() {
                   sx={{
                     backgroundColor: bgColor,
                     borderRadius: '4px',
-                    marginBottom: 1,
+                    marginBottom: 1.2,
                     transition: 'background-color 0.3s ease',
                     '&:hover': {
                       backgroundColor: hoverBgColor,
