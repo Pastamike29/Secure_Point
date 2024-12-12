@@ -72,7 +72,7 @@ export default function SoftwareAndDataIntegrityFailures() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F16(WeakSession).png?alt=media&token=77c60e8c-ede1-4b1a-8cf4-37dbd3052fb9' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F17(SoftwareAndDataFail).png?alt=media&token=632cc98c-6e2c-4ff3-aae9-4e6206e391b2' />
 
                       <Typography sx={{
                         pt: 3,

@@ -72,7 +72,7 @@ export default function UserEnumeration() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F14(SessionFix).png?alt=media&token=2407e99d-7d64-4eac-803f-676bd74493d1' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F15(UserEnum).png?alt=media&token=c62264b3-62c6-4e18-99cd-ceaa9eb35a00' />
 
                       <Typography sx={{
                         pt: 3,

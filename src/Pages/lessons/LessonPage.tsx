@@ -307,7 +307,7 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F11(ToxicDepen).png?alt=media&token=56fc37a3-49af-4d8c-b2b3-541cb7dd67a8'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F12(PasswordMissmanage).png?alt=media&token=399f3d76-13ba-46ca-859a-911822b37ed8'
                     onClick={() => handleNavigate('/LessonPage/PasswordMismanagement')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
@@ -377,7 +377,7 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F17(SoftwareAndDataFail).png?alt=media&token=632cc98c-6e2c-4ff3-aae9-4e6206e391b2'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F18(SecurityLoggingAndMonit).png?alt=media&token=7f6c9cab-23b0-4de3-8026-857b0fd45d34'
                     onClick={() => handleNavigate('/LessonPage/LoggingAndMonitoringFailures')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
@@ -385,8 +385,8 @@ export default function LessonPage() {
                 </Grid2>
 
                 <Box sx={{
-                  my:10,
-                  mb:55,
+                  my: 10,
+                  mb: 55,
                   height: 30,
                   width: '140vh',
                   boxShadow: '0 4px 0 rgba(0,0,0,0.2)'
@@ -407,7 +407,7 @@ export default function LessonPage() {
                     mx: 4,
                   }}
                 >
-                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F18(SecurityLoggingAndMonit).png?alt=media&token=7f6c9cab-23b0-4de3-8026-857b0fd45d34'
+                  <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F19(SSRF).png?alt=media&token=494c3c37-2c98-4937-b31e-74cca0569303'
                     onClick={() => handleNavigate('/LessonPage/ServerSideRequestForgery')}>
                     <Typography variant='h4'></Typography>
                   </GridCard2>
@@ -418,7 +418,6 @@ export default function LessonPage() {
               </Grid2>
 
             </Container>
-            <Chatbot />
           </Box>
         </Box>
       </Box>

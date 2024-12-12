@@ -72,7 +72,7 @@ export default function LaxSecuritySetting() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F8(InformationLeak).png?alt=media&token=c4188c58-a137-4f62-b13c-2291a71d5adb' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F10(LaxSecureSetting).png?alt=media&token=9af1fe65-efc7-4ad0-8105-ef705d605b04' />
 
                       <Typography sx={{
                         pt: 3,

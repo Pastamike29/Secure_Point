@@ -55,79 +55,81 @@ import { AuthProvider } from './Login/Component/AuthContext'
 import DynamicVulPage from './Pages/CodeExample/Page/DynamicVulPage'
 import FindingIssue from './Pages/Admin/Pages/FindingIssue/FindingIssue'
 
+import Chatbot from './Components/Chatbot'
 export default function App() {
 
   return (
     <UserProvider>
-    <AuthProvider>
-    <BrowserRouter> 
-    <ToggleColorMode> 
-      <Routes>
-      <Route path="/FeedbackModal" element={<FeedbackModal />}></Route>
-  
-        <Route path="/" element={<HomePage />}></Route>
-        <Route path="/LessonPage" element={<LessonPage />}></Route>
-        <Route path="/LessonPage/BrokenAccControl" element={<BrokenAccControl />}></Route>
-        <Route path="/LessonPage/DirectoryTraversal" element={<DirectoryTraversal />}></Route>
-        <Route path="/LessonPage/CrossSiteRequestForgery" element={<CrossSiteRequestForgery />}></Route>
-        <Route path="/LessonPage/UnencryptedCommunication" element={<UnencryptedCommunication />}></Route>
-        <Route path="/LessonPage/CommandInjection" element={<CommandInjection />}></Route>
-        <Route path="/LessonPage/SQLInjection" element={<SQLInjection />}></Route>
-        <Route path="/LessonPage/InsecureDesign" element={<InsecureDesign />}></Route>
-        <Route path="/LessonPage/InformationLeakage" element={<InformationLeakage />}></Route>
-        <Route path="/LessonPage/FileUploadVulnerabilities" element={<FileUploadVulnerabilities />}></Route>
-        <Route path="/LessonPage/LaxSecuritySettings" element={<LaxSecuritySetting />}></Route>
-        <Route path="/LessonPage/ToxicDependencies" element={<ToxicDependencies />}></Route>
-        <Route path="/LessonPage/PasswordMismanagement" element={<PasswordMismanagement />}></Route>
-        <Route path="/LessonPage/PrivilegeEscalation" element={<PrivilegeEscalation />}></Route>
-        <Route path="/LessonPage/SessionFixation" element={<SessionFixation />}></Route>
-        <Route path="/LessonPage/UserEnumeration" element={<UserEnumberation />}></Route>
-        <Route path="/LessonPage/WeakSessionIds" element={<WeakSessionIds />}></Route>
-        <Route path="/LessonPage/SoftwareAndDataIntegrityFailures" element={<SoftwareAndDataIntegrityFailures />}></Route>
-        <Route path="/LessonPage/LoggingAndMonitoringFailures" element={<LoggingAndMonitoringFailures/>}></Route>
-        <Route path="/LessonPage/ServerSideRequestForgery" element={<ServerSideRequestForgery />}></Route>
-        
-        
-        {/* <Route path='/CodeExample/BrokenCode/*' element={<BrokenCode />}></Route> */}
-        <Route path="/vulnerabilities/:issueName" element={<DynamicVulPage />} />
+      <AuthProvider>
+        <BrowserRouter>
+          <ToggleColorMode>
+            <Routes>
+              <Route path="/FeedbackModal" element={<FeedbackModal />}></Route>
 
-        <Route path='/Quiz' element={<QuizPage />}></Route>
-        <Route path='/ScoreBoard' element={<ScoreBoard />}></Route>
-        
-        
-        
-        <Route path='/admin' element={<AdminMain />}></Route>
-        <Route path='/admin/AddUser' element={<AddUser />}></Route>
-        <Route path='/admin/AddVulnerability' element={<AddVulnerability />}></Route>
-        <Route path="/admin/ApplicationManagement" element={<ApplicationManagement />} />
-        <Route path="/admin/FindingIssue" element={<FindingIssue />} />
+              <Route path="/" element={<HomePage />}></Route>
+              <Route path="/LessonPage" element={<LessonPage />}></Route>
+              <Route path="/LessonPage/BrokenAccControl" element={<BrokenAccControl />}></Route>
+              <Route path="/LessonPage/DirectoryTraversal" element={<DirectoryTraversal />}></Route>
+              <Route path="/LessonPage/CrossSiteRequestForgery" element={<CrossSiteRequestForgery />}></Route>
+              <Route path="/LessonPage/UnencryptedCommunication" element={<UnencryptedCommunication />}></Route>
+              <Route path="/LessonPage/CommandInjection" element={<CommandInjection />}></Route>
+              <Route path="/LessonPage/SQLInjection" element={<SQLInjection />}></Route>
+              <Route path="/LessonPage/InsecureDesign" element={<InsecureDesign />}></Route>
+              <Route path="/LessonPage/InformationLeakage" element={<InformationLeakage />}></Route>
+              <Route path="/LessonPage/FileUploadVulnerabilities" element={<FileUploadVulnerabilities />}></Route>
+              <Route path="/LessonPage/LaxSecuritySettings" element={<LaxSecuritySetting />}></Route>
+              <Route path="/LessonPage/ToxicDependencies" element={<ToxicDependencies />}></Route>
+              <Route path="/LessonPage/PasswordMismanagement" element={<PasswordMismanagement />}></Route>
+              <Route path="/LessonPage/PrivilegeEscalation" element={<PrivilegeEscalation />}></Route>
+              <Route path="/LessonPage/SessionFixation" element={<SessionFixation />}></Route>
+              <Route path="/LessonPage/UserEnumeration" element={<UserEnumberation />}></Route>
+              <Route path="/LessonPage/WeakSessionIds" element={<WeakSessionIds />}></Route>
+              <Route path="/LessonPage/SoftwareAndDataIntegrityFailures" element={<SoftwareAndDataIntegrityFailures />}></Route>
+              <Route path="/LessonPage/LoggingAndMonitoringFailures" element={<LoggingAndMonitoringFailures />}></Route>
+              <Route path="/LessonPage/ServerSideRequestForgery" element={<ServerSideRequestForgery />}></Route>
 
-        
+
+              {/* <Route path='/CodeExample/BrokenCode/*' element={<BrokenCode />}></Route> */}
+              <Route path="/vulnerabilities/:issueName" element={<DynamicVulPage />} />
+
+              <Route path='/Quiz' element={<QuizPage />}></Route>
+              <Route path='/ScoreBoard' element={<ScoreBoard />}></Route>
 
 
 
-        <Route path="/RegisterPage" element={<RegisterPage />} />
-        <Route path="/LoginPage" element={<LoginPage />} />
+              <Route path='/admin' element={<AdminMain />}></Route>
+              <Route path='/admin/AddUser' element={<AddUser />}></Route>
+              <Route path='/admin/AddVulnerability' element={<AddVulnerability />}></Route>
+              <Route path="/admin/ApplicationManagement" element={<ApplicationManagement />} />
+              <Route path="/admin/FindingIssue" element={<FindingIssue />} />
 
 
-        <Route path="/ProfilePage" element={<ProfilePage />} />
-        <Route path="/UpdateProfile" element={<UpdateProfile />} />
 
 
-        <Route path="/Overview" element={<Overview />} />
-        <Route path="/Overview/ApplicationIssues" element={<ApplicationIssues />} />
-        <Route path="/Overview/ApplicationIssues/CriticalRisk" element={<CriticalRisk />} />
-        <Route path="/Overview/ApplicationIssues/HighRisk" element={<HighRisk />} />
-        <Route path="/Overview/ApplicationIssues/MediumRisk" element={<MediumRisk />} />
-        <Route path="/Overview/ApplicationIssues/LowRisk" element={<LowRisk />} />
-        <Route path="/Overview/ApplicationIssues/InformativeRisk" element={<InformativeRisk />} />
-        <Route path="/Overview/ApplicationIssues/:applicationName" element={<DynamicFindingIssues />} />
+
+              <Route path="/RegisterPage" element={<RegisterPage />} />
+              <Route path="/LoginPage" element={<LoginPage />} />
 
 
-      </Routes>
-      </ToggleColorMode>
-    </BrowserRouter>
-    </AuthProvider>
+              <Route path="/ProfilePage" element={<ProfilePage />} />
+              <Route path="/UpdateProfile" element={<UpdateProfile />} />
+
+
+              <Route path="/Overview" element={<Overview />} />
+              <Route path="/Overview/ApplicationIssues" element={<ApplicationIssues />} />
+              <Route path="/Overview/ApplicationIssues/CriticalRisk" element={<CriticalRisk />} />
+              <Route path="/Overview/ApplicationIssues/HighRisk" element={<HighRisk />} />
+              <Route path="/Overview/ApplicationIssues/MediumRisk" element={<MediumRisk />} />
+              <Route path="/Overview/ApplicationIssues/LowRisk" element={<LowRisk />} />
+              <Route path="/Overview/ApplicationIssues/InformativeRisk" element={<InformativeRisk />} />
+              <Route path="/Overview/ApplicationIssues/:applicationName" element={<DynamicFindingIssues />} />
+
+
+            </Routes>
+            <Chatbot />
+          </ToggleColorMode>
+        </BrowserRouter>
+      </AuthProvider>
     </UserProvider>
 
   )

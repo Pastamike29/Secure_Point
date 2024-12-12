@@ -72,7 +72,7 @@ export default function PasswordMismanagement() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F11(ToxicDepen).png?alt=media&token=56fc37a3-49af-4d8c-b2b3-541cb7dd67a8' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F12(PasswordMissmanage).png?alt=media&token=399f3d76-13ba-46ca-859a-911822b37ed8' />
 
                       <Typography sx={{
                         pt: 3,

@@ -1,6 +1,6 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
 import {
+  Box,
   Collapse,
   Divider,
   Drawer,
@@ -10,17 +10,9 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-// Define the types for the props
-interface DropdownTitleProps {
-  listName: string;
-  isOpen: boolean;
-  onClick: () => void;
-}
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface SidebarItem {
   issueName: string;
@@ -32,62 +24,33 @@ interface OwaspCategory {
   items: SidebarItem[];
 }
 
-
-
-// Memoize DropdownTitle to prevent unnecessary re-renders
-const DropdownTitle: React.FC<DropdownTitleProps> = React.memo(({ listName, isOpen, onClick }) => (
-  <Typography
-    onClick={onClick}
-    role="button"
-    aria-expanded={isOpen}
-    tabIndex={0} // Make it keyboard accessible
-    onKeyDown={(e) => e.key === 'Enter' && onClick()} // Handle keyboard navigation
-  >
-    <ListItemText>
-      <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-        {isOpen ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-        <Typography variant="subtitle2">{listName}</Typography>
-      </Box>
-    </ListItemText>
-  </Typography>
-));
-
-// Memoize DropdownList to prevent unnecessary re-renders
-const DropdownList: React.FC<{ isOpen: boolean; issueName: string; path: string; onClick: () => void }> = React.memo(({ isOpen, issueName, path, onClick }) => (
-  <Collapse in={isOpen} timeout="auto" unmountOnExit>
-    <List component="div" disablePadding>
-      <ListItem disablePadding>
-        <ListItemButton onClick={onClick}>
-          <ListItemText primary={issueName} />
-        </ListItemButton>
-      </ListItem>
-    </List>
-  </Collapse>
-));
-
 export default function DynamicSidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [owaspCategories, setOwaspCategories] = useState<OwaspCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
 
-  const handleNavigation = (issueName: string) => {
-    navigate(`/vulnerabilities/${issueName}`);
+  const handleNavigation = (path: string) => {
+    navigate(path);
   };
 
+  const handleToggleCategory = (category: string) => {
+    setOpenCategory(openCategory === category ? null : category);
+  };
 
   useEffect(() => {
     const fetchOwaspCategories = async () => {
       try {
         const response = await fetch('http://localhost:5000/api/owasp-categories');
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error('Failed to fetch OWASP categories.');
         }
         const data = await response.json();
         setOwaspCategories(data);
       } catch (error) {
-        console.error('Error fetching OWASP categories:', error);
+        console.error('Error fetching categories:', error);
         setError('Failed to load OWASP categories.');
       } finally {
         setLoading(false);
@@ -95,52 +58,118 @@ export default function DynamicSidebar() {
     };
 
     fetchOwaspCategories();
-  }, []); // Fetch categories on component mount
-
-  const handleClick = (listName: string) => {
-    setOpenCategory(openCategory === listName ? null : listName);
-  };
-
-
+  }, []);
 
   if (loading) {
-    return <Typography variant="body1" sx={{ padding: 2 }}>Loading...</Typography>;
+    return (
+      <Typography variant="body1" sx={{ padding: 2 }}>
+        Loading...
+      </Typography>
+    );
   }
 
   if (error) {
-    return <Typography variant="body1" sx={{ padding: 2, color: 'red' }}>{error}</Typography>;
+    return (
+      <Typography variant="body1" sx={{ padding: 2, color: 'red' }}>
+        {error}
+      </Typography>
+    );
   }
 
   return (
-    <Drawer variant="permanent">
-      <Box sx={{ bgcolor: 'background.paper', width: '300px', height: '100%', mt: 10, overflowY: 'auto' }}>
-        {owaspCategories.length > 0 ? (
-          owaspCategories.map((category) => (
+    <Drawer
+      variant="permanent"
+      sx={{
+        '& .MuiDrawer-paper': {
+          width: '280px',
+          boxSizing: 'border-box',
+          position: 'fixed',
+          top: 0,
+          height: '100vh',
+        },
+      }}
+    >
+      <Box
+        sx={{
+          mt: 8,
+          overflowY: 'auto',
+          height: '100%',
+          '::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(51, 153, 255, 0.5)',
+            borderRadius: '4px',
+          },
+        }}
+      >
+        {owaspCategories.map((category) => {
+          const isOpen = openCategory === category.owasp;
+
+          return (
             <React.Fragment key={category.owasp}>
               <List>
-                <DropdownTitle
-                  listName={category.owasp}
-                  isOpen={openCategory === category.owasp}
-                  onClick={() => handleClick(category.owasp)}
-                />
-                {category.items.map((item) => (
-                  <DropdownList
-                    key={item.issueName}
-                    issueName={item.issueName}
-                    path={item.path}
-                    isOpen={openCategory === category.owasp}
-                    onClick={() => handleNavigation(item.issueName)} // Update to use issueName
+                <Typography
+                  onClick={() => handleToggleCategory(category.owasp)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    padding: '8px 16px',
+                    fontWeight: 600,
+                    color: isOpen ? 'primary.main' : 'text.primary',
+                    ':hover': {
+                      backgroundColor: 'rgba(51, 153, 255, 0.1)',
+                    },
+                  }}
+                >
+                  <ExpandMoreIcon
+                    sx={{
+                      transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+                      fontSize: '1.2rem',
+                      marginRight: '8px',
+                      transition: 'transform 0.3s',
+                    }}
                   />
-                ))}
+                  {category.owasp}
+                </Typography>
+
+                <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {category.items.map((item) => {
+                      const isActive = location.pathname === item.path;
+
+                      return (
+                        <ListItemButton
+                          key={item.issueName}
+                          onClick={() => handleNavigation(item.path)}
+                          sx={{
+                            pl: 4,
+                            backgroundColor: isActive ? 'rgba(51, 153, 255, 0.1)' : 'transparent',
+                            color: isActive ? 'primary.main' : 'text.primary',
+                            ':hover': {
+                              backgroundColor: 'rgba(51, 153, 255, 0.2)',
+                              color: 'primary.main',
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={item.issueName}
+                            sx={{
+                              fontWeight: isActive ? 700 : 500,
+                              color: isActive ? 'primary.main' : 'inherit',
+                            }}
+                          />
+                        </ListItemButton>
+                      );
+                    })}
+                  </List>
+                </Collapse>
               </List>
               <Divider />
             </React.Fragment>
-          ))
-        ) : (
-          <Typography variant="body1" sx={{ padding: 2 }}>
-            No OWASP categories available.
-          </Typography>
-        )}
+          );
+        })}
       </Box>
     </Drawer>
   );

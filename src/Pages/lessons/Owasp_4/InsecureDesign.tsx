@@ -72,7 +72,7 @@ export default function InsecureDesign() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F8(InformationLeak).png?alt=media&token=c4188c58-a137-4f62-b13c-2291a71d5adb' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F9(InsecureDesign).png?alt=media&token=842033bc-d045-4a9c-9762-708ac8645850' />
 
                       <Typography sx={{
                         pt: 3,

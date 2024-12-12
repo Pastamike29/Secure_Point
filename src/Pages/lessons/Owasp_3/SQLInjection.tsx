@@ -81,7 +81,7 @@ export default function SQLInjection() {
                                                        <Box sx={{
                                                             py: 3
                                                        }}>
-                                                            <FitImage src="https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F4(UnencryptCommu).png?alt=media&token=54247f20-92c3-4d94-b522-f1c17179f3f7" />
+                                                            <FitImage src="https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F6(SQLInjection).png?alt=media&token=19f98ffa-d1fd-4db5-834e-6921b628385c" />
 
                                                        </Box>
 

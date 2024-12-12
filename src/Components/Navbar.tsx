@@ -8,10 +8,10 @@ import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
+import StarIcon from '@mui/icons-material/Star';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
 import FeedbackModal from '../Pages/User/page/Page/FeedbackModal'; // Import your modal component
 import { useNavigate } from 'react-router-dom';
 import { useColorMode } from '../assets/Themes/ThemeContext';
@@ -32,7 +32,7 @@ export default function ResponsiveAppBar() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   useEffect(() => {
-    // Check if the token exists in localStorage (or session)
+    // Check if the token exists in sessionStorage
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true); // If token exists, user is logged in
@@ -111,11 +111,11 @@ export default function ResponsiveAppBar() {
         <Container maxWidth={false} sx={{ maxWidth: '190vh' }}>
           <Toolbar disableGutters>
             <img
-              src="https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Flogo_SecureP.png?alt=media&token=349d0a70-d898-44f0-a92d-5ce252448c6a" 
+              src="https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Flogo_SecureP.png?alt=media&token=349d0a70-d898-44f0-a92d-5ce252448c6a"
               alt="Logo"
               style={{
-                height: '40px', 
-                marginRight: '10px', 
+                height: '40px',
+                marginRight: '10px',
               }}
             />
             <Box sx={{ display: 'flex', cursor: 'pointer', mr: 'auto' }} onClick={() => navigate('/')}>
@@ -180,7 +180,7 @@ export default function ResponsiveAppBar() {
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu}>
-                  <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
+                  <StarIcon sx={{ color: 'gold', fontSize: '2rem' }} />
                 </IconButton>
               </Tooltip>
               <Menu

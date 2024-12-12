@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Avatar, Button } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Avatar,
+  Button,
+  Card,
+  CardContent,
+  CardActions,
+  LinearProgress
+} from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import { User } from '../../../../Login/Component/UserAuthen'; // Adjust the import path as necessary
 import 'react-toastify/dist/ReactToastify.css';
@@ -7,73 +16,109 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const ProfilePage: React.FC = () => {
-     const [userData, setUserData] = useState<User | null>(null); // Use User type
+  const [userData, setUserData] = useState<User | null>(null);
+  const navigate = useNavigate();
 
-const navigate = useNavigate();
+  const handleUpdateProfile = () => {
+    navigate('/UpdateProfile');
+  };
 
-const handleUpdateProfile= ()  =>{
-     navigate('/UpdateProfile')
-}
-     // Fetch user profile data when the component mounts
-     useEffect(() => {
-          const fetchUserProfile = async () => {
-               const token = localStorage.getItem('token'); // Get the token from local storage
-               if (!token) {
-                    toast.error('User is not logged in'); // Handle case when token is not found
-                    return;
-               }
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('User is not logged in');
+        return;
+      }
 
-               try {
-                    const response = await axios.get('http://localhost:5000/user/profile', {
-                         headers: {
-                              Authorization: `Bearer ${token}`, // Set the token in the header
-                         },
-                    });
-                    setUserData(response.data); // Assuming the response shape matches the User interface
-               } catch (error) {
-                    console.error('Error fetching user profile:', error);
-                    toast.error('Failed to fetch user data');
-               }
-          };
+      try {
+        const response = await axios.get('http://localhost:5000/user/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUserData(response.data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        toast.error('Failed to fetch user data');
+      }
+    };
 
-          fetchUserProfile();
-     }, []);
+    fetchUserProfile();
+  }, []);
 
-     if (!userData) {
-          return <Typography>Loading...</Typography>;
-     }
-
-     return (
-          <Box
-               sx={{
-                    maxWidth: 400,
-                    mx: 'auto',
-                    my:10,
-                    p: 4,
-                    bgcolor: 'background.paper',
-                    boxShadow: 3,
-                    borderRadius: 2,
-                    textAlign: 'center',
-               }}
-          >
-               <Typography variant="h4" gutterBottom>
-                    User Profile
-               </Typography>
-               <Avatar
-                    alt="Profile Picture"
-                    src={userData.profileImage || '/default-profile.png'}
-                    sx={{ width: 100, height: 100, mb: 2, mx: 'auto' }}
-               />
-               <Typography variant="h6">Username: {userData.username}</Typography>
-               <Typography variant="h6">Email: {userData.email}</Typography>
-               <Typography variant="h6">Password: ****</Typography>
-               <Typography variant="h6">Birth Date: {userData.birthDate || '-'}</Typography>
-               <Button variant="contained" sx={{ mt: 3 }} onClick={handleUpdateProfile}>
-                    Edit Profile
-               </Button>
-               <ToastContainer />
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        bgcolor: 'linear-gradient(to bottom right, #ece9e6, #ffffff)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        p: 2,
+      }}
+    >
+      {!userData ? (
+        <Box sx={{ width: '50%', maxWidth: 400 }}>
+          <LinearProgress />
+          <Typography variant="subtitle1" align="center" sx={{ mt: 2 }}>
+            Loading your profile...
+          </Typography>
+        </Box>
+      ) : (
+        <Card
+          sx={{
+            maxWidth: 400,
+            width: '100%',
+            p: 2,
+            boxShadow: 3,
+            borderRadius: 3,
+            bgcolor: 'background.paper',
+            textAlign: 'center',
+          }}
+        >
+          <Box sx={{ mb: 2 }}>
+            {/* <Avatar
+              alt="Profile Picture"
+              src={userData.profileImage || '/default-profile.png'}
+              sx={{
+                width: 120,
+                height: 120,
+                mx: 'auto',
+                mb: 2,
+                border: '2px solid',
+                borderColor: 'primary.main',
+              }}
+            /> */}
+            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+              {userData.username}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {userData.email}
+            </Typography>
           </Box>
-     );
+          <CardContent>
+            <Typography variant="body1" gutterBottom>
+              <strong>Password:</strong> ****
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              <strong>Birth Date:</strong> {userData.birthDate || '-'}
+            </Typography>
+          </CardContent>
+          <CardActions sx={{ justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              onClick={handleUpdateProfile}
+              sx={{ borderRadius: 2, px: 3 }}
+            >
+              Edit Profile
+            </Button>
+          </CardActions>
+          <ToastContainer />
+        </Card>
+      )}
+    </Box>
+  );
 };
 
 export default ProfilePage;

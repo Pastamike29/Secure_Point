@@ -56,7 +56,6 @@ export default function MainContent() {
           </Container>
         </Box>
 
-        <Chatbot />
 
       </Container>
 

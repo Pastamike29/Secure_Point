@@ -7,14 +7,14 @@ import {
     IconButton,
     Dialog,
     DialogContent,
-    CircularProgress,
 } from '@mui/material';
-import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 import ReplayIcon from '@mui/icons-material/Replay';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import { useUser } from '../Login/Component/UserAuthen';
 
 const Chatbot = () => {
+    const { user } = useUser(); // Get user from context
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
@@ -35,18 +35,18 @@ const Chatbot = () => {
     const simulateTyping = (fullText: string) => {
         const sanitizedText = fullText.replace(/[^\w\s.,!?'-]/g, '').trim(); // Basic sanitization
         setIsLoading(true);
-    
+
         // Start with an empty bot message
         setMessages((prev) => [...prev, { sender: 'Bot', text: '' }]);
-    
+
         let currentIndex = 0;
-    
+
         const interval = setInterval(() => {
             setMessages((prev) => {
                 // Ensure we are updating the last bot message
                 const lastMessageIndex = prev.length - 1;
                 const lastMessage = prev[lastMessageIndex];
-    
+
                 if (lastMessage?.sender === 'Bot') {
                     const updatedMessages = [...prev];
                     updatedMessages[lastMessageIndex] = {
@@ -57,43 +57,54 @@ const Chatbot = () => {
                 }
                 return prev;
             });
-    
+
             currentIndex++;
-    
+
             if (currentIndex >= sanitizedText.length) {
                 clearInterval(interval);
                 setIsLoading(false); // Stop the loading indicator
             }
         }, 50); // Adjust the typing speed
     };
-    
 
- 
+
     const handleSend = async () => {
         if (input.trim()) {
+
+            if (!user) {
+                alert('User not logged in. Please log in first.');
+                return;
+            }
+
+            const { username, email } = user;
+
             setMessages((prev) => [...prev, { sender: 'User', text: input }]);
             setInput('');
             setIsLoading(true);
             setError(null);
-    
+
             try {
                 const response = await fetch(
                     'http://localhost:3000/api/v1/prediction/63a7d545-be0e-4021-958b-5e1617f299a0',
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ question: input.trim() }),
+                        body: JSON.stringify({
+                            question: input.trim(),
+                            username,
+                            email,
+                        }),
                     }
                 );
-    
+
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-    
+
                 const data = await response.json();
-                const botResponse = (data.text?.trim() || 'Sorry, I didn’t get that.');
-    
-                // Directly display sanitized text without typing animation
+                const botResponse = data.text?.trim() || 'Sorry, I didn’t get that.';
+
+                // Add bot's response to messages
                 setMessages((prev) => [...prev, { sender: 'Bot', text: botResponse }]);
             } catch (error) {
                 setMessages((prev) => [
@@ -107,8 +118,6 @@ const Chatbot = () => {
             }
         }
     };
-    
-
 
     const handleReset = () => {
         setMessages([]);
@@ -148,7 +157,18 @@ const Chatbot = () => {
                         borderRadius: '50%',
                     }}
                 >
-                    <ChatIcon sx={{ fontSize: 30 }} />
+                    <img
+                        src="https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Flogo_SecureP.png?alt=media&token=349d0a70-d898-44f0-a92d-5ce252448c6a"
+                        alt="Logo"
+                        style={{
+                            height: '60px',
+                            marginRight: '10px',
+                            justifyContent: 'center',
+                            border: '4px solid white',
+                            borderRadius: 50 
+                        }}
+                    />
+
                 </IconButton>
             )}
 
@@ -254,7 +274,7 @@ const Chatbot = () => {
                                 },
                                 '& .MuiOutlinedInput-root': {
                                     borderRadius: 4,
-                                    '& fieldset': {
+                                    '& fieldset': { 
                                         borderColor: '#ddd',
                                     },
                                     '&:hover fieldset': {

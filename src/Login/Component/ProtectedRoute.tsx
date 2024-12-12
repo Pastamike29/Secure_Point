@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 
 // This function checks if the user is logged in by checking localStorage
 const ProtectedRoute = ({ children }) => {
-  const isLoggedIn = !!localStorage.getItem('user'); // Check if user data is stored in localStorage
+  const isLoggedIn = !!sessionStorage.getItem('user'); // Check if user data is stored in localStorage
 
   if (!isLoggedIn) {
     // Redirect to login if not logged in

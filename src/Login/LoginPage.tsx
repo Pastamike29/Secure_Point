@@ -14,7 +14,6 @@ interface JwtPayload {
     username?: string;
     email?: string; // Add other fields if necessary
     birthDate?: string | null; // Add birthDate field
-    profileImage?: string | null; // Add profileImage field
 }
 
 const LoginPage = () => {
@@ -26,50 +25,28 @@ const LoginPage = () => {
     const [emailError, setEmailError] = useState(''); // New state for email validation error
     const { setUser } = useUser(); // Get setUser from useUser hook
 
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                const decoded = jwtDecode<JwtPayload>(token);
-                if (decoded.exp && decoded.exp * 1000 > Date.now()) {
-                    setUserRole(decoded.role || '');
-                    setIsLoggedIn(true);
-                    console.log(`Welcome back, ${decoded.username || 'User'}`);
-                } else {
-                    localStorage.removeItem('token');
-                    setIsLoggedIn(false);
-                }
-            } catch (error) {
-                console.error('Invalid token', error);
-                setIsLoggedIn(false);
-            }
-        }
-    }, [setUser]);
 
     const handleLogin = async () => {
-        // Prevent login if email validation fails
-        if (emailError) return;
-
         try {
-            const userData = { email, password }; // Send email instead of username
+            const userData = { email, password };
             const response = await axios.post('http://localhost:5000/login', userData);
             const result = response.data;
 
-            localStorage.setItem('token', result.token);
+            // Decode the JWT to extract user details
             const decoded = jwtDecode<JwtPayload>(result.token);
 
+            // Store token in localStorage
+            localStorage.setItem('token', result.token);
+
+            // Update user context
             const userInfo: User = {
                 username: decoded.username || '',
                 email: decoded.email || '',
-                birthDate: decoded.birthDate || null,
-                profileImage: decoded.profileImage || null,
                 role: decoded.role || 'user',
+                birthDate: decoded.birthDate || null,
                 quiz_amount: 0,
             };
-
             setUser(userInfo);
-            setUserRole(decoded.role || '');
-            setIsLoggedIn(true);
 
             toast.success('Login successful!', {
                 position: 'top-right',
@@ -82,19 +59,27 @@ const LoginPage = () => {
                 navigate('/');
             }
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                toast.error('Invalid email or password', {
-                    position: 'top-right',
-                    autoClose: 3000,
-                });
-            } else {
-                toast.error('Something went wrong', {
-                    position: 'top-right',
-                    autoClose: 3000,
-                });
-            }
+            toast.error('Invalid email or password', {
+                position: 'top-right',
+                autoClose: 3000,
+            });
         }
     };
+
+
+    const handleLogout = () => {
+        setUser(null); // Clear context
+        localStorage.removeItem('token'); // Remove the token
+        localStorage.removeItem('username');
+        localStorage.removeItem('email');
+        toast.info('You have been logged out.', {
+            position: 'top-right',
+            autoClose: 3000,
+        });
+        navigate('/login'); // Redirect to login page
+    };
+
+
 
     // Handle email validation
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,6 +109,34 @@ const LoginPage = () => {
         };
     }, [email, password]);
 
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const decoded = jwtDecode<JwtPayload>(token);
+                if (decoded.exp && decoded.exp * 1000 > Date.now()) {
+                    const userInfo: User = {
+                        username: decoded.username || '',
+                        email: decoded.email || '',
+                        role: decoded.role || 'user',
+                        birthDate: decoded.birthDate || null,
+                        quiz_amount: 0,
+                    };
+                    setUser(userInfo); // Set user in context
+                    setIsLoggedIn(true);
+                } else {
+                    localStorage.removeItem('token');
+                    setIsLoggedIn(false);
+                }
+            } catch (error) {
+                console.error('Invalid token', error);
+                setIsLoggedIn(false);
+            }
+        }
+    }, [setUser]);
+
+
     return (
         <Box
             sx={{
@@ -139,12 +152,20 @@ const LoginPage = () => {
         >
             {isLoggedIn ? (
                 <>
-                    <Typography variant="h6">
+                    <Typography variant="h6" gutterBottom>
                         You are logged in as: {userRole || 'User'}
                     </Typography>
-                    <Typography variant="body1">
-                        Redirecting...
+                    <Typography variant="body1" gutterBottom>
+                        Welcome back!
                     </Typography>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={handleLogout}
+                        sx={{ mt: 2, width: '100%' }}
+                    >
+                        Logout
+                    </Button>
                 </>
             ) : (
                 <>

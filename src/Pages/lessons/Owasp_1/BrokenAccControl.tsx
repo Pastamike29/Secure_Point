@@ -78,7 +78,7 @@ export default function BrokenAccControl() {
                       my: 4,
                     }}>
 
-                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F19(SSRF).png?alt=media&token=494c3c37-2c98-4937-b31e-74cca0569303' />
+                      <FitImage src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F2(BrokenAccControl).png?alt=media&token=fa9abdfe-8992-444e-821d-e6da82954bdf' />
 
                       <Typography sx={{
                         pt: 3,
