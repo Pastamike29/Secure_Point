@@ -13,7 +13,7 @@ interface Score {
 const ScoreboardPage: React.FC = () => {
     const [scores, setScores] = useState<Score[]>([]);  // Type the state as an array of Score objects
     const navigate = useNavigate(); // Initialize useNavigate for redirection
-
+    
     useEffect(() => {
         // Fetch scores from the backend
         const fetchScores = async () => {

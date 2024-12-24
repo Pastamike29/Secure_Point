@@ -12,14 +12,13 @@ import {
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import { PhotoCamera } from '@mui/icons-material';
+import ResponsiveAppBar from '../../../../Components/Navbar';
 
 const UpdateProfile: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [image, setImage] = useState<File | null>(null);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -40,7 +39,6 @@ const UpdateProfile: React.FC = () => {
         setUsername(userData.username);
         setEmail(userData.email);
         setBirthDate(userData.birthDate || '');
-        setProfileImage(userData.profileImage);
       } catch (error) {
         console.error('Error fetching user profile:', error);
         toast.error('Failed to fetch profile data');
@@ -50,17 +48,6 @@ const UpdateProfile: React.FC = () => {
     fetchUserProfile();
   }, []);
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleSubmitProfile = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -94,6 +81,9 @@ const UpdateProfile: React.FC = () => {
   };
 
   return (
+    <>
+    <ResponsiveAppBar />
+
     <Box
       sx={{
         minHeight: '100vh',
@@ -118,7 +108,7 @@ const UpdateProfile: React.FC = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
           Profile Settings
         </Typography>
-        <Avatar
+        {/* <Avatar
           alt="Profile Picture"
           src={profileImage || '/default-profile.png'}
           sx={{
@@ -129,25 +119,9 @@ const UpdateProfile: React.FC = () => {
             border: '2px solid',
             borderColor: 'primary.main',
           }}
-        />
+        /> */}
         <CardContent sx={{ textAlign: 'left', p: 0 }}>
-          <input
-            accept="image/*"
-            style={{ display: 'none' }}
-            id="file-input"
-            type="file"
-            onChange={handleImageChange}
-          />
-          <label htmlFor="file-input">
-            <Button
-              variant="outlined"
-              component="span"
-              startIcon={<PhotoCamera />}
-              sx={{ mb: 3, display: 'block', mx: 'auto' }}
-            >
-              Upload Profile
-            </Button>
-          </label>
+
           <form onSubmit={handleSubmitProfile}>
             <TextField
               label="Username"
@@ -194,7 +168,9 @@ const UpdateProfile: React.FC = () => {
         <ToastContainer />
       </Card>
     </Box>
+    </>
   );
 };
+
 
 export default UpdateProfile;

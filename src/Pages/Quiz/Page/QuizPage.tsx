@@ -43,7 +43,6 @@ const QuizPage = () => {
       return;
     }
 
-    console.log("Submitting score for user:", user.username); // Log the username
 
     const scoreData = {
       username: user.username,

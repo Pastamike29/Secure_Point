@@ -14,6 +14,7 @@ import { User } from '../../../../Login/Component/UserAuthen'; // Adjust the imp
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import ResponsiveAppBar from '../../../../Components/Navbar';
 
 const ProfilePage: React.FC = () => {
   const [userData, setUserData] = useState<User | null>(null);
@@ -48,37 +49,40 @@ const ProfilePage: React.FC = () => {
   }, []);
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        bgcolor: 'linear-gradient(to bottom right, #ece9e6, #ffffff)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        p: 2,
-      }}
-    >
-      {!userData ? (
-        <Box sx={{ width: '50%', maxWidth: 400 }}>
-          <LinearProgress />
-          <Typography variant="subtitle1" align="center" sx={{ mt: 2 }}>
-            Loading your profile...
-          </Typography>
-        </Box>
-      ) : (
-        <Card
-          sx={{
-            maxWidth: 400,
-            width: '100%',
-            p: 2,
-            boxShadow: 3,
-            borderRadius: 3,
-            bgcolor: 'background.paper',
-            textAlign: 'center',
-          }}
-        >
-          <Box sx={{ mb: 2 }}>
-            {/* <Avatar
+    <>
+      <ResponsiveAppBar />
+
+      <Box
+        sx={{
+          minHeight: '100vh',
+          bgcolor: 'linear-gradient(to bottom right, #ece9e6, #ffffff)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          p: 2,
+        }}
+      >
+        {!userData ? (
+          <Box sx={{ width: '50%', maxWidth: 400 }}>
+            <LinearProgress />
+            <Typography variant="subtitle1" align="center" sx={{ mt: 2 }}>
+              Loading your profile...
+            </Typography>
+          </Box>
+        ) : (
+          <Card
+            sx={{
+              maxWidth: 400,
+              width: '100%',
+              p: 2,
+              boxShadow: 3,
+              borderRadius: 3,
+              bgcolor: 'background.paper',
+              textAlign: 'center',
+            }}
+          >
+            <Box sx={{ mb: 2 }}>
+              {/* <Avatar
               alt="Profile Picture"
               src={userData.profileImage || '/default-profile.png'}
               sx={{
@@ -90,34 +94,35 @@ const ProfilePage: React.FC = () => {
                 borderColor: 'primary.main',
               }}
             /> */}
-            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
-              {userData.username}
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {userData.email}
-            </Typography>
-          </Box>
-          <CardContent>
-            <Typography variant="body1" gutterBottom>
-              <strong>Password:</strong> ****
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              <strong>Birth Date:</strong> {userData.birthDate || '-'}
-            </Typography>
-          </CardContent>
-          <CardActions sx={{ justifyContent: 'center' }}>
-            <Button
-              variant="contained"
-              onClick={handleUpdateProfile}
-              sx={{ borderRadius: 2, px: 3 }}
-            >
-              Edit Profile
-            </Button>
-          </CardActions>
-          <ToastContainer />
-        </Card>
-      )}
-    </Box>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+                {userData.username}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {userData.email}
+              </Typography>
+            </Box>
+            <CardContent>
+              <Typography variant="body1" gutterBottom>
+                <strong>Password:</strong> ****
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                <strong>Birth Date:</strong> {userData.birthDate || '-'}
+              </Typography>
+            </CardContent>
+            <CardActions sx={{ justifyContent: 'center' }}>
+              <Button
+                variant="contained"
+                onClick={handleUpdateProfile}
+                sx={{ borderRadius: 2, px: 3 }}
+              >
+                Edit Profile
+              </Button>
+            </CardActions>
+            <ToastContainer />
+          </Card>
+        )}
+      </Box>
+    </>
   );
 };
 

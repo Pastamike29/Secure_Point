@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, CircularProgress, Snackbar, Typography, Box, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
-import { ArrowBack, ArrowForward, Close } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, Close, UploadFile } from '@mui/icons-material';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import AdminDashboardLayout from '../../Component/AdminDashboardLayout';
@@ -51,7 +51,7 @@ const FindingIssue: React.FC = () => {
 
         const delayTimeout = setTimeout(() => {
             fetchFindingIssues(page, searchTerm); // Fetch issues after delay
-        }, 500); 
+        }, 500);
 
         setTimeoutId(delayTimeout); // Store the timeout ID
 
@@ -84,11 +84,9 @@ const FindingIssue: React.FC = () => {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("Upload success:", response.data);
             // Trigger a success toast after uploading the file
             toast.success(`Successfully uploaded: ${file.name}`);
         } catch (error) {
-            console.error("Upload error:", error);
             toast.error(`Error uploading file: ${file.name}`);
         }
     };
@@ -116,7 +114,6 @@ const FindingIssue: React.FC = () => {
     const uploadFile = (file: File, retries = 0) => {
         const MAX_RETRIES = 3; // Define a maximum number of retries
         if (retries > MAX_RETRIES) {
-            console.error('Exceeded maximum retries');
             return;
         }
 
@@ -127,7 +124,6 @@ const FindingIssue: React.FC = () => {
                 const rows = csvContent.trim().split('\n').filter(row => row.trim() !== ''); // Remove empty rows
                 const headers = rows[0].split(',').map(header => header.trim());
 
-                console.log('CSV Headers:', headers); // Log headers for inspection
 
                 const validRows: string[][] = [];
                 rows.slice(1).forEach((row) => {
@@ -151,10 +147,8 @@ const FindingIssue: React.FC = () => {
                             { headers: { 'Content-Type': 'multipart/form-data' } }
                         );
                         toast.success('File uploaded successfully!');
-                        console.log('Server response:', response.data);
                     } catch (error) {
                         toast.error('Error uploading file.');
-                        console.error('Upload error:', error);
                     }
                 } else {
                     toast.info('No valid rows to upload.');
@@ -163,7 +157,6 @@ const FindingIssue: React.FC = () => {
 
             reader.readAsText(file);
         } catch (error) {
-            console.error('Upload failed, retrying...', error);
             uploadFile(file, retries + 1); // Retry with an incremented counter
         }
     };
@@ -211,12 +204,49 @@ const FindingIssue: React.FC = () => {
     };
 
 
+    const handleDownloadExcelTemplate = async () => {
+        try {
+            const response = await fetch("http://localhost:5000/download-FindingIssues-template");
+            if (!response.ok) {
+                throw new Error("Failed to download the template");
+            }
+
+            // Convert the response into a blob
+            const blob = await response.blob();
+
+            // Create a temporary link to download the file
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Finding Issues Template.xlsx";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error downloading template:", error);
+        }
+    };
+
+
+
     return (
         <AdminDashboardLayout title="Finding Issue Management">
             <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Button variant="contained" color="secondary" onClick={() => setDialogOpen(true)}>
-                    Upload CSV
-                </Button>
+                <Box>
+                    <Button variant="contained" color="secondary" onClick={() => setDialogOpen(true)}>
+                        Upload CSV
+                    </Button>
+
+                    <Button
+                        variant="contained"
+                        startIcon={<UploadFile />}
+                        onClick={handleDownloadExcelTemplate}
+                        sx={{
+                            mx: 3,
+                        }}
+                    >
+                        Download Excel Template
+                    </Button>
+                </Box>
 
                 <TextField
                     label="Page Number"

@@ -32,45 +32,40 @@ const Chatbot = () => {
         scrollToBottom(); // Scroll to the bottom whenever messages change
     }, [messages]);
 
-    const simulateTyping = (fullText: string) => {
-        const sanitizedText = fullText.replace(/[^\w\s.,!?'-]/g, '').trim(); // Basic sanitization
-        setIsLoading(true);
+    const formatResponseText = (text: string) => {
+        // Replace **text** with <strong>text</strong>
+        let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-        // Start with an empty bot message
-        setMessages((prev) => [...prev, { sender: 'Bot', text: '' }]);
+        // Replace \n with <br /> for line breaks
+        formattedText = formattedText.replace(/\n/g, '<br />');
 
-        let currentIndex = 0;
-
-        const interval = setInterval(() => {
-            setMessages((prev) => {
-                // Ensure we are updating the last bot message
-                const lastMessageIndex = prev.length - 1;
-                const lastMessage = prev[lastMessageIndex];
-
-                if (lastMessage?.sender === 'Bot') {
-                    const updatedMessages = [...prev];
-                    updatedMessages[lastMessageIndex] = {
-                        ...lastMessage,
-                        text: lastMessage.text + sanitizedText[currentIndex], // Append the next character
-                    };
-                    return updatedMessages;
-                }
-                return prev;
-            });
-
-            currentIndex++;
-
-            if (currentIndex >= sanitizedText.length) {
-                clearInterval(interval);
-                setIsLoading(false); // Stop the loading indicator
-            }
-        }, 50); // Adjust the typing speed
+        return formattedText;
     };
+
+
+    // const simulateTyping = (fullText: string) => {
+    //     const formattedLines = formatResponseText(fullText);
+    //     setIsLoading(true);
+
+    //     let currentIndex = 0;
+    //     const interval = setInterval(() => {
+    //         if (currentIndex < formattedLines.length) {
+    //             setMessages((prev) => [
+    //                 ...prev,
+    //                 { sender: 'Bot', text: formattedLines[currentIndex] },
+    //             ]);
+    //             currentIndex++;
+    //         } else {
+    //             clearInterval(interval);
+    //             setIsLoading(false);
+    //         }
+    //     }, 1000); // Adjust delay for each line
+    // };
+
 
 
     const handleSend = async () => {
         if (input.trim()) {
-
             if (!user) {
                 alert('User not logged in. Please log in first.');
                 return;
@@ -78,6 +73,7 @@ const Chatbot = () => {
 
             const { username, email } = user;
 
+            // Add user message
             setMessages((prev) => [...prev, { sender: 'User', text: input }]);
             setInput('');
             setIsLoading(true);
@@ -89,35 +85,35 @@ const Chatbot = () => {
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            question: input.trim(),
-                            username,
-                            email,
-                        }),
+                        body: JSON.stringify({ question: input.trim(), username, email }),
                     }
                 );
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                if (!response.ok) throw new Error('Network response was not ok');
 
                 const data = await response.json();
                 const botResponse = data.text?.trim() || 'Sorry, I didn’t get that.';
 
-                // Add bot's response to messages
-                setMessages((prev) => [...prev, { sender: 'Bot', text: botResponse }]);
+                const formattedText = formatResponseText(botResponse);
+
+                // Add bot response
+                setMessages((prev) => [
+                    ...prev,
+                    { sender: 'Bot', text: formattedText }, // Already formatted text
+                ]);
             } catch (error) {
                 setMessages((prev) => [
                     ...prev,
                     { sender: 'Bot', text: 'Sorry, something went wrong. Please try again later.' },
                 ]);
                 setError('Error: Something went wrong.');
-                console.error('Error:', error);
             } finally {
                 setIsLoading(false);
             }
         }
     };
+
+
 
     const handleReset = () => {
         setMessages([]);
@@ -152,7 +148,6 @@ const Chatbot = () => {
                         color: 'white',
                         width: 60,
                         height: 60,
-                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
                         '&:hover': { bgcolor: 'linear-gradient(135deg, #ff758c 30%, #ff7eb3 90%)' },
                         borderRadius: '50%',
                     }}
@@ -165,7 +160,7 @@ const Chatbot = () => {
                             marginRight: '10px',
                             justifyContent: 'center',
                             border: '4px solid white',
-                            borderRadius: 50 
+                            borderRadius: 50
                         }}
                     />
 
@@ -193,7 +188,7 @@ const Chatbot = () => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            bgcolor: 'linear-gradient(135deg, #ff7eb3 30%, #ff758c 90%)',
+                            bgcolor: 'linear-gradient(135deg, # 30%, #ff758c 90%)',
                             color: 'white',
                             p: 2,
                         }}
@@ -231,18 +226,34 @@ const Chatbot = () => {
                                 }}
                             >
                                 <Box
+                                    key={index}
                                     sx={{
-                                        maxWidth: '75%',
-                                        p: 1.5,
-                                        borderRadius: 4,
-                                        bgcolor: msg.sender === 'User' ? '#ff758c' : '#f1f0f0',
-                                        color: msg.sender === 'User' ? 'white' : 'black',
-                                        fontSize: '14px',
-                                        lineHeight: '20px',
-                                        boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
+                                        display: 'flex',
+                                        justifyContent: msg.sender === 'User' ? 'flex-end' : 'flex-start',
+                                        mb: 1,
                                     }}
                                 >
-                                    <Typography>{msg.text}</Typography>
+                                    <Box
+                                        sx={{
+                                            maxWidth: '75%',
+                                            p: 1.5,
+                                            borderRadius: 4,
+                                            bgcolor: msg.sender === 'User' ? '#ff758c' : '#f1f0f0',
+                                            color: msg.sender === 'User' ? 'white' : 'black',
+                                            fontSize: '14px',
+                                            lineHeight: '20px',
+                                            boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
+                                            display: 'flex', // Enable flexbox
+                                            justifyContent: 'center', // Horizontal centering
+                                            alignItems: 'center', // Vertical centering
+                                        }}
+                                    >
+                                        <Typography
+                                            component="div"
+                                            sx={{ whiteSpace: 'normal' }}
+                                            dangerouslySetInnerHTML={{ __html: msg.text }}
+                                        />
+                                    </Box>
                                 </Box>
                             </Box>
                         ))}
@@ -274,7 +285,7 @@ const Chatbot = () => {
                                 },
                                 '& .MuiOutlinedInput-root': {
                                     borderRadius: 4,
-                                    '& fieldset': { 
+                                    '& fieldset': {
                                         borderColor: '#ddd',
                                     },
                                     '&:hover fieldset': {
@@ -359,7 +370,11 @@ const Chatbot = () => {
                                         boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
                                     }}
                                 >
-                                    <Typography>{msg.text}</Typography>
+                                    <Typography
+                                        component="div"
+                                        sx={{ whiteSpace: 'normal' }}
+                                        dangerouslySetInnerHTML={{ __html: msg.text }}
+                                    />
                                 </Box>
                             </Box>
                         ))}

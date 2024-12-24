@@ -56,6 +56,7 @@ import DynamicVulPage from './Pages/CodeExample/Page/DynamicVulPage'
 import FindingIssue from './Pages/Admin/Pages/FindingIssue/FindingIssue'
 
 import Chatbot from './Components/Chatbot'
+import OwaspScrapping from './Pages/lessons/OwaspScrapping'
 export default function App() {
 
   return (
@@ -64,10 +65,13 @@ export default function App() {
         <BrowserRouter>
           <ToggleColorMode>
             <Routes>
+              <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+
               <Route path="/FeedbackModal" element={<FeedbackModal />}></Route>
 
               <Route path="/" element={<HomePage />}></Route>
               <Route path="/LessonPage" element={<LessonPage />}></Route>
+              <Route path="/LessonPage/OwaspScrapping" element={<OwaspScrapping />}></Route>
               <Route path="/LessonPage/BrokenAccControl" element={<BrokenAccControl />}></Route>
               <Route path="/LessonPage/DirectoryTraversal" element={<DirectoryTraversal />}></Route>
               <Route path="/LessonPage/CrossSiteRequestForgery" element={<CrossSiteRequestForgery />}></Route>

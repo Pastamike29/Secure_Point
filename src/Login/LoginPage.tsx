@@ -32,11 +32,10 @@ const LoginPage = () => {
             const response = await axios.post('http://localhost:5000/login', userData);
             const result = response.data;
 
-            // Decode the JWT to extract user details
-            const decoded = jwtDecode<JwtPayload>(result.token);
-
             // Store token in localStorage
             localStorage.setItem('token', result.token);
+            const decoded = jwtDecode<JwtPayload>(result.token);
+
 
             // Update user context
             const userInfo: User = {
@@ -47,6 +46,8 @@ const LoginPage = () => {
                 quiz_amount: 0,
             };
             setUser(userInfo);
+            setUserRole(decoded.role || '');
+            setIsLoggedIn(true);
 
             toast.success('Login successful!', {
                 position: 'top-right',
@@ -59,11 +60,17 @@ const LoginPage = () => {
                 navigate('/');
             }
         } catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.error('Axios error:', error.response?.data || error.message);
+            } else {
+                console.error('Unexpected error:', error);
+            }
             toast.error('Invalid email or password', {
                 position: 'top-right',
                 autoClose: 3000,
             });
         }
+
     };
 
 
@@ -135,6 +142,7 @@ const LoginPage = () => {
             }
         }
     }, [setUser]);
+
 
 
     return (

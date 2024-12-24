@@ -16,6 +16,7 @@ import FeedbackModal from '../Pages/User/page/Page/FeedbackModal'; // Import you
 import { useNavigate } from 'react-router-dom';
 import { useColorMode } from '../assets/Themes/ThemeContext';
 import LoginModal from '../Login/LoginModal';
+import ThemeToggle from '../assets/Themes/ThemeToggle';
 
 export default function ResponsiveAppBar() {
   const pages = ['Lesson', 'Code Example', 'Overview', 'Quiz', 'ScoreBoard'];
@@ -177,12 +178,16 @@ export default function ResponsiveAppBar() {
             </Box>
 
             {/* User Menu */}
-            <Box sx={{ flexGrow: 0 }}>
+            <Box sx={{ flexGrow: 0, display: 'flex',gap:'10px', alignItems: 'center' }}>
+
+              <ThemeToggle />
+
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu}>
                   <StarIcon sx={{ color: 'gold', fontSize: '2rem' }} />
                 </IconButton>
               </Tooltip>
+
               <Menu
                 sx={{ mt: '45px' }}
                 id="menu-appbar"

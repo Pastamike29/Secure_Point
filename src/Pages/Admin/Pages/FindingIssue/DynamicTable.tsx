@@ -142,7 +142,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
       return 'N/A';
     }
   };
-  
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -268,14 +268,23 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
   ).sort();
 
   const uniqueMonths = Array.from(
-    new Set(issues.map((issue) => new Date(issue['Found Date']).getMonth()))
+    new Set(
+      issues
+        .map((issue) => {
+          const foundDate = issue['Found Date'];
+          if (!foundDate) return null; // Skip if Found Date is missing
+          const parsedDate = new Date(foundDate);
+          return isValid(parsedDate) ? parsedDate.getMonth() : null; // Extract numeric month if valid
+        })
+        .filter((month) => month !== null) // Filter out invalid months
+    )
   )
-    .sort((a, b) => a - b) // Sort the months numerically (0 for January, 11 for December)
+    .sort((a, b) => a - b) // Sort months numerically
     .map((month) => ({
-      value: month + 1,
-      label: monthNames[month], // Display month name (January, February, etc.)
+      value: month + 1, // 1-based month value
+      label: monthNames[month], // Get month name
     }));
-
+  
   const currentPageIssues = filteredIssues.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
@@ -370,8 +379,6 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
         </FormControl>
       </Box>
 
-
-      return (
       <TableContainer component={Paper}>
         <Table>
           <TableHead>

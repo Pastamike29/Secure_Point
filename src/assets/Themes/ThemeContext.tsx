@@ -10,7 +10,7 @@ interface ColorModeContextType {
 
 // Create the ColorMode context
 const ColorModeContext = createContext<ColorModeContextType>({
-    toggleTheme: () => {},
+    toggleTheme: () => { },
     mode: 'light',
 });
 
@@ -37,25 +37,33 @@ export default function ToggleColorMode({ children }: { children: React.ReactNod
             mode,
             ...(mode === 'light'
                 ? {
-                      // Light mode colors
-                      background: {
-                          default: '#ffffff', // White background
-                          paper: '#f0f0f0', // Light grey paper background
-                      },
-                      text: {
-                          primary: '#000000', // Black text
-                      },
-                  }
+                    // Light Mode Colors
+                    background: {
+                        default: '#ffff',  // Light soft background
+                        paper: '#dcdcdc',    // Slightly darker surface (card or box)
+                    },
+                    text: {
+                        primary: '#003366',  // Dark blue for headings and main text
+                        secondary: '#555555', // Medium gray for secondary text
+                    },
+                    action: {
+                        active: '#ff8800',   // Orange for highlights or active items
+                    },
+                    custom: {
+                        highlight: '#ff8800', // Custom color for buttons or emphasized elements
+                    },
+                }
                 : {
-                      // Dark mode colors
-                      background: {
-                          default: '#212121', // Dark background (near-black)
-                          paper: '#2f2f2f', // Darker grey for paper surfaces
-                      },
-                      text: {
-                          primary: '#ffffff', // White text
-                      },
-                  }),
+                    // Dark Mode Colors
+                    background: {
+                        default: '#212121', // Dark background
+                        paper: '#2f2f2f',   // Darker gray for paper
+                    },
+                    text: {
+                        primary: '#ffffff', // White text
+                        secondary: '#bdbdbd', // Light gray for secondary text
+                    },
+                }),
         },
     });
 
