@@ -36,14 +36,6 @@ export default function DashboardLayout({children,title}:DashboardProps) {
   const { toggleTheme, mode } = useColorMode();
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
-
   const handleFeedbackClose = () => {
     setIsFeedbackOpen(false);
   };

@@ -7,22 +7,19 @@ import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
 import StarIcon from '@mui/icons-material/Star';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import FeedbackModal from '../Pages/User/page/Page/FeedbackModal'; // Import your modal component
 import { useNavigate } from 'react-router-dom';
-import { useColorMode } from '../assets/Themes/ThemeContext';
 import LoginModal from '../Login/LoginModal';
 import ThemeToggle from '../assets/Themes/ThemeToggle';
 
 export default function ResponsiveAppBar() {
-  const pages = ['Lesson', 'Code Example', 'Overview', 'Quiz', 'ScoreBoard'];
+  const pages = ['Lesson', 'Lesson2', 'Code Example', 'Overview', 'Quiz', 'ScoreBoard'];
   const settings = ['Profile', 'Feedback', 'Logout'];
   const navigate = useNavigate();
-  const { toggleTheme, mode } = useColorMode();
 
   const [isLoginOpen, setIsLoginOpen] = useState(false); // State for Login Modal
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
@@ -31,6 +28,8 @@ export default function ResponsiveAppBar() {
 
   // State for modals
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [firstIssueName, setFirstIssueName] = useState<string | null>(null); // State for first issueName
+  const [isLoading, setIsLoading] = useState(true); // Loading state for the menu
 
   useEffect(() => {
     // Check if the token exists in sessionStorage
@@ -38,12 +37,36 @@ export default function ResponsiveAppBar() {
     if (token) {
       setIsLoggedIn(true); // If token exists, user is logged in
     }
+
+    // Fetch first issueName from the API
+    const fetchFirstIssueName = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/vulnerability-type');
+        const data = await response.json();
+        if (data && Array.isArray(data) && data.length > 0) {
+          setFirstIssueName(data[0].issueName); // Get the first issueName
+        }
+      } catch (error) {
+        console.error('Failed to fetch issue names:', error);
+      } finally {
+        setIsLoading(false); // Set loading to false
+      }
+    };
+
+    fetchFirstIssueName();
   }, []);
 
-  const handleNavigate = (page) => {
+  const handleNavigate = (page: string) => {
     switch (page) {
       case 'Lesson':
         navigate('/LessonPage');
+        break;
+      case 'Lesson2':
+        if (firstIssueName) {
+          navigate(`/LessonPage/${firstIssueName}`); // Navigate to the first issueName dynamically
+        } else {
+          alert('Data is still loading. Please wait a moment.');
+        }
         break;
       case 'Code Example':
         navigate('/vulnerabilities/Insecure SSL');
@@ -161,7 +184,15 @@ export default function ResponsiveAppBar() {
                 sx={{ display: { xs: 'block', md: 'none' } }}
               >
                 {pages.map((page) => (
-                  <MenuItem key={page} onClick={() => handleNavigate(page)} sx={{ mx: 0.5 }}>
+                  <MenuItem
+                    key={page}
+                    onClick={() => handleNavigate(page)}
+                    sx={{
+                      mx: 0.5,
+                      color: page === 'Lesson2' && isLoading ? 'gray' : 'inherit',
+                      pointerEvents: page === 'Lesson2' && isLoading ? 'none' : 'auto',
+                    }}
+                  >
                     <Typography textAlign="center">{page}</Typography>
                   </MenuItem>
                 ))}
@@ -171,15 +202,23 @@ export default function ResponsiveAppBar() {
             {/* Desktop Menu */}
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
               {pages.map((page) => (
-                <Button key={page} onClick={() => handleNavigate(page)} sx={{ my: 1, mx: 0.5, color: 'white', display: 'block' }}>
+                <Button
+                  key={page}
+                  onClick={() => handleNavigate(page)}
+                  sx={{
+                    my: 1,
+                    mx: 0.5,
+                    color: page === 'Lesson2' && isLoading ? 'gray' : 'white',
+                    pointerEvents: page === 'Lesson2' && isLoading ? 'none' : 'auto',
+                  }}
+                >
                   {page}
                 </Button>
               ))}
             </Box>
 
             {/* User Menu */}
-            <Box sx={{ flexGrow: 0, display: 'flex',gap:'10px', alignItems: 'center' }}>
-
+            <Box sx={{ flexGrow: 0, display: 'flex', gap: '10px', alignItems: 'center' }}>
               <ThemeToggle />
 
               <Tooltip title="Open settings">

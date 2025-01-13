@@ -17,9 +17,15 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState<string | null>(null);
+  const [mainOpen, setMainOpen] = useState<boolean>(false);
+
 
   const handleClick = (listname: string) => {
     setOpen(open === listname ? null : listname);
+  };
+
+  const handleMainClick = () => {
+    setMainOpen(!mainOpen);
   };
 
   useEffect(() => {
@@ -125,193 +131,228 @@ export default function Sidebar() {
             backgroundColor: 'rgba(51, 153, 255, 0.5)',
             borderRadius: '4px',
           },
-        
+
         }}
       >
-       <List>
-          <DropdownTitle
-            list='list1'
-            listName='Broken Access Control'
-          />
-          <DropdownList
-            list='list1'
-            listName='Broken Access Control'
-            path='/LessonPage/BrokenAccControl'
-          />
-          <DropdownList
-            list='list1'
-            listName='Directory Traversal'
-            path='/LessonPage/DirectoryTraversal'
-          />
-          <DropdownList
-            list='list1'
-            listName='CrossSiteRequestForgery'
-            path='/LessonPage/CrossSiteRequestForgery'
-          />
-        </List>
 
-        <Divider />
+        {/* Parent Dropdown */}
+        <Typography
+          onClick={handleMainClick}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+            padding: '8px 16px',
+            py:2,
+            fontWeight: 700,
+            fontSize: '1.2rem',
+            color: mainOpen ? 'primary.main' : 'text.primary',
+            ':hover': {
+              backgroundColor: 'rgba(51, 153, 255, 0.1)',
+            },
+          }}
+        >
+          {mainOpen ? (
+            <ExpandMoreIcon sx={{ fontSize: '1.4rem', marginRight: '8px' }} />
+          ) : (
+            <ExpandMoreIcon
+              sx={{
+                transform: 'rotate(270deg)',
+                fontSize: '1.4rem',
+                marginRight: '8px',
+                transition: 'transform 0.3s',
+              }}
+            />
+          )}
+          OWASP 2021
+        </Typography>
 
-        <List>
-          <DropdownTitle
-            list='list2'
-            listName='Cryptographic Failures'
-          />
-          <DropdownList
-            list='list2'
-            listName='Unencrypted Communication'
-            path='/LessonPage/UnencryptedCommunication'
-          />
-        </List>
+        <Collapse in={mainOpen} timeout="auto" unmountOnExit>
+          <List>
+            <DropdownTitle
+              list='list1'
+              listName='Broken Access Control'
+            />
+            <DropdownList
+              list='list1'
+              listName='Broken Access Control'
+              path='/LessonPage/BrokenAccControl'
+            />
+            <DropdownList
+              list='list1'
+              listName='Directory Traversal'
+              path='/LessonPage/DirectoryTraversal'
+            />
+            <DropdownList
+              list='list1'
+              listName='CrossSiteRequestForgery'
+              path='/LessonPage/CrossSiteRequestForgery'
+            />
+          </List>
 
-        <Divider />
+          <Divider />
 
-        <List>
-          <DropdownTitle
-            list='list3'
-            listName='Injection'
-          />
-          <DropdownList
-            list='list3'
-            listName='SQL Injection'
-            path='/LessonPage/SQLInjection'
-          />
-          <DropdownList
-            list='list3'
-            listName='Command Injection'
-            path='/LessonPage/CommandInjection'
-          />
-        </List>
+          <List>
+            <DropdownTitle
+              list='list2'
+              listName='Cryptographic Failures'
+            />
+            <DropdownList
+              list='list2'
+              listName='Unencrypted Communication'
+              path='/LessonPage/UnencryptedCommunication'
+            />
+          </List>
 
-        <Divider />
+          <Divider />
 
-        <List>
-          <DropdownTitle
-            list='list4'
-            listName='Insecure Design'
-          />
-          <DropdownList
-            list='list4'
-            listName='Insecure Design'
-            path='/LessonPage/InsecureDesign'
-          />
-          <DropdownList
-            list='list4'
-            listName='Information Leakage'
-            path='/LessonPage/InformationLeakage'
-          />
-          <DropdownList
-            list='list4'
-            listName='File Upload Vulnerabilities'
-            path='/LessonPage/FileUploadVulnerabilities'
-          />
-        </List>
+          <List>
+            <DropdownTitle
+              list='list3'
+              listName='Injection'
+            />
+            <DropdownList
+              list='list3'
+              listName='SQL Injection'
+              path='/LessonPage/SQLInjection'
+            />
+            <DropdownList
+              list='list3'
+              listName='Command Injection'
+              path='/LessonPage/CommandInjection'
+            />
+          </List>
 
-        <Divider />
+          <Divider />
 
-        <List>
-          <DropdownTitle
-            list='list5'
-            listName='Security Misconfiguration'
-          />
-          <DropdownList
-            list='list5'
-            listName='Lax Security Settings'
-            path='/LessonPage/LaxSecuritySettings'
-          />
+          <List>
+            <DropdownTitle
+              list='list4'
+              listName='Insecure Design'
+            />
+            <DropdownList
+              list='list4'
+              listName='Insecure Design'
+              path='/LessonPage/InsecureDesign'
+            />
+            <DropdownList
+              list='list4'
+              listName='Information Leakage'
+              path='/LessonPage/InformationLeakage'
+            />
+            <DropdownList
+              list='list4'
+              listName='File Upload Vulnerabilities'
+              path='/LessonPage/FileUploadVulnerabilities'
+            />
+          </List>
 
-        </List>
+          <Divider />
 
-        <Divider />
+          <List>
+            <DropdownTitle
+              list='list5'
+              listName='Security Misconfiguration'
+            />
+            <DropdownList
+              list='list5'
+              listName='Lax Security Settings'
+              path='/LessonPage/LaxSecuritySettings'
+            />
 
-        <List>
-          <DropdownTitle
-            list='list6'
-            listName='Vulnerable and Outdated Components'
-          />
-          <DropdownList
-            list='list6'
-            listName='Toxic Dependencies'
-            path='/LessonPage/ToxicDependencies'
-          />
-        </List>
+          </List>
 
-        <Divider />
+          <Divider />
 
-        <List>
-          <DropdownTitle
-            list='list7'
-            listName='Identification and Authentication Failures'
-          />
-          <DropdownList
-            list='list7'
-            listName='Password Mismanagement'
-            path='/LessonPage/PasswordMismanagement'
-          />
-          <DropdownList
-            list='list7'
-            listName='Privilege Escalation'
-            path='/LessonPage/PrivilegeEscalation'
-          />
-          <DropdownList
-            list='list7'
-            listName='User Enumeration'
-            path='/LessonPage/UserEnumeration'
-          />
-          <DropdownList
-            list='list7'
-            listName='Session Fixation'
-            path='/LessonPage/SessionFixation'
-          />
-          <DropdownList
-            list='list7'
-            listName='Weak Session IDS'
-            path='/LessonPage/WeakSessionIds'
-          />
-        </List>
+          <List>
+            <DropdownTitle
+              list='list6'
+              listName='Vulnerable and Outdated Components'
+            />
+            <DropdownList
+              list='list6'
+              listName='Toxic Dependencies'
+              path='/LessonPage/ToxicDependencies'
+            />
+          </List>
+
+          <Divider />
+
+          <List>
+            <DropdownTitle
+              list='list7'
+              listName='Identification and Authentication Failures'
+            />
+            <DropdownList
+              list='list7'
+              listName='Password Mismanagement'
+              path='/LessonPage/PasswordMismanagement'
+            />
+            <DropdownList
+              list='list7'
+              listName='Privilege Escalation'
+              path='/LessonPage/PrivilegeEscalation'
+            />
+            <DropdownList
+              list='list7'
+              listName='User Enumeration'
+              path='/LessonPage/UserEnumeration'
+            />
+            <DropdownList
+              list='list7'
+              listName='Session Fixation'
+              path='/LessonPage/SessionFixation'
+            />
+            <DropdownList
+              list='list7'
+              listName='Weak Session IDS'
+              path='/LessonPage/WeakSessionIds'
+            />
+          </List>
 
 
-        <List>
-          <DropdownTitle
-            list='list8'
-            listName='Software and Data Integrity Failures'
-          />
-          <DropdownList
-            list='list8'
-            listName='Software and Data Integrity Failures'
-            path='/LessonPage/SoftwareAndDataIntegrityFailures'
-          />
-        </List>
+          <List>
+            <DropdownTitle
+              list='list8'
+              listName='Software and Data Integrity Failures'
+            />
+            <DropdownList
+              list='list8'
+              listName='Software and Data Integrity Failures'
+              path='/LessonPage/SoftwareAndDataIntegrityFailures'
+            />
+          </List>
 
-        <Divider />
+          <Divider />
 
-        <List>
-          <DropdownTitle
-            list='list9'
-            listName='Logging and Monitoring Failures'
-          />
-          <DropdownList
-            list='list9'
-            listName='Logging and Monitoring Failures'
-            path='/LessonPage/LoggingAndMonitoringFailures'
-          />
-        </List>
+          <List>
+            <DropdownTitle
+              list='list9'
+              listName='Logging and Monitoring Failures'
+            />
+            <DropdownList
+              list='list9'
+              listName='Logging and Monitoring Failures'
+              path='/LessonPage/LoggingAndMonitoringFailures'
+            />
+          </List>
 
-        <Divider />
+          <Divider />
 
-        <List>
-          <DropdownTitle
-            list='list10'
-            listName='Server Side Request Forgery'
-          />
-          <DropdownList
-            list='list10'
-            listName='Server Side Request Forgery'
-            path='/LessonPage/ServerSideRequestForgery '
+          <List>
+            <DropdownTitle
+              list='list10'
+              listName='Server Side Request Forgery'
+            />
+            <DropdownList
+              list='list10'
+              listName='Server Side Request Forgery'
+              path='/LessonPage/ServerSideRequestForgery '
 
-          />
+            />
 
-        </List>
+          </List>
+        </Collapse>
       </Box>
     </Drawer>
   );

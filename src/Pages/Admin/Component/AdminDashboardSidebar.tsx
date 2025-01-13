@@ -7,22 +7,10 @@ import { useColorMode } from "../../../assets/Themes/ThemeContext";
 export default function AdminDashboardSidebar() {
   const navigate = useNavigate();
 
-  const [open, setOpen] = useState<string | null>(null);
-  const settings = ['Profile', 'Dashboard', 'Logout'];
-  const { toggleTheme, mode } = useColorMode();
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-
   const handleNavigation = (path: string) => {
     navigate(path);
   };
 
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
 
   return (
     <Container>
@@ -113,6 +101,25 @@ export default function AdminDashboardSidebar() {
                 onClick={() => handleNavigation('/admin/AddVulnerability')}
               >
                 Vulnerability Management
+              </Typography>
+            </Box>
+          </List>
+
+          <Divider />
+          <List>
+            <Box>
+              <Typography
+                sx={{
+                  cursor: 'pointer',
+                  ml: 3,
+                  my: 1.5,
+                  ':hover': {
+                    opacity: 0.7,
+                  },
+                }}
+                onClick={() => handleNavigation('/admin/ModifyLessonPage')}
+              >
+                Lesson Management  
               </Typography>
             </Box>
           </List>

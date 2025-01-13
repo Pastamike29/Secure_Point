@@ -56,7 +56,8 @@ import DynamicVulPage from './Pages/CodeExample/Page/DynamicVulPage'
 import FindingIssue from './Pages/Admin/Pages/FindingIssue/FindingIssue'
 
 import Chatbot from './Components/Chatbot'
-import OwaspScrapping from './Pages/lessons/OwaspScrapping'
+import ModifyLessonPage from './Pages/Admin/Pages/ModifyLessonPage'
+import DynamicLessonPage from './Pages/lessons/DynamicLessonPage'
 export default function App() {
 
   return (
@@ -71,7 +72,6 @@ export default function App() {
 
               <Route path="/" element={<HomePage />}></Route>
               <Route path="/LessonPage" element={<LessonPage />}></Route>
-              <Route path="/LessonPage/OwaspScrapping" element={<OwaspScrapping />}></Route>
               <Route path="/LessonPage/BrokenAccControl" element={<BrokenAccControl />}></Route>
               <Route path="/LessonPage/DirectoryTraversal" element={<DirectoryTraversal />}></Route>
               <Route path="/LessonPage/CrossSiteRequestForgery" element={<CrossSiteRequestForgery />}></Route>
@@ -95,6 +95,7 @@ export default function App() {
 
               {/* <Route path='/CodeExample/BrokenCode/*' element={<BrokenCode />}></Route> */}
               <Route path="/vulnerabilities/:issueName" element={<DynamicVulPage />} />
+              <Route path="/LessonPage/:issueName" element={<DynamicLessonPage />} />
 
               <Route path='/Quiz' element={<QuizPage />}></Route>
               <Route path='/ScoreBoard' element={<ScoreBoard />}></Route>
@@ -103,6 +104,7 @@ export default function App() {
 
               <Route path='/admin' element={<AdminMain />}></Route>
               <Route path='/admin/AddUser' element={<AddUser />}></Route>
+              <Route path='/admin/ModifyLessonPage' element={<ModifyLessonPage />}></Route>
               <Route path='/admin/AddVulnerability' element={<AddVulnerability />}></Route>
               <Route path="/admin/ApplicationManagement" element={<ApplicationManagement />} />
               <Route path="/admin/FindingIssue" element={<FindingIssue />} />
