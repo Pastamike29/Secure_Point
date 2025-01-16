@@ -15,26 +15,12 @@ interface DashboardProps {
 
 }
 
-export default function DashboardLayout({children,title}:DashboardProps) {
+export default function AdminDashboardLayout({children,title}:DashboardProps) {
 
-  const handleSetting = (setting: string) => {
-    switch (setting) {
-      case 'Profile':
-        navigate('/Profile');
-        break;
-      case 'Feedback':
-        setIsFeedbackOpen(true);
-        break;
-      case 'Logout':
-        navigate('/Logout');
-        break;
-    }
-  };
+ 
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const navigate = useNavigate();
   const settings = ['Profile', 'Feedback', 'Logout'];
-  const { toggleTheme, mode } = useColorMode();
-  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const handleFeedbackClose = () => {
     setIsFeedbackOpen(false);

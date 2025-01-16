@@ -29,6 +29,7 @@ import ServerSideRequestForgery from './Pages/lessons/Owasp_10/ServerSideRequest
 
 import RegisterPage from './Login/ReigisterPage'
 import Overview from './Pages/Dashboard/Pages/Overview'
+import Ticket from './Pages/Dashboard/Pages/Ticket/Ticket'
 import DynamicFindingIssues from './Pages/Dashboard/Pages/FindingIssue/Vulnerabilities/DynamicFindingIssues'
 import CriticalRisk from './Pages/Dashboard/Pages/FindingIssue/CriticalRisk'
 import HighRisk from './Pages/Dashboard/Pages/FindingIssue/HighRisk'
@@ -58,6 +59,7 @@ import FindingIssue from './Pages/Admin/Pages/FindingIssue/FindingIssue'
 import Chatbot from './Components/Chatbot'
 import ModifyLessonPage from './Pages/Admin/Pages/ModifyLessonPage'
 import DynamicLessonPage from './Pages/lessons/DynamicLessonPage'
+import FeedbackManagement from './Pages/Admin/Pages/Feedback/feedbackManagement'
 export default function App() {
 
   return (
@@ -104,6 +106,7 @@ export default function App() {
 
               <Route path='/admin' element={<AdminMain />}></Route>
               <Route path='/admin/AddUser' element={<AddUser />}></Route>
+              <Route path='/admin/FeedbackManagement' element={<FeedbackManagement />}></Route>
               <Route path='/admin/ModifyLessonPage' element={<ModifyLessonPage />}></Route>
               <Route path='/admin/AddVulnerability' element={<AddVulnerability />}></Route>
               <Route path="/admin/ApplicationManagement" element={<ApplicationManagement />} />
@@ -122,6 +125,7 @@ export default function App() {
 
 
               <Route path="/Overview" element={<Overview />} />
+              <Route path="/Ticket" element={<Ticket />} />
               <Route path="/Overview/ApplicationIssues" element={<ApplicationIssues />} />
               <Route path="/Overview/ApplicationIssues/CriticalRisk" element={<CriticalRisk />} />
               <Route path="/Overview/ApplicationIssues/HighRisk" element={<HighRisk />} />

@@ -13,21 +13,50 @@ const FindingIssue: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
-    const [toastOpen, setToastOpen] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>("1");  // Input field value
-    const [rowsPerPage, setRowsPerPage] = useState<number>(10); // Default rows per page
     const [uploading, setUploading] = useState<boolean>(false);
     const [fileList, setFileList] = useState<File[]>([]); // Manage selected files
-    const [toastMessage, setToastMessage] = useState<string>('');
     const [dialogOpen, setDialogOpen] = useState<boolean>(false); // Modal state
+    const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false); // State for add modal
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [uploadSuccess, setUploadSuccess] = useState<boolean>(false); // New state for upload success status
     const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
+    const [newIssue, setNewIssue] = useState<any>({}); // State for new finding issue form
 
     const fileInputRef = React.useRef<HTMLInputElement | null>(null);
     const maxFileSize = 50 * 1024 * 1024; // 50 MB
 
     const limit = 100; // Limit to 100 rows
+
+    const columnOrder = [
+        'Application Number',
+        'Application Name',
+        'Scope',
+        'Application Contact',
+        'Department',
+        'Chief',
+        'Risk Rating',
+        'Status',
+        'Status remark',
+        'GRC log',
+        'Notify Owner',
+        'Last Date Notify Owner',
+        'Finding Issue',
+        'Description',
+        'Recommendation',
+        'Found Date',
+        'Fixed Criteria',
+        'Overdue Date',
+        'Overdue',
+        'Overdue Status',
+        'Overdue.1',
+        'Pentester',
+        'Testing Scope',
+        'Remark',
+        'No. Open of GRC ',
+        'Remark GRC',
+    ];
+
 
     const fetchFindingIssues = async (page: number, query: string) => {
         setLoading(true);
@@ -227,6 +256,66 @@ const FindingIssue: React.FC = () => {
     };
 
 
+    const handleAddIssueSubmit = async () => {
+        try {
+            const response = await axios.post('http://localhost:5000/addFindingIssue', newIssue);
+            if (response.status === 201) {
+                toast.success('Finding issue added successfully!');
+                setAddDialogOpen(false);
+                fetchFindingIssues(page, ''); // Refresh the table
+            } else {
+                toast.error('Failed to add finding issue.');
+            }
+        } catch (error) {
+            console.error('Error adding finding issue:', error);
+            toast.error('An error occurred while adding the issue.');
+        }
+    };
+
+    const handleAddIssueChange = (key: string, value: string) => {
+        setNewIssue((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const resetNewIssueForm = () => {
+        setNewIssue({});
+    };
+
+    const handleUpdateIssue = async (updatedIssue: any) => {
+        const { _id, ...updateData } = updatedIssue; // Exclude _id from the payload
+        try {
+            const response = await axios.put(
+                `http://localhost:5000/findingIssue/${_id}`,
+                updateData, // Send only fields other than _id
+                { headers: { "Content-Type": "application/json" } }
+            );
+            if (response.status === 200) {
+                toast.success("Issue updated successfully!");
+                fetchFindingIssues(page, searchTerm); // Refresh data after update
+            }
+        } catch (error) {
+            toast.error("Failed to update issue.");
+        }
+    };
+
+
+
+    const handleDeleteIssue = async (issueId: string) => {
+        try {
+            const response = await axios.delete(
+                `http://localhost:5000/findingIssue/${issueId}`
+            );
+            if (response.status === 200) {
+                setIssues((prevIssues) =>
+                    prevIssues.filter((issue) => issue._id !== issueId)
+                );
+                alert('Issue deleted successfully!');
+            }
+        } catch (error) {
+            alert('Failed to delete issue.');
+        }
+    };
+
+
 
     return (
         <AdminDashboardLayout title="Finding Issue Management">
@@ -246,7 +335,18 @@ const FindingIssue: React.FC = () => {
                     >
                         Download Excel Template
                     </Button>
+
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setAddDialogOpen(true)} // Open the add modal
+                    >
+                        Add Finding Issue
+                    </Button>
+
                 </Box>
+
+
 
                 <TextField
                     label="Page Number"
@@ -269,7 +369,10 @@ const FindingIssue: React.FC = () => {
             ) : error ? (
                 <Typography color="error">{error}</Typography>
             ) : (
-                <DynamicTable issues={issues} />
+                <DynamicTable
+                    issues={issues}
+                    onUpdateIssue={handleUpdateIssue}
+                    onDeleteIssue={handleDeleteIssue} />
             )}
 
             <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}>
@@ -324,6 +427,39 @@ const FindingIssue: React.FC = () => {
                     >
                         {uploading ? 'Uploading...' : 'Upload'}
                     </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={addDialogOpen}
+                onClose={() => {
+                    setAddDialogOpen(false);
+                    resetNewIssueForm();
+                }}
+            >
+                <DialogTitle>Add New Finding Issue</DialogTitle>
+                <DialogContent>
+                    {columnOrder.map((column, index) => (
+                        <TextField
+                            key={index}
+                            fullWidth
+                            label={column}
+                            value={newIssue[column] || ''}
+                            onChange={(e) =>
+                                setNewIssue((prev) => ({ ...prev, [column]: e.target.value }))
+                            }
+                            margin="normal"
+                        />
+                    ))}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        setAddDialogOpen(false);
+                        resetNewIssueForm();
+                    }}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleAddIssueSubmit}>Submit</Button>
                 </DialogActions>
             </Dialog>
 

@@ -134,6 +134,25 @@ export default function DashboardSidebar() {
           </List>
 
           <Divider />
+
+          <List>
+            <Box>
+              <Typography
+                sx={{
+                  cursor: 'pointer',
+                  ml: 3,
+                  my: 1.5,
+                  ':hover': {
+                    opacity: 0.7,
+                  },
+                }}
+                onClick={() => handleNavigation('/Overview')}
+              >
+                TICKET
+              </Typography>
+            </Box>
+          </List>
+
         </Box>
       </Drawer>
     </Container>

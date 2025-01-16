@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Table,
   TableHead,
@@ -14,8 +14,15 @@ import {
   FormControl,
   Box,
   Typography,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Button,
+  DialogActions,
 } from '@mui/material';
 import { parse, format, isValid } from 'date-fns';
+import { Edit, Delete, Close } from '@mui/icons-material';
 
 
 interface FindingIssue {
@@ -25,10 +32,14 @@ interface FindingIssue {
 
 interface DynamicTableProps {
   issues: FindingIssue[]; // Declare the issues prop
+  onUpdateIssue: (updatedIssue: FindingIssue) => void;
+  onDeleteIssue: (issueId: string) => void;
 }
 
 
-const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
+const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
+  onDeleteIssue, }) => {
+
   const [localIssues, setLocalIssues] = useState<FindingIssue[]>([]);
   const [filteredIssues, setFilteredIssues] = useState<FindingIssue[]>(issues);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({
@@ -45,6 +56,19 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
   const [yearFilter, setYearFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
   const [riskRatingFilter, setRiskRatingFilter] = useState('');
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingIssue, setEditingIssue] = useState<FindingIssue | null>(null);
+  const currentPageIssues = filteredIssues.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
   const normalizeKey = (key: string) => key.toLowerCase().replace(/\s+/g, '');
 
   const columnOrder = [
@@ -232,13 +256,6 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
     return <div>No data available</div>;
   }
 
-  const handleSort = (key: string) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
 
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
@@ -284,8 +301,56 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
       value: month + 1, // 1-based month value
       label: monthNames[month], // Get month name
     }));
-  
-  const currentPageIssues = filteredIssues.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    isDragging.current = true;
+    startX.current = e.pageX - scrollContainerRef.current.offsetLeft;
+    scrollLeft.current = scrollContainerRef.current.scrollLeft;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1.5; // Adjust multiplier for speed
+    scrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+  };
+
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+  };
+
+  const handleMouseLeave = () => {
+    isDragging.current = false;
+  };
+
+  const handleEditClick = (issue: FindingIssue) => {
+    setEditingIssue(issue);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditDialogClose = () => {
+    setEditDialogOpen(false);
+    setEditingIssue(null);
+  };
+
+
+  const handleEditSave = () => {
+    if (editingIssue) {
+      console.log("Updated issue being sent to API:", editingIssue);
+      onUpdateIssue(editingIssue);
+    }
+    handleEditDialogClose();
+  };
+
+
+  const handleDeleteClick = (issueId: string) => {
+    if (window.confirm('Are you sure you want to delete this issue?')) {
+      onDeleteIssue(issueId);
+    }
+  };
 
   return (
     <div>
@@ -379,13 +444,23 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
         </FormControl>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper}
+        ref={scrollContainerRef}
+        sx={{
+          overflowX: 'auto',
+          cursor: isDragging.current ? 'grabbing' : 'grab',
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}>
         <Table>
           <TableHead>
             <TableRow>
               {validColumns.map((column) => (
                 <TableCell key={column}>{column}</TableCell>
               ))}
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -397,11 +472,57 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
                   const displayValue = isDateColumn ? formatDate(value) : value;
                   return <TableCell key={column}>{displayValue}</TableCell>;
                 })}
+                <TableCell>
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleEditClick(issue)}
+                  >
+                    <Edit />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDeleteClick(issue._id)}
+                  >
+                    <Delete />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
+        <DialogContent>
+          {editingIssue &&
+            Object.keys(editingIssue).map((key) => (
+              <TextField
+                key={key}
+                fullWidth
+                label={key}
+                value={editingIssue[key] || ''}
+                onChange={(e) =>
+                  setEditingIssue((prev) =>
+                    prev ? { ...prev, [key]: e.target.value } : null
+                  )
+                }
+                margin="normal"
+              />
+            ))}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleEditDialogClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleEditSave} color="primary" variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+
+      </Dialog>
+
 
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
@@ -412,7 +533,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues }) => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-    </div>
+    </div >
   );
 };
 
