@@ -35,7 +35,7 @@ interface Vulnerability {
   recommendation?: string;
 }
 
-export default function AddVulnerability() {
+export default function CodeExampleManagement() {
   const [openModal, setOpenModal] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [openManualModal, setOpenManualModal] = useState(false);

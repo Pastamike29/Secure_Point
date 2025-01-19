@@ -48,18 +48,19 @@ import ProtectedRoute from './Login/Component/ProtectedRoute'
 import UpdateProfile from './Pages/User/page/Page/UpdateProfile'
 import ProfilePage from './Pages/User/page/Page/ProfilePage'
 import AdminMain from './Login/AdminMain'
-import AddUser from './Pages/Admin/Pages/AddUser'
-import AddVulnerability from './Pages/Admin/Pages/AddVulnerability'
 import ApplicationManagement from './Pages/Admin/Pages/FindingIssue/ApplicationManagement'
+import CodeExampleManagement from './Pages/Admin/Pages/CodeExampleManagement'
 import { UserProvider } from './Login/Component/UserAuthen'
 import { AuthProvider } from './Login/Component/AuthContext'
 import DynamicVulPage from './Pages/CodeExample/Page/DynamicVulPage'
 import FindingIssue from './Pages/Admin/Pages/FindingIssue/FindingIssue'
 
 import Chatbot from './Components/Chatbot'
-import ModifyLessonPage from './Pages/Admin/Pages/ModifyLessonPage'
 import DynamicLessonPage from './Pages/lessons/DynamicLessonPage'
-import FeedbackManagement from './Pages/Admin/Pages/Feedback/feedbackManagement'
+import FeedbackManagement from './Pages/Admin/Pages/Feedback/FeedbackManagement'
+import TicketManagement from './Pages/Admin/Pages/TicketManagement'
+import LessonPageManagement from './Pages/Admin/Pages/LessonPageManagement'
+import UserManagement from './Pages/Admin/Pages/UserManagement'
 export default function App() {
 
   return (
@@ -105,10 +106,11 @@ export default function App() {
 
 
               <Route path='/admin' element={<AdminMain />}></Route>
-              <Route path='/admin/AddUser' element={<AddUser />}></Route>
+              <Route path='/admin/UserManagement' element={<UserManagement />}></Route>
               <Route path='/admin/FeedbackManagement' element={<FeedbackManagement />}></Route>
-              <Route path='/admin/ModifyLessonPage' element={<ModifyLessonPage />}></Route>
-              <Route path='/admin/AddVulnerability' element={<AddVulnerability />}></Route>
+              <Route path='/admin/TicketManagement' element={<TicketManagement />}></Route>
+              <Route path='/admin/LessonPageManagement' element={<LessonPageManagement />}></Route>
+              <Route path='/admin/CodeExampleManagement' element={<CodeExampleManagement />}></Route>
               <Route path="/admin/ApplicationManagement" element={<ApplicationManagement />} />
               <Route path="/admin/FindingIssue" element={<FindingIssue />} />
 
@@ -125,7 +127,7 @@ export default function App() {
 
 
               <Route path="/Overview" element={<Overview />} />
-              <Route path="/Ticket" element={<Ticket />} />
+              <Route path="/Overview/Ticket" element={<Ticket />} />
               <Route path="/Overview/ApplicationIssues" element={<ApplicationIssues />} />
               <Route path="/Overview/ApplicationIssues/CriticalRisk" element={<CriticalRisk />} />
               <Route path="/Overview/ApplicationIssues/HighRisk" element={<HighRisk />} />

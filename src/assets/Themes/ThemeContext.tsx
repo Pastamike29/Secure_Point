@@ -10,7 +10,7 @@ interface ColorModeContextType {
 
 // Create the ColorMode context
 const ColorModeContext = createContext<ColorModeContextType>({
-    toggleTheme: () => { },
+    toggleTheme: () => {},
     mode: 'light',
 });
 
@@ -37,33 +37,47 @@ export default function ToggleColorMode({ children }: { children: React.ReactNod
             mode,
             ...(mode === 'light'
                 ? {
-                    // Light Mode Colors
-                    background: {
-                        default: '#ffff',  // Light soft background
-                        paper: '#dcdcdc',    // Slightly darker surface (card or box)
-                    },
-                    text: {
-                        primary: '#003366',  // Dark blue for headings and main text
-                        secondary: '#555555', // Medium gray for secondary text
-                    },
-                    action: {
-                        active: '#ff8800',   // Orange for highlights or active items
-                    },
-                    custom: {
-                        highlight: '#ff8800', // Custom color for buttons or emphasized elements
-                    },
-                }
+                      // Light Mode Colors
+                      background: {
+                          default: '#ffff', // Light soft background
+                          paper: '#dcdcdc', // Slightly darker surface (card or box)
+                      },
+                      text: {
+                          primary: '#003366', // Dark blue for headings and main text
+                          secondary: '#555555', // Medium gray for secondary text
+                      },
+                      action: {
+                          active: '#ff8800', // Orange for highlights or active items
+                      },
+                  }
                 : {
-                    // Dark Mode Colors
-                    background: {
-                        default: '#212121', // Dark background
-                        paper: '#2f2f2f',   // Darker gray for paper
+                      // Dark Mode Colors
+                      background: {
+                          default: '#212121', // Dark background
+                          paper: '#2f2f2f', // Darker gray for paper
+                      },
+                      text: {
+                          primary: '#ffffff', // White text
+                          secondary: '#bdbdbd', // Light gray for secondary text
+                      },
+                  }),
+        },
+        components: {
+            MuiOutlinedInput: {
+                styleOverrides: {
+                    root: {
+                        '& fieldset': {
+                            borderColor: 'grey', // Default border color
+                        },
+                        '&:hover fieldset': {
+                            borderColor: '#90caf9', // Hover border color
+                        },
+                        '&.Mui-focused fieldset': {
+                            borderColor: '#42a5f5', // Focused border color
+                        },
                     },
-                    text: {
-                        primary: '#ffffff', // White text
-                        secondary: '#bdbdbd', // Light gray for secondary text
-                    },
-                }),
+                },
+            },
         },
     });
 

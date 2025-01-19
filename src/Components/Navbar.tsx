@@ -17,7 +17,7 @@ import LoginModal from '../Login/LoginModal';
 import ThemeToggle from '../assets/Themes/ThemeToggle';
 
 export default function ResponsiveAppBar() {
-  const pages = ['Lesson', 'Lesson2', 'Code Example', 'Overview', 'Quiz', 'ScoreBoard'];
+  const pages = ['Lesson', 'Lesson2', 'Code Example', 'Overview', 'Quiz'];
   const settings = ['Profile', 'Feedback', 'Logout'];
   const navigate = useNavigate();
 
@@ -62,11 +62,7 @@ export default function ResponsiveAppBar() {
         navigate('/LessonPage');
         break;
       case 'Lesson2':
-        if (firstIssueName) {
-          navigate(`/LessonPage/${firstIssueName}`); // Navigate to the first issueName dynamically
-        } else {
-          alert('Data is still loading. Please wait a moment.');
-        }
+        navigate('/LessonPage/issueName 3')
         break;
       case 'Code Example':
         navigate('/vulnerabilities/Insecure SSL');
@@ -76,9 +72,6 @@ export default function ResponsiveAppBar() {
         break;
       case 'Quiz':
         navigate('/Quiz');
-        break;
-      case 'ScoreBoard':
-        navigate('/ScoreBoard');
         break;
       default:
         navigate('/');

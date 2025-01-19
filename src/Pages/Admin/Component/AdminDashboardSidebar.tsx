@@ -79,7 +79,7 @@ export default function AdminDashboardSidebar() {
                     opacity: 0.7,
                   },
                 }}
-                onClick={() => handleNavigation('/admin/AddUser')}
+                onClick={() => handleNavigation('/admin/UserManagement')}
               >
                 User Management
               </Typography>
@@ -106,7 +106,6 @@ export default function AdminDashboardSidebar() {
           </List>
 
           <Divider />
-
           <List>
             <Box>
               <Typography
@@ -118,14 +117,15 @@ export default function AdminDashboardSidebar() {
                     opacity: 0.7,
                   },
                 }}
-                onClick={() => handleNavigation('/admin/AddVulnerability')}
+                onClick={() => handleNavigation('/admin/TicketManagement')}
               >
-                Vulnerability Management
+                Ticket Management
               </Typography>
             </Box>
           </List>
 
           <Divider />
+
           <List>
             <Box>
               <Typography
@@ -137,7 +137,7 @@ export default function AdminDashboardSidebar() {
                     opacity: 0.7,
                   },
                 }}
-                onClick={() => handleNavigation('/admin/ModifyLessonPage')}
+                onClick={() => handleNavigation('/admin/LessonPageManagement')}
               >
                 Lesson Management  
               </Typography>
@@ -145,6 +145,26 @@ export default function AdminDashboardSidebar() {
           </List>
 
           <Divider />
+          <List>
+            <Box>
+              <Typography
+                sx={{
+                  cursor: 'pointer',
+                  ml: 3,
+                  my: 1.5,
+                  ':hover': {
+                    opacity: 0.7,
+                  },
+                }}
+                onClick={() => handleNavigation('/admin/CodeExampleManagement')}
+              >
+                Code Example Management
+              </Typography>
+            </Box>
+          </List>
+
+          <Divider />
+
           <List>
             <Box>
               <Typography

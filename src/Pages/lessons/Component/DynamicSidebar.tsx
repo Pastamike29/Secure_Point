@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface SidebarItem {
   issueName: string;
@@ -58,8 +59,7 @@ export default function DynamicSidebarLessonPage() {
 
       setOwaspCategories(categoriesWithPaths);
     } catch (error) {
-      setError('Failed to load OWASP categories.');
-      console.error(error);
+      toast.error('Failed to load OWASP categories.');
     } finally {
       setLoading(false);
     }
@@ -162,7 +162,7 @@ export default function DynamicSidebarLessonPage() {
                     transition: 'transform 0.3s',
                   }}
                 />
-                {year}
+                {`OWASP: ${year}`} {/* Add OWASP prefix */}
               </Typography>
 
               <Collapse in={openYear === year} timeout="auto" unmountOnExit>

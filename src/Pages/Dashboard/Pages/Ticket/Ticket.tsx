@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
      Box,
      Typography,
      Button,
      TextField,
-     IconButton,
      Grid,
      Paper,
 } from '@mui/material';
@@ -14,10 +13,11 @@ import DashboardLayout from '../../Components/DashboardLayout';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 
+const API_URL = 'http://localhost:5000';
+
 const Ticket: React.FC = () => {
-
+     const [activeDropdown, setActiveDropdown] = useState<null | 'applicationNumber' | 'applicationName' | 'findingIssue'>(null);
      const [emailError, setEmailError] = useState(false);
-
      const [formData, setFormData] = useState({
           application_number: '',
           employee_id: '',
@@ -25,29 +25,88 @@ const Ticket: React.FC = () => {
           name: '',
           finding_issue: '',
           email: '',
-          message: ''
+          message: '',
      });
 
-     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-          const { name, value } = e.target;
+     const [dropdownData, setDropdownData] = useState({
+          applicationNumbers: [] as string[],
+          applicationNames: [] as string[],
+          findingIssues: [] as string[],
+     });
 
-          if (name === "email") {
-               // Check if the email ends with @ttbbank.com
-               const emailRegex = /^[a-zA-Z0-9._%+-]+@ttbbank\.com$/;
-               if (!emailRegex.test(value)) {
-                    setEmailError(true); // Set error state
-               } else {
-                    setEmailError(false); // Clear error state
-               }
+
+     
+     const [searchData, setSearchData] = useState({
+          applicationNumber: '',
+          applicationName: '',
+          findingIssue: '',
+     });
+
+     const dropdownRef = useRef<HTMLDivElement>(null);
+
+     const fetchDropdownData = async () => {
+          try {
+               const [applicationNumbersRes, applicationNamesRes, findingIssuesRes] = await Promise.all([
+                    axios.get(`${API_URL}/application-numbers`),
+                    axios.get(`${API_URL}/application-names`),
+                    axios.get(`${API_URL}/finding-issues`),
+               ]);
+
+               setDropdownData({
+                    applicationNumbers: applicationNumbersRes.data || [],
+                    applicationNames: applicationNamesRes.data || [],
+                    findingIssues: findingIssuesRes.data || [],
+               });
+          } catch (error) {
+               toast.error('Failed to load dropdown options.');
           }
+     };
 
+     useEffect(() => {
+          fetchDropdownData();
+     }, []);
+
+     useEffect(() => {
+          const handleClickOutside = (event: MouseEvent) => {
+               if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                    setActiveDropdown(null); // Collapse the dropdown
+               }
+          };
+
+          document.addEventListener('mousedown', handleClickOutside);
+          return () => {
+               document.removeEventListener('mousedown', handleClickOutside);
+          };
+     }, []);
+
+
+     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+          const { name, value } = e.target;
           setFormData((prevData) => ({ ...prevData, [name]: value }));
+
+          // Validate TTB email
+          if (name === 'email') {
+               const isValidTTBEmail = value.endsWith('@ttbbank.com');
+               setEmailError(!isValidTTBEmail);
+          }
+     };
+
+     const handleSearchChange = (
+          e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+          field: keyof typeof searchData
+     ) => {
+          const { value } = e.target;
+          setSearchData((prevData) => ({ ...prevData, [field]: value }));
      };
 
      const handleSubmit = async () => {
+          if (emailError) {
+               toast.error('Please correct the email before submitting.', { position: 'top-right' });
+               return;
+          }
+
           try {
-               console.log('Submitting form data:', formData); // Log form data
-               const response = await axios.post('http://localhost:5000/tickets', formData);
+               await axios.post(`${API_URL}/tickets`, formData);
                toast.success('Ticket sent successfully!', { position: 'top-right' });
                setFormData({
                     application_number: '',
@@ -59,301 +118,318 @@ const Ticket: React.FC = () => {
                     message: '',
                });
           } catch (error) {
-               console.error('Error submitting ticket:', error);
                toast.error('Failed to send ticket. Please try again.', { position: 'top-right' });
           }
      };
 
+     const filteredData = {
+          applicationNumbers: dropdownData.applicationNumbers.filter((num) =>
+               (num || '').toLowerCase().includes((searchData.applicationNumber || '').toLowerCase())
+          ),
+          applicationNames: dropdownData.applicationNames.filter((name) =>
+               (name || '').toLowerCase().includes((searchData.applicationName || '').toLowerCase())
+          ),
+          findingIssues: dropdownData.findingIssues.filter((issue) =>
+               (issue || '').toLowerCase().includes((searchData.findingIssue || '').toLowerCase())
+          ),
+     };
 
      return (
-          <>
-               <DashboardLayout title="Ticket">
-                    <Box sx={{ py: 5 }}>
-                         <Paper
+          <DashboardLayout title="Ticket">
+               <Box sx={{ py: 5 }}>
+                    <Paper
+                         sx={{
+                              display: 'flex',
+                              flexDirection: { xs: 'column', sm: 'row' },
+                              height: { xs: '100%', sm: '50 vh' },
+                              width: { xs: '100%', sm: '100 vh' },
+                              borderRadius: 2,
+                              overflow: 'hidden',
+                              boxShadow: 4,
+                         }}
+                    >
+                         {/* Left Side */}
+                         <Box
                               sx={{
+                                   flex: 8,
+                                   backgroundColor: '#ffffff',
+                                   color: '#121212',
                                    display: 'flex',
-                                   flexDirection: { xs: 'column', sm: 'row' },
-                                   height: { xs: '100%', sm: '50 vh' },
-                                   width: { xs: '100%', sm: '100 vh' },
-                                   borderRadius: 2,
-                                   overflow: 'hidden',
-                                   boxShadow: 4,
+                                   flexDirection: 'column',
+                                   justifyContent: 'center',
+                                   p: 10,
                               }}
                          >
-                              {/* Left Side */}
-                              <Box
-                                   sx={{
-                                        flex: 8,
-                                        backgroundColor: '#ffffff',
-                                        color: '#121212',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-                                        p: 10
-                                   }}
-                              >
-                                   <Typography
-                                        variant="h5"
-                                        sx={{ fontWeight: 'bold', color: '#f06292', mb: 2 }}
-                                   >
-                                        FINDING ISSUE TICKET
-                                   </Typography>
+                              <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#f06292', mb: 2 }}>
+                                   FINDING ISSUE TICKET
+                              </Typography>
 
-                                   <Grid container spacing={4}>
-                                        <Grid item xs={6}>
-                                             <TextField
-                                                  label="Application Number"
-                                                  name="application_number"
-                                                  value={formData.application_number}
-                                                  onChange={handleInputChange} // Ensure this updates formData
-                                                  fullWidth
-                                                  required
-                                                  InputLabelProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  inputProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  sx={{
-                                                       '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                 borderColor: '#121212',
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                       },
-                                                  }} />
-                                        </Grid>
-
-                                        <Grid item xs={6}>
-                                             <TextField
-                                                  label="Employee ID"
-                                                  name="employee_id"
-                                                  value={formData.employee_id}
-                                                  onChange={handleInputChange}
-                                                  required
-                                                  variant="outlined"
-                                                  InputLabelProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  inputProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  sx={{
-                                                       '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                 borderColor: '#121212',
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                       },
-                                                  }} />
-                                        </Grid>
-
-                                        <Grid item xs={6}>
-                                             <TextField
-                                                  label="Application Name"
-                                                  name="application_name"
-                                                  required
-                                                  value={formData.application_name}
-                                                  onChange={handleInputChange}
-                                                  variant="outlined"
-                                                  InputLabelProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  inputProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  sx={{
-                                                       '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                 borderColor: '#121212',
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                       },
-                                                  }} />
-                                        </Grid>
-
-                                        <Grid item xs={6}>
-                                             <TextField
-                                                  label="Name"
-                                                  name="name"
-                                                  required
-                                                  value={formData.name}
-                                                  onChange={handleInputChange}
-                                                  variant="outlined"
-                                                  InputLabelProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  inputProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  sx={{
-                                                       '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                 borderColor: '#121212',
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                       },
-                                                  }} />
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                             <TextField
-                                                  label="Finding Issue"
-                                                  name="finding_issue"
-                                                  required
-                                                  value={formData.finding_issue}
-                                                  onChange={handleInputChange}
-                                                  variant="outlined"
-                                                  InputLabelProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  inputProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  sx={{
-                                                       '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                 borderColor: '#121212',
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                       },
-                                                  }} />
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                             <TextField
-                                                  label="TTB Email"
-                                                  name="email"
-                                                  value={formData.email}
-                                                  onChange={handleInputChange}
-                                                  fullWidth
-                                                  required
-                                                  variant="outlined"
-                                                  error={emailError} // Display red border when error is true
-                                                  helperText={emailError ? "Please use @ttbbank.com only" : ""} // Show error message
-                                                  InputLabelProps={{ style: { color: emailError ? "#d32f2f" : "#121212", fontSize: '1.2rem' } }}
-                                                  inputProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  sx={{
-                                                       '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                 borderColor: emailError ? '#d32f2f' : '#121212',
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                 borderColor: emailError ? '#d32f2f' : '#ffccd5',
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                 borderColor: emailError ? '#d32f2f' : '#ffccd5',
-                                                            },
-                                                       },
-                                                  }}
-                                             />
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                             <TextField
-                                                  label="Message"
-                                                  name="message"
-                                                  fullWidth
-                                                  required
-                                                  value={formData.message}
-                                                  onChange={handleInputChange}
-                                                  variant="outlined"
-                                                  InputLabelProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  inputProps={{ style: { color: '#121212', fontSize: '1.2rem' } }}
-                                                  sx={{
-                                                       '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                 borderColor: '#121212',
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                 borderColor: '#ffccd5',
-                                                            },
-                                                       },
-                                                  }} />
-                                        </Grid>
-                                   </Grid>
-                                   <Button
-                                        variant="contained"
-                                        sx={{
-                                             bgcolor: '#ff4d6d',
-                                             color: '#fff',
-                                             fontWeight: 'bold',
-                                             fontSize: '1.2rem',
-                                             py: 2,
-                                             mt: 10,
-                                             '&:hover': {
-                                                  bgcolor: '#ff6684',
-                                             },
-                                        }}
-                                        onClick={handleSubmit} // Attach the handleSubmit function here
-                                   >
-                                        Submit
-                                   </Button>
-                                   <Typography
-                                        variant="caption"
-                                        sx={{ mt: 1, textAlign: 'center', color: '#757575' }}
-                                   >
-                                        I agree I only upload <span style={{ color: '#f06292' }}>Quality work</span>
-                                   </Typography>
-                              </Box>
-
-                              {/* Right Side */}
-                              <Box
-                                   sx={{
-                                        flex: 2,
-                                        backgroundColor: '#333333',
-                                        color: '#ffffff',
-                                        padding: 3,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-                                   }}
-                              >
-                                   <Box
-                                        sx={{
-                                             display: 'flex',
-                                             justifyContent: 'center',
-                                             alignItems: 'center',
-                                             mb: 3,
-                                        }}
-                                   >
-                                        <IconButton
-                                             sx={{
-                                                  backgroundColor: '#f06292',
-                                                  width: 60,
-                                                  height: 60,
-                                                  borderRadius: '50%',
+                              <Grid container spacing={4}>
+                                   <Grid item xs={6}>
+                                        <TextField
+                                             label="Application Number"
+                                             name="application_number"
+                                             value={formData.application_number}
+                                             onFocus={() => setActiveDropdown('applicationNumber')}
+                                             onChange={(e) => {
+                                                  handleInputChange(e);
+                                                  handleSearchChange(e, 'applicationNumber');
                                              }}
-                                        >
-                                             <Typography
-                                                  variant="h6"
-                                                  sx={{ color: '#ffffff', fontWeight: 'bold' }}
+                                             fullWidth
+                                             InputLabelProps={{ style: { color: 'grey' } }}
+                                             inputProps={{ style: { color: 'grey' } }}
+                                             placeholder="Search Application Number"
+                                             variant="outlined"
+
+                                        />
+                                        {activeDropdown === 'applicationNumber' && (
+                                             <Box
+                                                  ref={dropdownRef}
+                                                  sx={{
+                                                       maxHeight: '200px',
+                                                       overflowY: 'auto',
+                                                       mt: 1,
+                                                       border: '1px solid grey',
+                                                       borderRadius: '4px',
+                                                       backgroundColor: 'white',
+                                                  }}
                                              >
-                                                  M
-                                             </Typography>
-                                        </IconButton>
-                                   </Box>
+                                                  {filteredData.applicationNumbers.map((number) => (
+                                                       <Typography
+                                                            key={number}
+                                                            sx={{
+                                                                 cursor: 'pointer',
+                                                                 padding: '5px 10px',
+                                                                 backgroundColor:
+                                                                      formData.application_number === number
+                                                                           ? 'rgba(0, 0, 0, 0.1)'
+                                                                           : 'transparent',
+                                                                 '&:hover': {
+                                                                      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                                                                 },
+                                                            }}
+                                                            onClick={() => {
+                                                                 setFormData((prevData) => ({
+                                                                      ...prevData,
+                                                                      application_number: number,
+                                                                 }));
+                                                                 setActiveDropdown(null);
+                                                            }}
+                                                       >
+                                                            {number}
+                                                       </Typography>
+                                                  ))}
+                                             </Box>
+                                        )}
+                                   </Grid>
 
-                                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                        <LocationOnIcon sx={{ mr: 1, color: '#f06292' }} />
-                                        <Typography variant="body1">Location: Dribbble</Typography>
-                                   </Box>
+                                   <Grid item xs={6}>
+                                        <TextField
+                                             label="Name"
+                                             name="name"
+                                             value={formData.name}
+                                             onChange={handleInputChange}
+                                             fullWidth
+                                             required
+                                             InputLabelProps={{ style: { color: 'grey' } }}
+                                             inputProps={{ style: { color: 'grey' } }}
+                                        />
+                                   </Grid>
 
-                                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <AttachMoneyIcon sx={{ mr: 1, color: '#f06292' }} />
-                                        <Typography variant="body1">Ticket Price: $79.95</Typography>
-                                   </Box>
-                              </Box>
-                         </Paper>
-                         <ToastContainer />
-                    </Box>
-               </DashboardLayout>
-          </>
+                                   <Grid item xs={6}>
+                                        <TextField
+                                             label="Application Name"
+                                             name="application_name"
+                                             value={formData.application_name}
+                                             onFocus={() => setActiveDropdown('applicationName')}
+                                             onChange={(e) => {
+                                                  handleInputChange(e);
+                                                  handleSearchChange(e, 'applicationName');
+                                             }}
+                                             fullWidth
+                                             InputLabelProps={{ style: { color: 'grey' } }}
+                                             inputProps={{ style: { color: 'grey' } }}
+                                             placeholder="Search Application Name"
+                                             variant="outlined"
+                                        />
+                                        {activeDropdown === 'applicationName' && (
+                                             <Box
+                                                  ref={dropdownRef}
+                                                  sx={{
+                                                       maxHeight: '200px',
+                                                       overflowY: 'auto',
+                                                       mt: 1,
+                                                       border: '1px solid grey',
+                                                       borderRadius: '4px',
+                                                       backgroundColor: 'white',
+                                                  }}
+                                             >
+                                                  {filteredData.applicationNames.map((name) => (
+                                                       <Typography
+                                                            key={name}
+                                                            sx={{
+                                                                 cursor: 'pointer',
+                                                                 padding: '5px 10px',
+                                                                 backgroundColor:
+                                                                      formData.application_name === name
+                                                                           ? 'rgba(0, 0, 0, 0.1)'
+                                                                           : 'transparent',
+                                                                 '&:hover': {
+                                                                      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                                                                 },
+                                                            }}
+                                                            onClick={() => {
+                                                                 setFormData((prevData) => ({
+                                                                      ...prevData,
+                                                                      application_name: name,
+                                                                 }));
+                                                                 setActiveDropdown(null);
+                                                            }}
+                                                       >
+                                                            {name}
+                                                       </Typography>
+                                                  ))}
+                                             </Box>
+                                        )}
+                                   </Grid>
+
+                                   <Grid item xs={6}>
+                                        <TextField
+                                             label="Employee ID"
+                                             name="employee_id"
+                                             value={formData.employee_id}
+                                             onChange={handleInputChange}
+                                             fullWidth
+                                             required
+                                             InputLabelProps={{ style: { color: 'grey' } }}
+                                             inputProps={{ style: { color: 'grey' } }}
+                                        />
+                                   </Grid>
+
+                                   <Grid item xs={6}>
+                                        <TextField
+                                             label="Finding Issue"
+                                             name="finding_issue"
+                                             value={formData.finding_issue}
+                                             onFocus={() => setActiveDropdown('findingIssue')}
+                                             onChange={(e) => {
+                                                  handleInputChange(e);
+                                                  handleSearchChange(e, 'findingIssue');
+                                             }}
+                                             fullWidth
+                                             InputLabelProps={{ style: { color: 'grey' } }}
+                                             inputProps={{ style: { color: 'grey' } }}
+                                             placeholder="Search Finding Issue"
+                                             variant="outlined"
+                                        />
+                                        {activeDropdown === 'findingIssue' && (
+                                             <Box
+                                                  ref={dropdownRef}
+                                                  sx={{
+                                                       maxHeight: '200px',
+                                                       overflowY: 'auto',
+                                                       mt: 1,
+                                                       border: '1px solid grey',
+                                                       borderRadius: '4px',
+                                                       backgroundColor: 'white',
+                                                  }}
+                                             >
+                                                  {filteredData.findingIssues.map((issue) => (
+                                                       <Typography
+                                                            key={issue}
+                                                            sx={{
+                                                                 cursor: 'pointer',
+                                                                 padding: '5px 10px',
+                                                                 backgroundColor:
+                                                                      formData.finding_issue === issue
+                                                                           ? 'rgba(0, 0, 0, 0.1)'
+                                                                           : 'transparent',
+                                                                 '&:hover': {
+                                                                      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                                                                 },
+                                                            }}
+                                                            onClick={() => {
+                                                                 setFormData((prevData) => ({
+                                                                      ...prevData,
+                                                                      finding_issue: issue,
+                                                                 }));
+                                                                 setActiveDropdown(null);
+                                                            }}
+                                                       >
+                                                            {issue}
+                                                       </Typography>
+                                                  ))}
+                                             </Box>
+                                        )}
+                                   </Grid>
+
+                                   <Grid item xs={6}>
+                                        <TextField
+                                             label="TTB Email"
+                                             name="email"
+                                             value={formData.email}
+                                             onChange={handleInputChange}
+                                             fullWidth
+                                             required
+                                             InputLabelProps={{ style: { color: 'grey' } }}
+                                             inputProps={{ style: { color: 'grey' } }}
+                                             error={emailError}
+                                             helperText={emailError ? 'Please use your @ttbbank.com mail only' : ''}
+                                        />
+                                   </Grid>
+
+                                   <Grid item xs={6}>
+                                        <TextField
+                                             label="Message"
+                                             name="message"
+                                             value={formData.message}
+                                             onChange={handleInputChange}
+                                             fullWidth
+                                             required
+                                             multiline
+                                             rows={4}
+                                             InputLabelProps={{ style: { color: 'grey' } }}
+                                             inputProps={{ style: { color: 'grey' } }}
+                                        />
+                                   </Grid>
+                              </Grid>
+                              <Button
+                                   variant="contained"
+                                   sx={{
+                                        bgcolor: '#ff4d6d',
+                                        color: '#fff',
+                                        fontWeight: 'bold',
+                                        fontSize: '1.2rem',
+                                        py: 2,
+                                        mt: 10,
+                                        '&:hover': {
+                                             bgcolor: '#ff6684',
+                                        },
+                                   }}
+                                   onClick={handleSubmit}
+                              >
+                                   Submit
+                              </Button>
+                         </Box>
+
+                         {/* Right Side */}
+                         <Box
+                              sx={{
+                                   flex: 2,
+                                   backgroundColor: '#333333',
+                                   color: '#ffffff',
+                                   padding: 3,
+                                   display: 'flex',
+                                   flexDirection: 'column',
+                                   justifyContent: 'center',
+                              }}
+                         >
+
+                         </Box>
+                    </Paper>
+                    <ToastContainer />
+               </Box>
+          </DashboardLayout>
      );
 };
 

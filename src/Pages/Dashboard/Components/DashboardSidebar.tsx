@@ -146,7 +146,7 @@ export default function DashboardSidebar() {
                     opacity: 0.7,
                   },
                 }}
-                onClick={() => handleNavigation('/Overview')}
+                onClick={() => handleNavigation('/Overview/Ticket')}
               >
                 TICKET
               </Typography>

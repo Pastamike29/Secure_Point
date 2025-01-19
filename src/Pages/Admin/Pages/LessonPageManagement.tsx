@@ -30,7 +30,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 
-export default function ModifyLessonPage() {
+export default function LessonPageManagement() {
 
   const [lessons, setLessons] = useState<any[]>([]);
   const [editingIndex, setEditingIndex] = useState<string | null>(null);
@@ -85,15 +85,20 @@ export default function ModifyLessonPage() {
     try {
       const response = await fetch(`${API_BASE_URL}/lessons`);
       const data = await response.json();
-      console.log('Fetched lessons:', data.data); // Debug fetched data
+
+      console.log('Fetched lessons:', data); // Log the full data
       if (Array.isArray(data.data)) {
         setLessons(data.data);
-        setFilteredLessons(data.data); // Ensure filtered lessons are updated
+        setFilteredLessons(data.data);
       } else {
         console.error('Invalid data structure:', data);
+        setLessons([]); // Reset to empty if data is invalid
+        setFilteredLessons([]);
       }
     } catch (error) {
-      console.error('Error fetching lessons:', error);
+      toast.error('Failed to fetch lessons.');
+      setLessons([]); // Reset to empty in case of error
+      setFilteredLessons([]);
     }
   };
 
@@ -205,25 +210,19 @@ export default function ModifyLessonPage() {
       const result = await response.json();
 
       if (editingIndex !== null) {
-        // Update the existing lesson in state
-        setLessons((prevLessons) =>
-          prevLessons.map((lesson) =>
-            lesson._id === editingIndex ? result : lesson
-          )
-        );
+        // Edit lesson case
+        toast.success('Lesson updated successfully!');
       } else {
-        // Add the new lesson to the state
-        setLessons((prevLessons) => [...prevLessons, result]);
+        // Add new lesson case
+        toast.success('Lesson added successfully!');
       }
 
       setModalOpen(false);
-      alert('Lesson saved successfully!');
+      setEditingIndex(null);
     } catch (error) {
-      console.error('Failed to save lesson:', error);
-      alert('Failed to save lesson.');
+      toast.error('Failed to save lesson.');
     }
   };
-
 
   const handleDeleteLesson = async (lessonId: string) => {
     try {
@@ -235,9 +234,9 @@ export default function ModifyLessonPage() {
 
       const updatedLessons = lessons.filter((lesson) => lesson._id !== lessonId);
       setLessons(updatedLessons);
-      alert('Lesson deleted successfully!');
+      toast.success('Lesson deleted successfully!');
     } catch (error) {
-      alert('Failed to delete lesson.');
+      toast.error('Failed to delete lesson.');
     }
   };
 

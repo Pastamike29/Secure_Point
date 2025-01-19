@@ -35,7 +35,7 @@ interface User {
 }
 
 
-const AddUser: React.FC = () => {
+const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -347,4 +347,4 @@ const AddUser: React.FC = () => {
   );
 };
 
-export default AddUser;
+export default UserManagement;
