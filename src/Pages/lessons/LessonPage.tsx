@@ -117,7 +117,7 @@ export default function LessonPage() {
                   >
                   </Box>
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4
@@ -156,7 +156,7 @@ export default function LessonPage() {
                   </Box>
 
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4
@@ -184,7 +184,7 @@ export default function LessonPage() {
                     </Typography>
                   </Box>
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4,
@@ -218,7 +218,7 @@ export default function LessonPage() {
                     </Typography>
                   </Box>
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4,
@@ -256,7 +256,7 @@ export default function LessonPage() {
                     </Typography>
                   </Box>
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4,
@@ -282,7 +282,7 @@ export default function LessonPage() {
                     <Typography variant='h6'>ตัวอย่างเช่น การใช้ไลบรารีหรือเฟรมเวิร์กที่มีช่องโหว่ที่รู้จัก แต่ยังไม่ได้อัปเดตเป็นเวอร์ชันที่ปลอดภัย ซึ่งอาจถูกใช้ในการโจมตีที่สามารถทำให้ข้อมูลถูกขโมยหรือระบบถูกควบคุมจากภายนอกได้</Typography>
                   </Box>
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4,
@@ -312,7 +312,7 @@ export default function LessonPage() {
 
                   </Box>
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4,
@@ -356,7 +356,7 @@ export default function LessonPage() {
                     </Typography>
                   </Box>
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4,
@@ -380,7 +380,7 @@ export default function LessonPage() {
                     <Typography variant='h6'>ตัวอย่างการโจมตี เช่น หากมีผู้ไม่หวังดีพยายามเข้าถึงระบบด้วยรหัสผ่านผิดซ้ำหลายครั้ง ระบบควรบันทึกเหตุการณ์เหล่านี้เพื่อให้ผู้ดูแลสามารถตรวจพบความพยายามดังกล่าวและดำเนินการตอบสนอง แต่หากไม่มีการบันทึกหรือแจ้งเตือนใด ๆ ผู้โจมตีอาจจะสามารถทำซ้ำได้จนกว่าจะเจอรหัสผ่านที่ถูกต้อง</Typography>
                   </Box>
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4,
@@ -409,7 +409,7 @@ export default function LessonPage() {
                     </Typography>
                   </Box>
                   <Grid2
-                    container spacing={{ xs: 2, md: 12 }}
+                    container spacing={{ xs: 2, md: 4 }}
                     columns={{ xs: 4, sm: 8, md: 12 }}
                     sx={{
                       mx: 4,

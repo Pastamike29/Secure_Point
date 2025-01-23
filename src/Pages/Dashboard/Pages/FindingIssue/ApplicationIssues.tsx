@@ -10,6 +10,10 @@ import {
   Typography,
   Paper,
   TextField,
+  Card,
+  CardContent,
+  Grid,
+  Button
 } from '@mui/material';
 import DashboardLayout from '../../Components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
@@ -29,7 +33,7 @@ export default function ApplicationRiskTable() {
   const [applications, setApplications] = useState<ApplicationDetails[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>(''); // Search query state
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,7 +45,7 @@ export default function ApplicationRiskTable() {
         }
 
         const data = await response.json();
-        
+
         const groupedData = data.data.map((item: any) => ({
           "Application Name": item.applicationName || 'N/A',
           Details: {
@@ -53,7 +57,7 @@ export default function ApplicationRiskTable() {
           },
         }));
 
-        setApplications(groupedData); // Set the grouped data to the state
+        setApplications(groupedData);
         setLoading(false);
       } catch (err: any) {
         console.error('Fetch error:', err);
@@ -74,7 +78,7 @@ export default function ApplicationRiskTable() {
   }
 
   const handleRowClick = (applicationName: string) => {
-    const encodedAppName = encodeURIComponent(applicationName); // Encode the application name
+    const encodedAppName = encodeURIComponent(applicationName);
     navigate(`/Overview/ApplicationIssues/${encodedAppName}`);
   };
 
@@ -82,7 +86,6 @@ export default function ApplicationRiskTable() {
     setSearchQuery(event.target.value.toLowerCase());
   };
 
-  // Filtered applications based on search query
   const filteredApplications = applications.filter((app) => {
     const { "Application Name": appName, Details } = app;
     return (
@@ -94,7 +97,6 @@ export default function ApplicationRiskTable() {
     );
   });
 
-  // Calculate Total Applications Scanned and Total Findings
   const totalApplicationsScanned = filteredApplications.length;
   const totalFindings = filteredApplications.reduce(
     (total, app) => total + app.Details["Total Vulnerabilities"],
@@ -103,79 +105,114 @@ export default function ApplicationRiskTable() {
 
   return (
     <DashboardLayout title='Finding Issue Applications'>
-      <Box sx={{ padding: '16px' }}>
-        {/* Total Applications Scanned and Total Findings */}
-        <Box sx={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            <Typography variant="h6">Total Applications Scanned: {totalApplicationsScanned}</Typography>
-            <Typography variant="h6">Total Findings: {totalFindings}</Typography>
-          </Box>
+      <Box>
+        {/* Totals Section */}
+        <Grid container spacing={4} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={6}>
+            <Card elevation={4} sx={{ p: 2, borderRadius: '12px', backgroundColor: '#424242' }}>
+              <CardContent>
+                <Typography variant="h6" color="textPrimary" sx={{ color: '#ffffff' }}>
+                  Total Applications Scanned
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#90caf9' }}>
+                  {totalApplicationsScanned}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card elevation={4} sx={{ p: 2, borderRadius: '12px', backgroundColor: '#424242' }}>
+              <CardContent>
+                <Typography variant="h6" color="primary" sx={{ color: '#ffffff' }}>
+                  Total Findings
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#e57373' }}>
+                  {totalFindings}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-          {/* Search Bar */}
+
+        {/* Search and Table */}
+        <Box sx={{ mb: 4 }}>
           <TextField
             label="Search Applications"
             variant="outlined"
-            size="small"
+            size="medium"
+            fullWidth
             value={searchQuery}
             onChange={handleSearchChange}
-            sx={{ width: '300px' }}
+            sx={{
+              backgroundColor: '#424242',
+              borderRadius: '8px',
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: '#616161',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#90caf9',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#1e88e5',
+                },
+              },
+              input: { color: '#ffffff' },
+              label: { color: '#ffffff' },
+            }}
           />
         </Box>
 
         {filteredApplications.length === 0 ? (
-          <Typography>No applications match your search.</Typography>
+          <Typography sx={{ color: '#ffffff' }}>No applications match your search.</Typography>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden', backgroundColor: '#424242' }}>
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell>Application Name</TableCell>
-                  <TableCell>Application Number</TableCell>
-                  <TableCell>Application Contact</TableCell>
-                  <TableCell>Department</TableCell>
-                  <TableCell>Chief</TableCell>
-                  <TableCell>Total Vulnerabilities</TableCell>
+                <TableRow sx={{ backgroundColor: '#616161' }}>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Application Name</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Application Number</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Application Contact</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Department</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Chief</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Total Vulnerabilities</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredApplications
-                  .sort((a, b) =>
-                    (a["Application Name"] || '').toLowerCase().localeCompare((b["Application Name"] || '').toLowerCase()) // Safely handle null/undefined
-                  )
-                  .map((app, index) => (
-                    <TableRow
-                      key={index}
-                      hover
+                {filteredApplications.map((app, index) => (
+                  <TableRow
+                    key={index}
+                    hover
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'background-color 0.3s ease',
+                      '&:hover': {
+                        backgroundColor: '#616161',
+                      },
+                    }}
+                    onClick={() => handleRowClick(app["Application Name"])}
+                  >
+                    <TableCell sx={{ color: '#ffffff' }}>{app["Application Name"]}</TableCell>
+                    <TableCell sx={{ color: '#ffffff' }}>{app.Details["Application Number"]}</TableCell>
+                    <TableCell sx={{ color: '#ffffff' }}>{app.Details["Application Contact"]}</TableCell>
+                    <TableCell sx={{ color: '#ffffff' }}>{app.Details.Department}</TableCell>
+                    <TableCell sx={{ color: '#ffffff' }}>{app.Details.Chief}</TableCell>
+                    <TableCell
                       sx={{
-                        cursor: 'pointer',
-                        opacity: 1,
-                        transition: 'opacity 0.3s ease',
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                          opacity: 0.7,
-                        },
+                        fontWeight: 'bold',
+                        color: app.Details["Total Vulnerabilities"] > 10 ? '#e57373' : '#81c784',
                       }}
-                      onClick={() => handleRowClick(app["Application Name"])}
                     >
-                      <TableCell>{app["Application Name"] || 'N/A'}</TableCell>
-                      <TableCell>{app.Details["Application Number"] || 'N/A'}</TableCell>
-                      <TableCell>{app.Details["Application Contact"] || 'N/A'}</TableCell>
-                      <TableCell>{app.Details.Department || 'N/A'}</TableCell>
-                      <TableCell>{app.Details.Chief || 'N/A'}</TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: app.Details["Total Vulnerabilities"] > 10 ? 'red' : 'inherit',
-                        }}
-                      >
-                        {app.Details["Total Vulnerabilities"] ?? 'N/A'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                      {app.Details["Total Vulnerabilities"]}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
         )}
+
       </Box>
     </DashboardLayout>
   );

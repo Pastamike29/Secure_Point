@@ -1,5 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField } from '@mui/material';
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Paper,
+  TextField,
+  Grid,
+  Card,
+  CardContent,
+} from '@mui/material';
 import DashboardLayout from '../../Components/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,41 +40,28 @@ interface RiskRatingGroup {
 
 export default function InformativeRisk() {
   const [riskRatings, setRiskRatings] = useState<RiskRatingGroup[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<ApplicationDetails[]>([]);
-  const [totalApplications, setTotalApplications] = useState<number>(0);
-  const [totalFindings, setTotalFindings] = useState<number>(0);
+  const [filteredApplications, setFilteredApplications] = useState<RiskRatingGroup[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const navigate = useNavigate();
 
-  // Fetch data from the backend
   const fetchApplicationsByRisk = async () => {
     try {
       const response = await fetch('http://localhost:5000/getApplicationByRiskRating');
       if (!response.ok) throw new Error('Failed to fetch data');
       const data = await response.json();
 
-      console.log(data); // Debug response data
+      const informativeRiskData = data.data
+        .filter((item: RiskRatingGroup) => item._id.toLowerCase() === 'informative')
+        .map((item) => ({
+          ...item,
+          "Total Applications Scanned": item.applications.length,
+          "Total Findings": item.totalFindings,
+        }));
 
-      // Filter data for "Informative" risk group
-      const informativeRiskData = data.data.filter((item: RiskRatingGroup) => item._id.toLowerCase() === 'informative');
       setRiskRatings(informativeRiskData);
-
-      // Calculate totals
-      const totalApps = informativeRiskData.reduce((acc, group) => acc + group.applications.length, 0);
-      const totalFinds = informativeRiskData.reduce((acc, group) => acc + group.totalFindings, 0);
-      setTotalApplications(totalApps);
-      setTotalFindings(totalFinds);
-
-      // Flatten the applications for easier search
-      const allApplications = informativeRiskData.flatMap((group) =>
-        group.applications.map((app) => ({
-          ...app.applicationDetails,
-          "Finding Issues Count": app.totalFindings || 0, // Add totalFindings if missing
-        }))
-      );
-      setFilteredApplications(allApplications);
+      setFilteredApplications(informativeRiskData);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
     } finally {
@@ -68,122 +69,150 @@ export default function InformativeRisk() {
     }
   };
 
-  // Filter applications based on search query
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
-
-    // Filter applications by checking if any field matches the search query
-    const allApplications = riskRatings.flatMap((group) =>
-      group.applications.map((app) => app.applicationDetails)
-    );
-
-    const filtered = allApplications.filter((app) =>
-      Object.values(app).some((value) =>
-        value && value.toString().toLowerCase().includes(query)
-      )
-    );
-
-    setFilteredApplications(filtered);
-  };
-
   useEffect(() => {
     fetchApplicationsByRisk();
   }, []);
 
-  // Handle loading or error states
-  if (loading) {
-    return (
-      <Typography align="center" variant="h6" sx={{ marginTop: '20px' }}>
-        Loading...
-      </Typography>
-    );
-  }
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
 
-  if (error) {
-    return (
-      <Typography align="center" color="error" variant="h6" sx={{ marginTop: '20px' }}>
-        Error: {error}
-      </Typography>
-    );
-  }
+    const filteredData = riskRatings.map((group) => ({
+      ...group,
+      applications: group.applications.filter((app) => {
+        const { applicationDetails } = app;
+        return (
+          (applicationDetails["Application Name"]?.toLowerCase().includes(query)) ||
+          (applicationDetails["Application Number"]?.toLowerCase().includes(query)) ||
+          (applicationDetails["Application Contact"]?.toLowerCase().includes(query)) ||
+          (applicationDetails["Department"]?.toLowerCase().includes(query)) ||
+          (applicationDetails["Chief"]?.toLowerCase().includes(query))
+        );
+      }),
+    }));
 
-  // Navigate to the application details page
+    setFilteredApplications(filteredData);
+  };
+
   const handleRowClick = (applicationName: string) => {
     const encodedAppName = encodeURIComponent(applicationName);
     navigate(`/Overview/ApplicationIssues/${encodedAppName}`);
   };
 
+  if (loading) {
+    return <Typography align="center" variant="h6" sx={{ marginTop: '20px' }}>Loading...</Typography>;
+  }
+
+  if (error) {
+    return <Typography align="center" color="error" variant="h6" sx={{ marginTop: '20px' }}>Error: {error}</Typography>;
+  }
+
   return (
     <DashboardLayout title="Informative Risk Applications">
-      <Box sx={{ padding: '16px' }}>
-        {/* Title and Search Bar */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            INFORMATIVE RISK APPLICATIONS
-          </Typography>
+      <Box sx={{ padding: '32px', backgroundColor: '#333333', minHeight: '100vh' }}>
+        <Grid container spacing={4} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={6}>
+            <Card elevation={4} sx={{ p: 2, borderRadius: '12px', backgroundColor: '#424242' }}>
+              <CardContent>
+                <Typography variant="h6" color="textPrimary" sx={{ color: '#ffffff' }}>
+                  Total Applications Scanned
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#90caf9' }}>
+                  {riskRatings.reduce((acc, group) => acc + (group["Total Applications Scanned"] || 0), 0) || 'N/A'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card elevation={4} sx={{ p: 2, borderRadius: '12px', backgroundColor: '#424242' }}>
+              <CardContent>
+                <Typography variant="h6" color="textPrimary" sx={{ color: '#ffffff' }}>
+                  Total Findings
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#e57373' }}>
+                  {riskRatings.reduce((acc, group) => acc + (group["Total Findings"] || 0), 0) || 'N/A'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        <Box sx={{ mb: 4 }}>
           <TextField
-            label="Search"
+            label="Search Applications"
             variant="outlined"
+            fullWidth
             value={searchQuery}
             onChange={handleSearchChange}
-            sx={{ width: '300px' }}
+            sx={{
+              backgroundColor: '#424242',
+              borderRadius: '8px',
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: '#616161',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#90caf9',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#1e88e5',
+                },
+              },
+              input: { color: '#ffffff' },
+              label: { color: '#ffffff' },
+            }}
           />
         </Box>
 
-        {/* Totals Section */}
-        <Box sx={{alignItems: 'center', mt: 3, mb: 2 }}>
-          <Typography variant="h6">
-            <strong>Total Applications Scanned:</strong> {totalApplications}
-          </Typography>
-          <Typography variant="h6">
-            <strong>Total Finding Issues:</strong> {totalFindings}
-          </Typography>
-        </Box>
+        {filteredApplications.map((group) => (
+          <Box key={group._id} sx={{ marginBottom: '24px' }}>
+            <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+              {group._id.toUpperCase()} RISK APPLICATIONS
+            </Typography>
+            <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden', backgroundColor: '#424242', mt: 2 }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#616161' }}>
+                    <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Application Name</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Application Number</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Application Contact</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Department</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Chief</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', fontSize: '16px', color: '#ffffff' }}>Total Finding Issues</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {group.applications.map((app, index) => {
+                    const applicationDetails = app.applicationDetails;
 
-        {/* Results Table */}
-        {filteredApplications.length === 0 ? (
-          <Typography sx={{ marginTop: '16px' }}>
-            No applications match your search query.
-          </Typography>
-        ) : (
-          <TableContainer component={Paper} sx={{ marginTop: '24px' }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell><strong>Application Name</strong></TableCell>
-                  <TableCell><strong>Application Number</strong></TableCell>
-                  <TableCell><strong>Application Contact</strong></TableCell>
-                  <TableCell><strong>Department</strong></TableCell>
-                  <TableCell><strong>Chief</strong></TableCell>
-                  <TableCell><strong>Total Finding Issues</strong></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredApplications.map((app, index) => {
-                  console.log(`App ${index} Data:`, app); // Debug log for each application
-
-                  return (
-                    <TableRow
-                      key={index}
-                      sx={{ cursor: 'pointer' }}
-                      onClick={() => handleRowClick(app["Application Name"])}
-                    >
-                      <TableCell>{app["Application Name"] || 'N/A'}</TableCell>
-                      <TableCell>{app["Application Number"] || 'N/A'}</TableCell>
-                      <TableCell>{app["Application Contact"] || 'N/A'}</TableCell>
-                      <TableCell>{app.Department || 'N/A'}</TableCell>
-                      <TableCell>{app.Chief || 'N/A'}</TableCell>
-                      <TableCell>
-                        {app["Finding Issues Count"] != null ? app["Finding Issues Count"] : '0'}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+                    return (
+                      <TableRow
+                        sx={{
+                          cursor: 'pointer',
+                          transition: 'background-color 0.3s ease',
+                          '&:hover': {
+                            backgroundColor: '#616161',
+                          },
+                        }}
+                        key={app.applicationName + index}
+                        onClick={() => handleRowClick(app.applicationName)}
+                      >
+                        <TableCell sx={{ color: '#ffffff' }}>{applicationDetails["Application Name"] || 'N/A'}</TableCell>
+                        <TableCell sx={{ color: '#ffffff' }}>{applicationDetails["Application Number"] || 'N/A'}</TableCell>
+                        <TableCell sx={{ color: '#ffffff' }}>{applicationDetails["Application Contact"] || 'N/A'}</TableCell>
+                        <TableCell sx={{ color: '#ffffff' }}>{applicationDetails["Department"] || 'N/A'}</TableCell>
+                        <TableCell sx={{ color: '#ffffff' }}>{applicationDetails["Chief"] || 'N/A'}</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', color: app.totalFindings > 10 ? '#e57373' : '#81c784' }}>
+                          {app.totalFindings || 'N/A'}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        ))}
       </Box>
     </DashboardLayout>
   );

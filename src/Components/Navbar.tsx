@@ -17,7 +17,7 @@ import LoginModal from '../Login/LoginModal';
 import ThemeToggle from '../assets/Themes/ThemeToggle';
 
 export default function ResponsiveAppBar() {
-  const pages = ['Lesson', 'Lesson2', 'Code Example', 'Overview', 'Quiz'];
+  const pages = ['Lesson', 'Code Example', 'Overview', 'Quiz'];
   const settings = ['Profile', 'Feedback', 'Logout'];
   const navigate = useNavigate();
 

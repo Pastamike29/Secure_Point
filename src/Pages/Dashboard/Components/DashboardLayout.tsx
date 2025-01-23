@@ -41,7 +41,9 @@ export default function DashboardLayout({ children, title }: { children?: React.
             mb: 3
           }}
         >
-          <Typography variant="h4" component="div">
+          <Typography variant="h4" component="div" sx={{
+            fontWeight:'600'
+          }}>
             {title}
           </Typography>
           <ThemeToggle />

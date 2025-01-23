@@ -1,22 +1,21 @@
 import React from 'react';
 import { useColorMode } from './ThemeContext';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography, Switch } from '@mui/material';
 
 const ThemeToggle: React.FC = () => {
-     const { toggleTheme, mode } = useColorMode();
+    const { toggleTheme, mode } = useColorMode();
 
-     return (
-          <Box display="flex" alignItems="center">
-          
-               <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={toggleTheme}
-               >
-                     Theme
-               </Button>
-          </Box>
-     );
+    return (
+        <Box display="flex" alignItems="center" gap={1}>
+       
+            <Switch
+                checked={mode === 'dark'}
+                onChange={toggleTheme}
+                color="primary"
+                inputProps={{ 'aria-label': 'theme toggle' }}
+            />
+        </Box>
+    );
 };
 
 export default ThemeToggle;

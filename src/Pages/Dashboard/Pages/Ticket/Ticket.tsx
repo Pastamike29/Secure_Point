@@ -135,7 +135,7 @@ const Ticket: React.FC = () => {
      };
 
      return (
-          <DashboardLayout title="Ticket">
+          <DashboardLayout title="TICKET">
                <Box sx={{ py: 5 }}>
                     <Paper
                          sx={{
@@ -148,10 +148,8 @@ const Ticket: React.FC = () => {
                               boxShadow: 4,
                          }}
                     >
-                         {/* Left Side */}
                          <Box
                               sx={{
-                                   flex: 8,
                                    backgroundColor: '#ffffff',
                                    color: '#121212',
                                    display: 'flex',
@@ -412,20 +410,7 @@ const Ticket: React.FC = () => {
                               </Button>
                          </Box>
 
-                         {/* Right Side */}
-                         <Box
-                              sx={{
-                                   flex: 2,
-                                   backgroundColor: '#333333',
-                                   color: '#ffffff',
-                                   padding: 3,
-                                   display: 'flex',
-                                   flexDirection: 'column',
-                                   justifyContent: 'center',
-                              }}
-                         >
-
-                         </Box>
+                   
                     </Paper>
                     <ToastContainer />
                </Box>

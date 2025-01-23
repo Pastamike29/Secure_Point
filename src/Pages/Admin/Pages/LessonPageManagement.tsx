@@ -53,9 +53,9 @@ export default function LessonPageManagement() {
     issueName: '',
     sub_issueName: '',
     owasp: '',
-    owasp_year: '', // Default value includes "OWASP"
-    description: '',
-    recommendation: '',
+    owasp_year: '',
+    descriptions: [''], // Changed to array
+    recommendations: [''], // Changed to array
     issueCode_Java: '',
     solveCode_Java: '',
     issueCode_Dotnet: '',
@@ -74,6 +74,7 @@ export default function LessonPageManagement() {
     solve_html: '',
     create_at: '',
   });
+
 
 
   // Fetch lessons on component load
@@ -102,6 +103,30 @@ export default function LessonPageManagement() {
     }
   };
 
+
+  const handleAddField = (field: string) => {
+    setNewLesson((prevLesson) => ({
+      ...prevLesson,
+      [field]: [...(prevLesson[field] || []), ''], // Ensure the field is an array
+    }));
+  };
+
+
+  const handleRemoveField = (field: string, index: number) => {
+    setNewLesson((prevLesson) => ({
+      ...prevLesson,
+      [field]: (prevLesson[field] || []).filter((_, i) => i !== index), // Ensure the field is an array
+    }));
+  };
+  
+  const handleFieldChange = (field: string, index: number, value: string) => {
+    setNewLesson((prevLesson) => ({
+      ...prevLesson,
+      [field]: prevLesson[field].map((item, i) =>
+        i === index ? value : item
+      ),
+    }));
+  };
 
 
   const handleConfirmUpload = () => {
@@ -194,9 +219,8 @@ export default function LessonPageManagement() {
     try {
       const endpoint =
         editingIndex !== null
-          ? `${API_BASE_URL}/lessons/${editingIndex}` // Use editingIndex directly as the ID
+          ? `${API_BASE_URL}/lessons/${editingIndex}`
           : `${API_BASE_URL}/lessons`;
-
       const method = editingIndex !== null ? 'PUT' : 'POST';
 
       const response = await fetch(endpoint, {
@@ -207,22 +231,19 @@ export default function LessonPageManagement() {
 
       if (!response.ok) throw new Error(`Error from API: ${response.statusText}`);
 
-      const result = await response.json();
-
-      if (editingIndex !== null) {
-        // Edit lesson case
-        toast.success('Lesson updated successfully!');
-      } else {
-        // Add new lesson case
-        toast.success('Lesson added successfully!');
-      }
-
+      toast.success(
+        editingIndex !== null
+          ? 'Lesson updated successfully!'
+          : 'Lesson added successfully!'
+      );
       setModalOpen(false);
       setEditingIndex(null);
+      fetchLessons();
     } catch (error) {
       toast.error('Failed to save lesson.');
     }
   };
+
 
   const handleDeleteLesson = async (lessonId: string) => {
     try {
@@ -242,14 +263,20 @@ export default function LessonPageManagement() {
 
   const handleEditLesson = (lessonId: string) => {
     const lessonToEdit = lessons.find((lesson) => lesson._id === lessonId);
-    if (!lessonToEdit) {
-      return;
-    }
+    if (!lessonToEdit) return;
 
     setEditingIndex(lessonId);
-    setNewLesson(lessonToEdit);
+
+    setNewLesson({
+      ...lessonToEdit,
+      recommendations: lessonToEdit.recommendations || [''], // Ensure an array
+      descriptions: lessonToEdit.descriptions || [''], // Ensure an array
+    });
+
     setModalOpen(true);
   };
+
+
 
   const handleFilterChange = (field: string, value: string) => {
     setFilters((prevFilters) => ({ ...prevFilters, [field]: value }));
@@ -666,13 +693,70 @@ export default function LessonPageManagement() {
                   onChange={(e) => setNewLesson({ ...newLesson, description: e.target.value })}
                   sx={{ mb: 2 }}
                 />
-                <TextField
-                  label="Recommendation"
-                  fullWidth
-                  value={newLesson.recommendation}
-                  onChange={(e) => setNewLesson({ ...newLesson, recommendation: e.target.value })}
-                  sx={{ mb: 2 }}
-                />
+                {(newLesson.recommendations || []).map((rec: string, index: number) => (
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <TextField
+                      label={`Recommendation ${index + 1}`}
+                      fullWidth
+                      value={rec || ''} // Fallback to empty string
+                      onChange={(e) =>
+                        handleFieldChange('recommendations', index, e.target.value)
+                      }
+                      sx={{ mr: 2 }}
+                    />
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleRemoveField('recommendations', index)}
+                    >
+                      Remove
+                    </Button>
+                  </Box>
+                ))}
+                <Button
+                  variant="outlined"
+                  onClick={() => handleAddField('recommendations')}
+                  sx={{ mt: 2 }}
+                >
+                  Add Recommendation
+                </Button>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="subtitle1">Descriptions</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                {(newLesson.descriptions || []).map((desc: string, index: number) => (
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <TextField
+                      label={`Description ${index + 1}`}
+                      fullWidth
+                      multiline
+                      rows={3}
+                      value={desc || ''} // Fallback to empty string
+                      onChange={(e) =>
+                        handleFieldChange('descriptions', index, e.target.value)
+                      }
+                      sx={{ mr: 2 }}
+                    />
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleRemoveField('descriptions', index)}
+                    >
+                      Remove
+                    </Button>
+                  </Box>
+                ))}
+                <Button
+                  variant="outlined"
+                  onClick={() => handleAddField('descriptions')}
+                  sx={{ mt: 2 }}
+                >
+                  Add Description
+                </Button>
               </AccordionDetails>
             </Accordion>
 
