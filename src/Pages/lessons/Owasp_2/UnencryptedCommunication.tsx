@@ -69,7 +69,7 @@ export default function UnencryptedCommunication() {
                     <Typography variant='h4' sx={{
                       color: '#5155f5'
                     }}>
-                      Pastar Mike
+                      SecurePoint
                     </Typography>
                     <Box sx={{
                       boxShadow: 3,

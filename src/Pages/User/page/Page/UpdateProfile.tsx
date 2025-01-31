@@ -9,7 +9,7 @@ import {
   CardContent,
   CardActions
 } from '@mui/material';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import ResponsiveAppBar from '../../../../Components/Navbar';
@@ -108,18 +108,7 @@ const UpdateProfile: React.FC = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
           Profile Settings
         </Typography>
-        {/* <Avatar
-          alt="Profile Picture"
-          src={profileImage || '/default-profile.png'}
-          sx={{
-            width: 120,
-            height: 120,
-            mx: 'auto',
-            mb: 2,
-            border: '2px solid',
-            borderColor: 'primary.main',
-          }}
-        /> */}
+     
         <CardContent sx={{ textAlign: 'left', p: 0 }}>
 
           <form onSubmit={handleSubmitProfile}>
@@ -165,7 +154,6 @@ const UpdateProfile: React.FC = () => {
             </CardActions>
           </form>
         </CardContent>
-        <ToastContainer />
       </Card>
     </Box>
     </>

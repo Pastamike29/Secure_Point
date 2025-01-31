@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Table,
   TableHead,
@@ -23,6 +23,13 @@ import {
 } from '@mui/material';
 import { parse, format, isValid } from 'date-fns';
 import { Edit, Delete, Close } from '@mui/icons-material';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { debounce } from 'lodash'; // Ensure you install lodash (npm install lodash)
 
 
 interface FindingIssue {
@@ -31,13 +38,13 @@ interface FindingIssue {
 }
 
 interface DynamicTableProps {
-  issues: FindingIssue[]; // Declare the issues prop
-  onUpdateIssue: (updatedIssue: FindingIssue) => void;
+  issues: FindingIssue[];
+  fetchFindingIssues: () => Promise<void>; // Add this line
   onDeleteIssue: (issueId: string) => void;
 }
 
 
-const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
+const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
   onDeleteIssue, }) => {
 
   const [localIssues, setLocalIssues] = useState<FindingIssue[]>([]);
@@ -49,20 +56,24 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [applicationNumberFilter, setApplicationNumberFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [foundDateFilter, setFoundDateFilter] = useState('');
   const [yearFilter, setYearFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
   const [riskRatingFilter, setRiskRatingFilter] = useState('');
+  const [totalIssues, setTotalIssues] = useState(0); // ✅ Corrected state declaration
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingIssue, setEditingIssue] = useState<FindingIssue | null>(null);
-  const currentPageIssues = filteredIssues.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  const currentPageIssues = localIssues; // ✅ Directly use API-fetched issues
+  const [loading, setLoading] = useState(false); // Track loading state
+
+
+  useEffect(() => {
+    console.log("Current page issues:", currentPageIssues); // Debug log
+  }, [currentPageIssues]);
+
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -123,20 +134,88 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
     { value: 'Critical', label: 'Critical' },
   ];
 
-  const fetchIssues = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/findingIssue'); // Replace with your actual API endpoint
-      const data = await response.json();
-      setLocalIssues(Array.isArray(data.finding_issues) ? data.finding_issues : []); // Set the correct key for issues
-    } catch (error) {
-      setLocalIssues([]); // Fallback to empty array if fetch fails
+  const fetchFindingIssues = useCallback(
+    async (currentPage = 0, currentRowsPerPage = rowsPerPage, searchQuery?: string) => {
+      try {
+        setLoading(true);
+        
+        // ✅ Ensure latest search query is sent
+        const finalSearchQuery = searchQuery !== undefined ? searchQuery : searchTerm;
+  
+        console.log(`🚀 Fetching data for page=${currentPage}, rowsPerPage=${currentRowsPerPage}, search="${finalSearchQuery}"`);
+  
+        const response = await axios.get(`http://localhost:5000/findingIssue`, {
+          params: {
+            page: currentPage + 1,
+            limit: currentRowsPerPage,
+            search: finalSearchQuery || '', // ✅ Ensures an empty string is sent when no search term
+          },
+        });
+  
+        const { finding_issues, total_issues } = response.data;
+        console.log(`✅ Received ${finding_issues.length} issues from API`);
+  
+        setLocalIssues(finding_issues);
+        setFilteredIssues(finding_issues);
+        setTotalIssues(total_issues);
+        setPage(currentPage);
+      } catch (error) {
+        console.error('❌ Error fetching finding issues:', error);
+        setLocalIssues([]);
+        setFilteredIssues([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [rowsPerPage, searchTerm]
+  );
+  
+
+
+
+  useEffect(() => {
+    console.log(`Current state: page=${page}, rowsPerPage=${rowsPerPage}, searchTerm="${searchTerm}"`);
+    setLocalIssues(issues);
+
+  }, [page, rowsPerPage, searchTerm]), [issues];
+
+  useEffect(() => {
+    setFilteredIssues(localIssues);
+  }, [localIssues]);
+
+
+  const handleEditSave = async () => {
+    if (editingIssue) {
+      const { _id, ...updateData } = editingIssue;
+
+      try {
+        const response = await axios.put(
+          `http://localhost:5000/findingIssue/${_id}`,
+          updateData
+        );
+
+        if (response.status === 200) {
+          toast.success('Issue updated successfully!');
+
+          // Force refresh the window
+          window.location.reload();
+        }
+      } catch (error) {
+        toast.error('Failed to update issue.');
+      }
     }
   };
 
 
-  useEffect(() => {
-    fetchIssues();
-  }, []);
+
+  const handleDeleteClick = async (issueId: string) => {
+    if (window.confirm('Are you sure you want to delete this issue?')) {
+      await onDeleteIssue(issueId);
+
+      // Refresh data and reset to the first page
+      await fetchFindingIssues(0, rowsPerPage);
+    }
+  };
 
   // Filter columns to exclude ones where all values are NaN or undefined
   const validColumns = issues.length
@@ -146,54 +225,71 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
     : [];
 
 
-
   const getNormalizedValue = (issue: FindingIssue, column: string) => {
     const normalizedKey = normalizeKey(column);
     const matchingKey = Object.keys(issue).find(
       (key) => normalizeKey(key) === normalizedKey
     );
-    console.log(`Matching key for column "${column}":`, matchingKey); // Debug log
-    return matchingKey ? issue[matchingKey] : 'N/A';
+
+    if (matchingKey && issue[matchingKey] !== null && issue[matchingKey] !== undefined) {
+      return issue[matchingKey];
+    }
+
+    // Return a default value instead of "N/A"
+    return '';
   };
 
   const formatDate = (date: string | null) => {
     if (!date) return 'N/A';
     try {
-      // Parse the date with the expected format
-      const parsedDate = parse(date, 'dd-MMM-yyyy', new Date());
-      return isValid(parsedDate) ? format(parsedDate, 'dd/MM/yyyy') : 'N/A';
+      // Parse the date in the expected format (YYYY-MM-DD)
+      const parsedDate = dayjs(date, 'YYYY-MM-DD');
+      return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY') : 'N/A';
     } catch {
       return 'N/A';
     }
   };
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
 
   useEffect(() => {
-    let filtered = issues.filter((issue) => {
+    setFilteredIssues(localIssues);
+  }, [localIssues]);
+
+  useEffect(() => {
+    const formattedIssues = issues.map((issue) => ({
+      ...issue,
+      'Found Date': issue['Found Date']
+        ? dayjs(issue['Found Date']).format('YYYY-MM-DD')
+        : null,
+      'Overdue Date': issue['Overdue Date']
+        ? dayjs(issue['Overdue Date']).format('YYYY-MM-DD')
+        : null,
+    }));
+
+    setLocalIssues(formattedIssues);
+  }, [issues]);
+
+  useEffect(() => {
+    let filtered = localIssues.filter((issue) => {
       return Object.values(issue).some((value) =>
-        String(value).toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        value
+          ? String(value).toLowerCase().includes(searchTerm.toLowerCase()) // Apply search term filter
+          : false
       );
     });
 
-
     if (applicationNumberFilter) {
-      filtered = filtered.filter((issue) => {
-        const applicationNumber = String(issue['Application Number']).trim().toLowerCase();
-        const isMatch = applicationNumber.includes(applicationNumberFilter.toLowerCase());
-        return isMatch;
-      });
+      filtered = filtered.filter((issue) =>
+        String(issue['Application Number'])
+          .toLowerCase()
+          .includes(applicationNumberFilter.toLowerCase())
+      );
     }
 
     if (foundDateFilter) {
       filtered = filtered.filter((issue) => {
         const foundDate = new Date(issue['Found Date']);
-        const filterDate = new Date(foundDateFilter); // Parse the selected filter date
+        const filterDate = new Date(foundDateFilter);
         return (
           foundDate.getFullYear() === filterDate.getFullYear() &&
           foundDate.getMonth() === filterDate.getMonth() &&
@@ -202,72 +298,33 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
       });
     }
 
-    if (yearFilter) {
-      filtered = filtered.filter((issue) => {
-        const foundYear = new Date(issue['Found Date']).getFullYear();
-        return foundYear === parseInt(yearFilter);
-      });
-    }
-
-    if (monthFilter) {
-      filtered = filtered.filter((issue) => {
-        const foundMonth = new Date(issue['Found Date']).getMonth() + 1;
-        return foundMonth === parseInt(monthFilter);
-      });
-    }
-
-    if (riskRatingFilter) {
-      filtered = filtered.filter((issue) => issue['Risk Rating'] === riskRatingFilter);
-    }
-
-    const sortedIssues = filtered.sort((a, b) => {
-      if (sortConfig.key) {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-
-        if (aValue == null || aValue === 'N/A') return sortConfig.direction === 'asc' ? -1 : 1;
-        if (bValue == null || bValue === 'N/A') return sortConfig.direction === 'asc' ? 1 : -1;
-
-        const aNum = parseFloat(aValue);
-        const bNum = parseFloat(bValue);
-        if (!isNaN(aNum) && !isNaN(bNum)) {
-          return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
-        }
-
-        if (String(aValue).toLowerCase() < String(bValue).toLowerCase()) {
-          return sortConfig.direction === 'asc' ? -1 : 1;
-        }
-        if (String(aValue).toLowerCase() > String(bValue).toLowerCase()) {
-          return sortConfig.direction === 'asc' ? 1 : -1;
-        }
-      }
-      return 0;
-    });
-
-    setFilteredIssues(sortedIssues);
-  }, [issues, sortConfig, debouncedSearchTerm, applicationNumberFilter, foundDateFilter, yearFilter, monthFilter, riskRatingFilter]);
+    console.log(`✅ Filtered issues count: ${filtered.length}`);
+    setFilteredIssues(filtered);
+    setPage(0); // Reset pagination on new search results
+  }, [searchTerm, applicationNumberFilter, foundDateFilter, localIssues]);
 
 
-  const columns = filteredIssues.length > 0
-    ? columnOrder.filter((column) => column in filteredIssues[0])
-    : [];
 
-  if (!Array.isArray(filteredIssues)) {
-    return <div>No data available</div>;
-  }
-
-
-  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+  const handleChangePage = async (event: unknown, newPage: number) => {
     setPage(newPage);
+    await fetchFindingIssues(newPage, rowsPerPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const handleChangeRowsPerPage = async (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(0); // Reset to the first page when rows per page changes
+    await fetchFindingIssues(0, newRowsPerPage);
   };
+
+  const debouncedFetchIssues = useCallback(debounce((searchValue: string) => {
+    fetchFindingIssues(0, rowsPerPage, searchValue);
+  }, 500), [rowsPerPage]); // ✅ Calls API only after 500ms of inactivity
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
+    const searchValue = event.target.value.trim();
+    setSearchTerm(searchValue);
+    debouncedFetchIssues(searchValue);
   };
 
   const uniqueApplicationNumbers = Array.from(
@@ -326,30 +383,34 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
     isDragging.current = false;
   };
 
-  const handleEditClick = (issue: FindingIssue) => {
-    setEditingIssue(issue);
+  const handleEditClick = (issueId: string) => {
+    const issue = localIssues.find((item) => item._id === issueId);
+
+    if (!issue) {
+      toast.error("Issue not found in local issues.");
+      console.error("Local issues:", localIssues);
+      console.error("Issue ID:", issueId);
+      return;
+    }
+
+    console.log("Selected issue for editing:", issue);
+
+    const formattedIssue = { ...issue };
+    formattedIssue['Found Date'] = issue['Found Date']
+      ? dayjs(issue['Found Date']).format('YYYY-MM-DD')
+      : null;
+    formattedIssue['Overdue Date'] = issue['Overdue Date']
+      ? dayjs(issue['Overdue Date']).format('YYYY-MM-DD')
+      : null;
+
+    setEditingIssue(formattedIssue);
     setEditDialogOpen(true);
   };
+
 
   const handleEditDialogClose = () => {
     setEditDialogOpen(false);
     setEditingIssue(null);
-  };
-
-
-  const handleEditSave = () => {
-    if (editingIssue) {
-      console.log("Updated issue being sent to API:", editingIssue);
-      onUpdateIssue(editingIssue);
-    }
-    handleEditDialogClose();
-  };
-
-
-  const handleDeleteClick = (issueId: string) => {
-    if (window.confirm('Are you sure you want to delete this issue?')) {
-      onDeleteIssue(issueId);
-    }
   };
 
   return (
@@ -444,16 +505,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
         </FormControl>
       </Box>
 
-      <TableContainer component={Paper}
-        ref={scrollContainerRef}
-        sx={{
-          overflowX: 'auto',
-          cursor: isDragging.current ? 'grabbing' : 'grab',
-        }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}>
+      <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
@@ -464,54 +516,133 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
             </TableRow>
           </TableHead>
           <TableBody>
-            {currentPageIssues.map((issue) => (
-              <TableRow key={issue._id}>
-                {validColumns.map((column) => {
-                  const value = getNormalizedValue(issue, column);
-                  const isDateColumn = ['Found Date', 'Overdue Date'].includes(column);
-                  const displayValue = isDateColumn ? formatDate(value) : value;
-                  return <TableCell key={column}>{displayValue}</TableCell>;
-                })}
-                <TableCell>
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleEditClick(issue)}
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleDeleteClick(issue._id)}
-                  >
-                    <Delete />
-                  </IconButton>
+            {loading ? ( // Show a loading message
+              <TableRow>
+                <TableCell colSpan={validColumns.length + 1} align="center">
+                  <Typography variant="body1">Loading data...</Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : currentPageIssues.length > 0 ? ( // Show data if available
+              currentPageIssues.map((issue) => (
+                <TableRow key={issue._id}>
+                  {validColumns.map((column) => {
+                    const value = getNormalizedValue(issue, column);
+                    const isDateColumn = ['Found Date', 'Overdue Date'].includes(column);
+                    const displayValue = isDateColumn && value ? formatDate(value) : value || '';
+                    return <TableCell key={column}>{displayValue}</TableCell>;
+                  })}
+                  <TableCell>
+                    <IconButton color="primary" onClick={() => handleEditClick(issue._id)}>
+                      <Edit />
+                    </IconButton>
+                    <IconButton color="error" onClick={() => handleDeleteClick(issue._id)}>
+                      <Delete />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={validColumns.length + 1} align="center">
+                  <Typography variant="body1">No data available</Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
+        <DialogTitle>Edit Finding Issue</DialogTitle>
         <DialogContent>
           {editingIssue &&
-            Object.keys(editingIssue).map((key) => (
-              <TextField
-                key={key}
-                fullWidth
-                label={key}
-                value={editingIssue[key] || ''}
-                onChange={(e) =>
-                  setEditingIssue((prev) =>
-                    prev ? { ...prev, [key]: e.target.value } : null
-                  )
-                }
-                margin="normal"
-              />
-            ))}
-        </DialogContent>
+            Object.keys(editingIssue).map((key) => {
+              if (key === 'Found Date' || key === 'Overdue Date') {
+                return (
+                  <LocalizationProvider dateAdapter={AdapterDayjs} key={key}>
+                    <DatePicker
+                      label={key}
+                      value={editingIssue[key] ? dayjs(editingIssue[key]) : null}
+                      onChange={(newValue) => {
+                        setEditingIssue((prev) =>
+                          prev
+                            ? {
+                              ...prev,
+                              [key]: newValue ? newValue.format('YYYY-MM-DD') : null,
+                            }
+                            : null
+                        );
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          margin: 'normal',
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
 
+                );
+              } else if (key === 'Risk Rating') {
+                return (
+                  <TextField
+                    key={key}
+                    fullWidth
+                    select
+                    label={key}
+                    value={editingIssue[key] || ''}
+                    onChange={(e) =>
+                      setEditingIssue((prev) =>
+                        prev ? { ...prev, [key]: e.target.value } : null
+                      )
+                    }
+                    margin="normal"
+                  >
+                    <MenuItem value="Critical">Critical</MenuItem>
+                    <MenuItem value="High">High</MenuItem>
+                    <MenuItem value="Medium">Medium</MenuItem>
+                    <MenuItem value="Low">Low</MenuItem>
+                    <MenuItem value="Informative">Informative</MenuItem>
+                  </TextField>
+                );
+              } else if (key === 'Status' || key === 'Overdue Status') {
+                return (
+                  <TextField
+                    key={key}
+                    fullWidth
+                    select
+                    label={key}
+                    value={editingIssue[key] || ''}
+                    onChange={(e) =>
+                      setEditingIssue((prev) =>
+                        prev ? { ...prev, [key]: e.target.value } : null
+                      )
+                    }
+                    margin="normal"
+                  >
+                    <MenuItem value="Open">Open</MenuItem>
+                    <MenuItem value="Close">Close</MenuItem>
+                  </TextField>
+                );
+              } else {
+                return (
+                  <TextField
+                    key={key}
+                    fullWidth
+                    label={key}
+                    value={editingIssue[key] || ''}
+                    onChange={(e) =>
+                      setEditingIssue((prev) =>
+                        prev ? { ...prev, [key]: e.target.value } : null
+                      )
+                    }
+                    margin="normal"
+                  />
+                );
+              }
+            })}
+        </DialogContent>
         <DialogActions>
           <Button onClick={handleEditDialogClose} color="secondary">
             Cancel
@@ -520,19 +651,20 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues, onUpdateIssue,
             Save
           </Button>
         </DialogActions>
-
       </Dialog>
-
 
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={filteredIssues.length}
+        count={totalIssues}  // ✅ Use the correct variable name
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
+
+
+
     </div >
   );
 };

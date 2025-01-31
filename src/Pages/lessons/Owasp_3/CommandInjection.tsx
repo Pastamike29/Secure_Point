@@ -66,7 +66,7 @@ export default function CommanInjection() {
                     <Typography variant='h4' sx={{
                       color: '#5155f5'
                     }}>
-                      Secure Point
+                      SecurePoint
                     </Typography>
                     <Box sx={{
                       boxShadow: 3,

@@ -24,9 +24,9 @@ export default function DirectoryTraversal() {
                          <Box sx={{
                               zIndex: 1201,
                          }}>
-                              <Navbar>
+                              <Navbar />
 
-                              </Navbar>
+                              
                          </Box>
 
                          <Box sx={{
@@ -58,11 +58,11 @@ export default function DirectoryTraversal() {
                                              <Box sx={{
                                                   fontWeight: 'bold',
                                              }}>
-                                                  <Typography variant='h4'> Directory Traversal</Typography>
+                                                  <Typography variant='h4' sx={{fontWeight:'500'}}> Directory Traversal</Typography>
                                                   <Typography variant='h4' sx={{
                                                        color: '#5155f5'
                                                   }}>
-                                                       Pastar Mike
+                                                       SecurePoint 
                                                   </Typography>
                                                   <Box sx={{
                                                        boxShadow: 3,

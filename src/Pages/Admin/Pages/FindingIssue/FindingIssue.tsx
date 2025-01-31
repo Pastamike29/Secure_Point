@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button, CircularProgress, Snackbar, Typography, Box, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import { Button, CircularProgress, Snackbar, Typography, Box, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, MenuItem } from '@mui/material';
 import { ArrowBack, ArrowForward, Close, UploadFile } from '@mui/icons-material';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import AdminDashboardLayout from '../../Component/AdminDashboardLayout';
 import DynamicTable from './DynamicTable';
+import dayjs, { Dayjs } from 'dayjs'; // Import Dayjs for type definition
+
 
 const FindingIssue: React.FC = () => {
     const [issues, setIssues] = useState<any[]>([]); // Define your data structure
@@ -21,12 +26,23 @@ const FindingIssue: React.FC = () => {
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [uploadSuccess, setUploadSuccess] = useState<boolean>(false); // New state for upload success status
     const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
-    const [newIssue, setNewIssue] = useState<any>({}); // State for new finding issue form
+    const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null); // Allow Dayjs or null
+    const [newIssue, setNewIssue] = useState<any>({
+        'Risk Rating': '',
+        'Status': '',
+        'Found Date': null,
+        'Overdue Date': null
+    });
 
     const fileInputRef = React.useRef<HTMLInputElement | null>(null);
     const maxFileSize = 50 * 1024 * 1024; // 50 MB
 
     const limit = 100; // Limit to 100 rows
+
+    const sanitizeString = (input: string): string => {
+        return input.replace(/[^a-zA-Z0-9\s\-@.]/g, '').trim();
+    };
+
 
     const columnOrder = [
         'Application Number',
@@ -102,7 +118,6 @@ const FindingIssue: React.FC = () => {
     const handleFileDelete = (file: File) => {
         setFileList(prevFiles => prevFiles.filter(f => f !== file));
     };
-
     const handleConfirmUpload = async (file: File) => {
         const formData = new FormData();
         formData.append("file", file);
@@ -113,12 +128,27 @@ const FindingIssue: React.FC = () => {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            // Trigger a success toast after uploading the file
-            toast.success(`Successfully uploaded: ${file.name}`);
-        } catch (error) {
-            toast.error(`Error uploading file: ${file.name}`);
+
+            const { skipped, duplicates, message } = response.data;
+
+            if (duplicates > 0 && skipped > 0) {
+                toast.info(`Uploaded: ${file.name}. Skipped ${skipped} invalid rows and ${duplicates} duplicates.`);
+            } else if (duplicates > 0) {
+                toast.info(`Uploaded: ${file.name}. Skipped ${duplicates} duplicates.`);
+            } else if (skipped > 0) {
+                toast.info(`Uploaded: ${file.name}. Skipped ${skipped} invalid rows.`);
+            } else {
+                toast.success(`Successfully uploaded: ${file.name}`);
+            }
+
+            // Refresh data after upload
+            fetchFindingIssues(page, searchTerm);
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || `Error uploading file: ${file.name}`;
+            toast.error(errorMessage);
         }
     };
+
 
     const handleButtonClick = async () => {
         if (fileList.length === 0) {
@@ -272,49 +302,27 @@ const FindingIssue: React.FC = () => {
         }
     };
 
-    const handleAddIssueChange = (key: string, value: string) => {
-        setNewIssue((prev) => ({ ...prev, [key]: value }));
-    };
 
     const resetNewIssueForm = () => {
-        setNewIssue({});
+        setNewIssue({
+            'Risk Rating': '',
+            'Status': '',
+            'Found Date': null,
+            'Overdue Date': null
+        });
     };
-
-    const handleUpdateIssue = async (updatedIssue: any) => {
-        const { _id, ...updateData } = updatedIssue; // Exclude _id from the payload
-        try {
-            const response = await axios.put(
-                `http://localhost:5000/findingIssue/${_id}`,
-                updateData, // Send only fields other than _id
-                { headers: { "Content-Type": "application/json" } }
-            );
-            if (response.status === 200) {
-                toast.success("Issue updated successfully!");
-                fetchFindingIssues(page, searchTerm); // Refresh data after update
-            }
-        } catch (error) {
-            toast.error("Failed to update issue.");
-        }
-    };
-
-
 
     const handleDeleteIssue = async (issueId: string) => {
         try {
-            const response = await axios.delete(
-                `http://localhost:5000/findingIssue/${issueId}`
-            );
+            const response = await axios.delete(`http://localhost:5000/findingIssue/${issueId}`);
             if (response.status === 200) {
-                setIssues((prevIssues) =>
-                    prevIssues.filter((issue) => issue._id !== issueId)
-                );
-                alert('Issue deleted successfully!');
+                setIssues((prevIssues) => prevIssues.filter((issue) => issue._id !== issueId));
+                toast.success('Issue deleted successfully!');
             }
         } catch (error) {
-            alert('Failed to delete issue.');
+            toast.error('Failed to delete issue.');
         }
     };
-
 
 
     return (
@@ -371,8 +379,9 @@ const FindingIssue: React.FC = () => {
             ) : (
                 <DynamicTable
                     issues={issues}
-                    onUpdateIssue={handleUpdateIssue}
-                    onDeleteIssue={handleDeleteIssue} />
+                    fetchFindingIssues={() => fetchFindingIssues(page, searchTerm)} // Pass fetchFindingIssues as a prop
+                    onDeleteIssue={handleDeleteIssue} // Pass handleDeleteIssue here
+                />
             )}
 
             <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}>
@@ -424,12 +433,12 @@ const FindingIssue: React.FC = () => {
                         onClick={handleButtonClick}
                         color="primary"
                         disabled={uploading}
+                        startIcon={uploading ? <CircularProgress size={20} /> : undefined}
                     >
-                        {uploading ? 'Uploading...' : 'Upload'}
+                        {uploading ? 'Uploading' : 'Upload'}
                     </Button>
                 </DialogActions>
             </Dialog>
-
             <Dialog
                 open={addDialogOpen}
                 onClose={() => {
@@ -439,31 +448,111 @@ const FindingIssue: React.FC = () => {
             >
                 <DialogTitle>Add New Finding Issue</DialogTitle>
                 <DialogContent>
-                    {columnOrder.map((column, index) => (
-                        <TextField
-                            key={index}
-                            fullWidth
-                            label={column}
-                            value={newIssue[column] || ''}
-                            onChange={(e) =>
-                                setNewIssue((prev) => ({ ...prev, [column]: e.target.value }))
-                            }
-                            margin="normal"
-                        />
-                    ))}
+                    {columnOrder.map((column, index) => {
+                        if (column === 'Found Date' || column === 'Overdue Date') {
+                            return (
+                                <LocalizationProvider dateAdapter={AdapterDayjs} key={index}>
+                                    <DatePicker
+                                        label={column} // Set label dynamically based on column name
+                                        value={newIssue[column] || null} // Use state for individual fields
+                                        onChange={(newValue) => {
+                                            setNewIssue((prev) => ({
+                                                ...prev,
+                                                [column]: newValue, // Update corresponding field in the state
+                                            }));
+                                        }}
+                                        slotProps={{
+                                            textField: {
+                                                fullWidth: true,
+                                                margin: 'normal',
+                                            },
+                                        }}
+                                    />
+                                </LocalizationProvider>
+                            );
+                        } else if (column === 'Risk Rating') {
+                            return (
+                                <TextField
+                                    key={index}
+                                    fullWidth
+                                    select
+                                    label={column}
+                                    value={newIssue[column] || ''}
+                                    onChange={(e) =>
+                                        setNewIssue((prev) => ({
+                                            ...prev,
+                                            [column]: e.target.value,
+                                        }))
+                                    }
+                                    margin="normal"
+                                    SelectProps={{
+                                        native: true,
+                                    }}
+                                >
+                                    <option value=""></option>
+                                    <option value="Critical">Critical</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Informative">Informative</option>
+                                </TextField>
+                            );
+                        } else if (column === 'Status' || column === 'Overdue Status') {
+                            return (
+                                <TextField
+                                    key={index}
+                                    fullWidth
+                                    select
+                                    label={column}
+                                    value={newIssue[column] || ''}
+                                    onChange={(e) =>
+                                        setNewIssue((prev) => ({
+                                            ...prev,
+                                            [column]: e.target.value,
+                                        }))
+                                    }
+                                    margin="normal"
+                                    SelectProps={{
+                                        native: true,
+                                    }}
+                                >
+                                    <option value=""></option>
+                                    <option value="Open">Open</option>
+                                    <option value="Close">Close</option>
+                                </TextField>
+                            );
+                        } else {
+                            return (
+                                <TextField
+                                    key={index}
+                                    fullWidth
+                                    label={column}
+                                    value={newIssue[column] || ''}
+                                    onChange={(e) =>
+                                        setNewIssue((prev) => ({
+                                            ...prev,
+                                            [column]: e.target.value,
+                                        }))
+                                    }
+                                    margin="normal"
+                                />
+                            );
+                        }
+                    })}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => {
-                        setAddDialogOpen(false);
-                        resetNewIssueForm();
-                    }}>
+                    <Button
+                        onClick={() => {
+                            setAddDialogOpen(false);
+                            resetNewIssueForm();
+                        }}
+                    >
                         Cancel
                     </Button>
                     <Button onClick={handleAddIssueSubmit}>Submit</Button>
                 </DialogActions>
             </Dialog>
 
-            <ToastContainer />
         </AdminDashboardLayout>
     );
 };

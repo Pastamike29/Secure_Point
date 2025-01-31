@@ -6,6 +6,7 @@ import SQLInjection from './Pages/lessons/Owasp_3/SQLInjection'
 import BrokenAccControl from './Pages/lessons/Owasp_1/BrokenAccControl'
 import DirectoryTraversal from './Pages/lessons/Owasp_1/DirectoryTraversal'
 
+import { ToastContainer } from 'react-toastify'
 import ToggleColorMode from './assets/Themes/ThemeContext'
 import { Route, Routes } from 'react-router-dom'
 import { BrowserRouter } from "react-router-dom";
@@ -44,7 +45,7 @@ import FeedbackModal from './Pages/User/page/Page/FeedbackModal'
 import QuizPage from './Pages/Quiz/Page/QuizPage'
 import ScoreBoard from './Pages/Quiz/Page/ScoreBoard'
 import LoginPage from './Login/LoginPage'
-import ProtectedRoute from './Login/Component/ProtectedRoute'
+import {ProtectedRoute, ProtectedAdminRoute, GuestRoute} from './Login/Component/ProtectedRoute'
 import UpdateProfile from './Pages/User/page/Page/UpdateProfile'
 import ProfilePage from './Pages/User/page/Page/ProfilePage'
 import AdminMain from './Login/AdminMain'
@@ -69,7 +70,6 @@ export default function App() {
         <BrowserRouter>
           <ToggleColorMode>
             <Routes>
-              <Route path="*" element={<h1>404 - Page Not Found</h1>} />
 
               <Route path="/FeedbackModal" element={<FeedbackModal />}></Route>
 
@@ -104,23 +104,15 @@ export default function App() {
               <Route path='/ScoreBoard' element={<ScoreBoard />}></Route>
 
 
-
-              <Route path='/admin' element={<AdminMain />}></Route>
-              <Route path='/admin/UserManagement' element={<UserManagement />}></Route>
-              <Route path='/admin/FeedbackManagement' element={<FeedbackManagement />}></Route>
-              <Route path='/admin/TicketManagement' element={<TicketManagement />}></Route>
-              <Route path='/admin/LessonPageManagement' element={<LessonPageManagement />}></Route>
-              <Route path='/admin/CodeExampleManagement' element={<CodeExampleManagement />}></Route>
-              <Route path="/admin/ApplicationManagement" element={<ApplicationManagement />} />
-              <Route path="/admin/FindingIssue" element={<FindingIssue />} />
-
-
-
-
-
               <Route path="/RegisterPage" element={<RegisterPage />} />
-              <Route path="/LoginPage" element={<LoginPage />} />
-
+              <Route
+                path="/LoginPage"
+                element={
+                  <GuestRoute>
+                    <LoginPage />
+                  </GuestRoute>
+                }
+              />
 
               <Route path="/ProfilePage" element={<ProfilePage />} />
               <Route path="/UpdateProfile" element={<UpdateProfile />} />
@@ -136,9 +128,35 @@ export default function App() {
               <Route path="/Overview/ApplicationIssues/InformativeRisk" element={<InformativeRisk />} />
               <Route path="/Overview/ApplicationIssues/:applicationName" element={<DynamicFindingIssues />} />
 
+              <Route path="AdminLogin" element={<AdminMain />} />
+              {/* Protect all routes under /admin/* */}
+              <Route
+                path="/admin/*"
+                element={
+                  <ProtectedAdminRoute requiredRole="admin">
+                    <Routes>
+                      <Route path="UserManagement" element={<UserManagement />} />
+                      <Route path="FeedbackManagement" element={<FeedbackManagement />} />
+                      <Route path="TicketManagement" element={<TicketManagement />} />
+                      <Route path="ApplicationManagement" element={<ApplicationManagement />} />
+                      <Route path="FindingIssueManagement" element={<FindingIssue />} />
+                      <Route path="CodeExampleManagement" element={<CodeExampleManagement />} />
+                      <Route path="LessonPageManagement" element={<LessonPageManagement />} />
+                      <Route path="FindingIssue" element={<FindingIssue />} />
+                    </Routes>
+                  </ProtectedAdminRoute>
+                }
+              />
+
+
+
+              {/* Fallback for unmatched routes */}
+              <Route path="*" element={<h1>404 - Page Not Found</h1>} />
 
             </Routes>
             <Chatbot />
+            <ToastContainer position="top-right" autoClose={5000} />
+
           </ToggleColorMode>
         </BrowserRouter>
       </AuthProvider>

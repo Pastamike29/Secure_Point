@@ -9,7 +9,7 @@ import {
   CardActions,
   LinearProgress
 } from '@mui/material';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { User } from '../../../../Login/Component/UserAuthen'; // Adjust the import path as necessary
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
@@ -118,7 +118,6 @@ const ProfilePage: React.FC = () => {
                 Edit Profile
               </Button>
             </CardActions>
-            <ToastContainer />
           </Card>
         )}
       </Box>

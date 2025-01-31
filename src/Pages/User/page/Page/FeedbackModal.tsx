@@ -3,7 +3,7 @@ import { Modal, Box, Button, Typography, TextField, IconButton } from '@mui/mate
 import { useForm, Controller } from 'react-hook-form';
 import { Email, PhotoCamera, Close } from '@mui/icons-material';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const FeedbackModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
@@ -174,7 +174,6 @@ const FeedbackModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
           </form>
         </Box>
       </Modal>
-      <ToastContainer />
     </>
   );
 };

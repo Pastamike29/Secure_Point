@@ -11,7 +11,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import DashboardLayout from '../../Components/DashboardLayout';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const API_URL = 'http://localhost:5000';
 
@@ -412,7 +412,6 @@ const Ticket: React.FC = () => {
 
                    
                     </Paper>
-                    <ToastContainer />
                </Box>
           </DashboardLayout>
      );

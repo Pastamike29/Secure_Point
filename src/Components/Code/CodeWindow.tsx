@@ -19,7 +19,10 @@ export default function CodeWindow({ codeSnippets, sx }: CodeWindowProps) {
   const [copied, setCopied] = useState(false);
 
   const languageOptions = useMemo(
-    () => Object.keys(codeSnippets).filter((lang) => codeSnippets[lang]?.trim().toUpperCase() !== 'N/A'),
+    () =>
+      Object.keys(codeSnippets).filter(
+        (lang) => typeof codeSnippets[lang] === 'string' && codeSnippets[lang].trim().toUpperCase() !== 'N/A'
+      ),
     [codeSnippets]
   );
 

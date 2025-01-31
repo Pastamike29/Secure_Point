@@ -8,6 +8,7 @@ import { useColorMode } from '../../../assets/Themes/ThemeContext';
 import FeedbackModal from '../../../Pages/User/page/Page/FeedbackModal';
 
 
+
 interface DashboardProps {
   children?: React.ReactNode;
   title?: string;
@@ -15,9 +16,9 @@ interface DashboardProps {
 
 }
 
-export default function AdminDashboardLayout({children,title}:DashboardProps) {
+export default function AdminDashboardLayout({ children, title }: DashboardProps) {
 
- 
+
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const navigate = useNavigate();
   const settings = ['Profile', 'Feedback', 'Logout'];
@@ -53,7 +54,7 @@ export default function AdminDashboardLayout({children,title}:DashboardProps) {
             {title}
           </Typography>
 
-  
+
         </Box>
 
         {/* Rest of the Content */}
@@ -63,6 +64,6 @@ export default function AdminDashboardLayout({children,title}:DashboardProps) {
       <FeedbackModal open={isFeedbackOpen} onClose={handleFeedbackClose} />
 
     </Box>
-    
+
   );
 }

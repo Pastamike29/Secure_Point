@@ -23,8 +23,10 @@ import {
 } from '@mui/material';
 import { UploadFile, Close, Edit, Delete } from '@mui/icons-material';
 import AdminDashboardLayout from '../Component/AdminDashboardLayout';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import DOMPurify from 'dompurify'; // Import dompurify
+
 
 interface Vulnerability {
   _id?: string; // MongoDB ID
@@ -50,6 +52,8 @@ export default function CodeExampleManagement() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+
+  const sanitizeInput = (input: string) => DOMPurify.sanitize(input);
 
   const [loading, setLoading] = useState(true);
 
@@ -141,15 +145,22 @@ export default function CodeExampleManagement() {
   };
 
   const handleManualSubmit = () => {
+    // Sanitize inputs
+    const sanitizedOwasp = sanitizeInput(owasp);
+    const sanitizedSubIssueName = sanitizeInput(sub_issueName);
+    const sanitizedIssueName = sanitizeInput(issueName);
+    const sanitizedDescription = sanitizeInput(description);
+    const sanitizedRecommendation = sanitizeInput(recommendation);
+
     const manualData = {
-      owasp,
-      issueName,
-      sub_issueName,
-      description,
-      recommendation,
+      owasp: sanitizedOwasp,
+      issueName: sanitizedIssueName,
+      sub_issueName: sanitizedSubIssueName,
+      description: sanitizedDescription,
+      recommendation: sanitizedRecommendation,
     };
 
-    fetch(`${API_BASE_URL}/vulnerabilities`, {
+    fetch('http://localhost:5000/vulnerabilities', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -165,8 +176,6 @@ export default function CodeExampleManagement() {
       .then(() => {
         toast.success('Vulnerability added successfully!');
         resetManualForm();
-        setOpenManualModal(false);
-        fetchVulnerabilities(); // Refresh vulnerabilities
       })
       .catch((error) => {
         console.error('Manual addition failed:', error);
@@ -174,18 +183,25 @@ export default function CodeExampleManagement() {
       });
   };
 
+
   const handleEditSubmit = () => {
-    if (!selectedVulnerability || !selectedVulnerability._id) return;
+    // Sanitize inputs
+    const sanitizedOwasp = sanitizeInput(owasp);
+    const sanitizedSubIssueName = sanitizeInput(sub_issueName);
+    const sanitizedIssueName = sanitizeInput(issueName);
+    const sanitizedDescription = sanitizeInput(description);
+    const sanitizedRecommendation = sanitizeInput(recommendation);
 
     const updatedData = {
-      owasp,
-      issueName,
-      sub_issueName,
-      description,
-      recommendation,
+      owasp: sanitizedOwasp,
+      issueName: sanitizedIssueName,
+      sub_issueName: sanitizedSubIssueName,
+      description: sanitizedDescription,
+      recommendation: sanitizedRecommendation,
     };
 
-    fetch(`${API_BASE_URL}/vulnerabilities/${selectedVulnerability._id}`, {
+    // Handle PUT request
+    fetch(`http://localhost:5000/vulnerabilities/${selectedVulnerability?._id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -200,8 +216,6 @@ export default function CodeExampleManagement() {
       })
       .then(() => {
         toast.success('Vulnerability updated successfully!');
-        handleCloseEditModal();
-        fetchVulnerabilities(); // Refresh vulnerabilities
       })
       .catch((error) => {
         console.error('Update failed:', error);
@@ -279,8 +293,7 @@ export default function CodeExampleManagement() {
   };
 
   return (
-    <AdminDashboardLayout title="Vulnerability Management">
-      <ToastContainer />
+    <AdminDashboardLayout title="Code Example Management">
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Card sx={{ width: '90%' }}>
@@ -350,7 +363,7 @@ export default function CodeExampleManagement() {
                       </TableBody>
                     </Table>
                     <TablePagination
-                      rowsPerPageOptions={[ 10, 25, 50]}
+                      rowsPerPageOptions={[10, 25, 50]}
                       component="div"
                       count={totalCount}
                       rowsPerPage={rowsPerPage}
@@ -434,8 +447,6 @@ export default function CodeExampleManagement() {
                   </Button>
                 </DialogActions>
               </Dialog>
-
-              {/* Manual Add Modal */}
               {/* Add Manually Modal */}
               <Dialog
                 open={openManualModal}

@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
     Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
     Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, IconButton,
-    CircularProgress
 } from '@mui/material';
 import axios from 'axios';
 import Papa from 'papaparse';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DashboardLayout from '../../../Dashboard/Components/DashboardLayout';
 import CloseIcon from '@mui/icons-material/Close';
@@ -324,7 +323,6 @@ export default function ApplicationManagement() {
                     </DialogActions>
                 </Dialog>
 
-                <ToastContainer />
             </Box>
         </DashboardLayout>
     );

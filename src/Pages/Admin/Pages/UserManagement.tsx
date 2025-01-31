@@ -15,11 +15,11 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Snackbar,
   Select,
   MenuItem,
 } from '@mui/material';
-import MuiAlert from '@mui/material/Alert';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import AdminDashboardLayout from '../Component/AdminDashboardLayout';
 
@@ -31,9 +31,8 @@ interface User {
   role: string;
   birth_date: string;
   quiz_amount: number;
-  last_updated: string; // New field
+  last_updated: string;
 }
-
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -54,16 +53,9 @@ const UserManagement: React.FC = () => {
     birthdate: '',
     quizAmount: 0,
   });
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
   const [emailError, setEmailError] = useState(false);
 
-
-  // Placeholder for token retrieval
   const getToken = () => {
-    // Replace this with a real token retrieval method
     return localStorage.getItem('authToken') || 'mockToken';
   };
 
@@ -75,30 +67,19 @@ const UserManagement: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Response data:', response.data); // Add this
-      const data = response.data;
-
-      if (Array.isArray(data)) {
-        setUsers(data);
-      } else {
-        console.error('Expected an array of users, but received:', data);
-        setUsers([]);
-      }
+      setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
-      setSnackbarMessage('Failed to fetch users');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
+      toast.error('Failed to fetch users');
     }
   };
-
 
   const handleClickOpen = (user?: User) => {
     if (user) {
       setCurrentUser(user);
       setFormValues({
         username: user.username,
-        password: '', // To prevent showing hashed passwords
+        password: '',
         email: user.email,
         role: user.role,
         birthdate: user.birth_date || '',
@@ -118,11 +99,9 @@ const UserManagement: React.FC = () => {
     setOpen(true);
   };
 
-
   const handleClose = () => {
     setOpen(false);
   };
-
 
   const validateEmail = (email: string) => {
     const regex = /^[a-zA-Z0-9._%+-]+@ttbbank\.com$/i;
@@ -132,44 +111,35 @@ const UserManagement: React.FC = () => {
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const email = e.target.value;
     setFormValues({ ...formValues, email });
-    setEmailError(!validateEmail(email)); // Update validation state
+    setEmailError(!validateEmail(email));
   };
-
 
   const handleSave = async () => {
     if (emailError) {
-      setSnackbarMessage('Please correct the errors before saving.');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
+      toast.error('Please correct the errors before saving.');
       return;
     }
 
-    // Existing save logic
     try {
       const token = getToken();
       if (currentUser) {
         await axios.put(`http://localhost:5000/admin/user/${currentUser.id}`, formValues, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSnackbarMessage('User updated successfully!');
+        toast.success('User updated successfully!');
       } else {
         await axios.post('http://localhost:5000/admin/user', formValues, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSnackbarMessage('User created successfully!');
+        toast.success('User created successfully!');
       }
-      setSnackbarSeverity('success');
       fetchUsers();
       handleClose();
     } catch (error) {
       console.error('Error saving user:', error);
-      setSnackbarMessage('Failed to save user');
-      setSnackbarSeverity('error');
-    } finally {
-      setSnackbarOpen(true);
+      toast.error('Failed to save user');
     }
   };
-
 
   const handleDelete = async (id: string) => {
     try {
@@ -177,15 +147,11 @@ const UserManagement: React.FC = () => {
       await axios.delete(`http://localhost:5000/admin/user/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setSnackbarMessage('User deleted successfully!');
-      setSnackbarSeverity('success');
+      toast.success('User deleted successfully!');
       fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
-      setSnackbarMessage('Failed to delete user');
-      setSnackbarSeverity('error');
-    } finally {
-      setSnackbarOpen(true);
+      toast.error('Failed to delete user');
     }
   };
 
@@ -196,7 +162,6 @@ const UserManagement: React.FC = () => {
   return (
     <AdminDashboardLayout title="User Management">
       <Container>
-
         <Button variant="contained" color="primary" onClick={() => handleClickOpen()} sx={{ my: 2 }}>
           Add User
         </Button>
@@ -209,7 +174,7 @@ const UserManagement: React.FC = () => {
                 <TableCell>Role</TableCell>
                 <TableCell>Birthdate</TableCell>
                 <TableCell>Quiz Amount</TableCell>
-                <TableCell>Last Updated</TableCell> {/* New column */}
+                <TableCell>Last Updated</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -221,7 +186,7 @@ const UserManagement: React.FC = () => {
                   <TableCell>{user.role}</TableCell>
                   <TableCell>{user.birth_date}</TableCell>
                   <TableCell>{user.quiz_amount}</TableCell>
-                  <TableCell>{new Date(user.last_updated).toLocaleString()}</TableCell> {/* Format timestamp */}
+                  <TableCell>{new Date(user.last_updated).toLocaleString()}</TableCell>
                   <TableCell>
                     <Button
                       variant="contained"
@@ -254,10 +219,9 @@ const UserManagement: React.FC = () => {
               value={formValues.username}
               onChange={(e) => setFormValues({ ...formValues, username: e.target.value })}
             />
-
             <TextField
               margin="dense"
-              label="Password" // New field for password
+              label="Password"
               type="password"
               fullWidth
               variant="outlined"
@@ -272,12 +236,8 @@ const UserManagement: React.FC = () => {
               variant="outlined"
               value={formValues.email}
               onChange={handleEmailChange}
-              error={emailError} // Highlight field in red if there's an error
-              helperText={
-                emailError ? (
-                  <span style={{ fontSize: '1rem' }}>Please use your @TTBBANK.COM email only</span>
-                ) : ''
-              }
+              error={emailError}
+              helperText={emailError && 'Please use your @TTBBANK.COM email only'}
             />
             <TextField
               margin="dense"
@@ -300,14 +260,9 @@ const UserManagement: React.FC = () => {
               value={formValues.quizAmount}
               onChange={(e) => {
                 const value = parseInt(e.target.value, 10);
-                if (!isNaN(value)) {
-                  setFormValues({ ...formValues, quizAmount: value });
-                } else {
-                  setFormValues({ ...formValues, quizAmount: 0 }); // Default to 0 if the input is invalid
-                }
+                setFormValues({ ...formValues, quizAmount: isNaN(value) ? 0 : value });
               }}
             />
-
             <Select
               fullWidth
               value={formValues.role}
@@ -328,20 +283,6 @@ const UserManagement: React.FC = () => {
             </Button>
           </DialogActions>
         </Dialog>
-
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={6000}
-          onClose={() => setSnackbarOpen(false)}
-        >
-          <MuiAlert
-            elevation={6}
-            severity={snackbarSeverity}
-            onClose={() => setSnackbarOpen(false)}
-          >
-            {snackbarMessage}
-          </MuiAlert>
-        </Snackbar>
       </Container>
     </AdminDashboardLayout>
   );

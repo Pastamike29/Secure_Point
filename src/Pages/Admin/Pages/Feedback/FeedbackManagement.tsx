@@ -21,7 +21,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminDashboardLayout from '../../Component/AdminDashboardLayout';
 
@@ -197,7 +197,6 @@ const FeedbackManagement: React.FC = () => {
         </Dialog>
       )}
 
-      <ToastContainer position="top-right" />
     </AdminDashboardLayout>
   );
 };

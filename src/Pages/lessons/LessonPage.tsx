@@ -224,7 +224,7 @@ export default function LessonPage() {
                       mx: 4,
                     }}
                   >
-                    <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F5(CommandInjection).png?alt=media&token=89118588-a77e-49f9-a747-fcce6bf280af'
+                    <GridCard2 src='https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2F9(InsecureDesign).png?alt=media&token=842033bc-d045-4a9c-9762-708ac8645850'
                       onClick={() => handleNavigate('/LessonPage/InsecureDesign')}>
                       <Typography variant='h4'></Typography>
                     </GridCard2>

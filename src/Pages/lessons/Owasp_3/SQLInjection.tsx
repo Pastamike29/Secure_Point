@@ -70,7 +70,7 @@ export default function SQLInjection() {
                                                   <Typography variant='h4' sx={{
                                                        color: '#5155f5'
                                                   }}>
-                                                       Pastar Mike
+                                                       Secure Point
                                                   </Typography>
                                                   <Box sx={{
                                                        boxShadow: 3,

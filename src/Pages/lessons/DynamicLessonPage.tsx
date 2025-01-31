@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Container, Typography, CircularProgress } from '@mui/material';
-import CodeDescriptionTemplate from '../CodeExample/Component/CodeDescriptionTemplate';
 import LessonLayout from '../lessons/Component/LessonLayout';
+import CodeDescriptionTemplateLessonPage from './Component/CodeDescriptionTemplateLessonPage';
+import { toast } from 'react-toastify';
 
 const DynamicLessonPage = () => {
     const { issueName } = useParams<{ issueName: string }>();
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         console.log('Issue Name:', issueName); // Debug issueName
@@ -24,8 +26,9 @@ const DynamicLessonPage = () => {
                 console.log('Fetched Data:', result); // Debug API response
                 setData(Array.isArray(result) ? result : [result]); // Ensure data is an array
             } catch (error) {
-                console.error('Error fetching vulnerability data:', error);
-                setError('Failed to load vulnerability data.');
+                toast.error('This issue name is inaccurate')
+                navigate('*'); 
+
             } finally {
                 setLoading(false);
             }
@@ -51,7 +54,7 @@ const DynamicLessonPage = () => {
                 {data.length > 0 ? (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                         {data.map((vul, index) => (
-                            <CodeDescriptionTemplate
+                            <CodeDescriptionTemplateLessonPage
                                 key={index}
                                 row={index + 1}
                                 vulnerability={vul}

@@ -21,7 +21,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast}from 'react-toastify';
 import AdminDashboardLayout from '../Component/AdminDashboardLayout';
 
 const API_URL = 'http://localhost:5000/tickets';
@@ -194,7 +194,7 @@ const TicketManagement: React.FC = () => {
                         </Button>
                     </DialogActions>
                 </Dialog>
-                <ToastContainer />
+
             </Box>
         </AdminDashboardLayout>
     );

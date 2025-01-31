@@ -58,6 +58,17 @@ export default function DynamicSidebarLessonPage() {
       }));
 
       setOwaspCategories(categoriesWithPaths);
+
+      // Automatically expand the first OWASP year and category
+      if (categoriesWithPaths.length > 0) {
+        const firstYear = categoriesWithPaths[0].owasp_year;
+        setOpenYear(firstYear);
+
+        const firstCategory = categoriesWithPaths.find((cat) => cat.owasp_year === firstYear);
+        if (firstCategory) {
+          setOpenCategory(firstCategory.owasp);
+        }
+      }
     } catch (error) {
       toast.error('Failed to load OWASP categories.');
     } finally {

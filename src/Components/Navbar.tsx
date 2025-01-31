@@ -15,54 +15,42 @@ import FeedbackModal from '../Pages/User/page/Page/FeedbackModal'; // Import you
 import { useNavigate } from 'react-router-dom';
 import LoginModal from '../Login/LoginModal';
 import ThemeToggle from '../assets/Themes/ThemeToggle';
+import { useAuth } from '../Login/Component/AuthContext'; // 🔹 Import Auth Context
 
 export default function ResponsiveAppBar() {
   const pages = ['Lesson', 'Code Example', 'Overview', 'Quiz'];
   const settings = ['Profile', 'Feedback', 'Logout'];
   const navigate = useNavigate();
+  const { isAuthenticated, role } = useAuth(); // 🔹 Get role from context
 
   const [isLoginOpen, setIsLoginOpen] = useState(false); // State for Login Modal
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+  const [isAdmin, setIsAdmin] = useState(false); // 🔹 New state for admin check
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const [anchorElQuiz, setAnchorElQuiz] = useState<null | HTMLElement>(null); // State for Quiz dropdown
 
   // State for modals
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const [firstIssueName, setFirstIssueName] = useState<string | null>(null); // State for first issueName
-  const [isLoading, setIsLoading] = useState(true); // Loading state for the menu
 
   useEffect(() => {
-    // Check if the token exists in sessionStorage
     const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole'); // 🔹 Fetch user role from localStorage
+
     if (token) {
-      setIsLoggedIn(true); // If token exists, user is logged in
-    }
-
-    // Fetch first issueName from the API
-    const fetchFirstIssueName = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/vulnerability-type');
-        const data = await response.json();
-        if (data && Array.isArray(data) && data.length > 0) {
-          setFirstIssueName(data[0].issueName); // Get the first issueName
-        }
-      } catch (error) {
-        console.error('Failed to fetch issue names:', error);
-      } finally {
-        setIsLoading(false); // Set loading to false
+      setIsLoggedIn(true);
+      if (userRole === 'admin') {
+        setIsAdmin(true);
       }
-    };
-
-    fetchFirstIssueName();
+    }
   }, []);
+
+
 
   const handleNavigate = (page: string) => {
     switch (page) {
       case 'Lesson':
-        navigate('/LessonPage');
-        break;
-      case 'Lesson2':
-        navigate('/LessonPage/issueName 3')
+        navigate('/LessonPage/Broken Access Control');
         break;
       case 'Code Example':
         navigate('/vulnerabilities/Insecure SSL');
@@ -70,16 +58,27 @@ export default function ResponsiveAppBar() {
       case 'Overview':
         navigate('/Overview');
         break;
-      case 'Quiz':
-        navigate('/Quiz');
-        break;
       default:
         navigate('/');
     }
     handleCloseNavMenu();
   };
 
-  const handleSetting = (setting) => {
+  const handleQuizNavigate = (submenu: string) => {
+    switch (submenu) {
+      case 'Quiz':
+        navigate('/Quiz');
+        break;
+      case 'Scoreboard':
+        navigate('/Scoreboard');
+        break;
+      default:
+        break;
+    }
+    handleCloseQuizMenu();
+  };
+
+  const handleSetting = (setting: string) => {
     switch (setting) {
       case 'Profile':
         navigate('/ProfilePage');
@@ -88,15 +87,18 @@ export default function ResponsiveAppBar() {
         setIsFeedbackOpen(true);
         break;
       case 'Logout':
-        localStorage.removeItem('token'); // Remove token on logout
-        setIsLoggedIn(false); // Update state
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole'); // 🔹 Remove role when logging out
+        setIsLoggedIn(false);
+        setIsAdmin(false);
         navigate('/');
         break;
       default:
         break;
     }
-    handleCloseUserMenu();
+    setAnchorElUser(null);
   };
+
 
   const handleFeedbackClose = () => {
     setIsFeedbackOpen(false);
@@ -114,12 +116,20 @@ export default function ResponsiveAppBar() {
     }
   };
 
+  const handleOpenQuizMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElQuiz(event.currentTarget);
+  };
+
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  const handleCloseQuizMenu = () => {
+    setAnchorElQuiz(null);
   };
 
   return (
@@ -176,33 +186,43 @@ export default function ResponsiveAppBar() {
                 onClose={handleCloseNavMenu}
                 sx={{ display: { xs: 'block', md: 'none' } }}
               >
-                {pages.map((page) => (
-                  <MenuItem
-                    key={page}
-                    onClick={() => handleNavigate(page)}
-                    sx={{
-                      mx: 0.5,
-                      color: page === 'Lesson2' && isLoading ? 'gray' : 'inherit',
-                      pointerEvents: page === 'Lesson2' && isLoading ? 'none' : 'auto',
-                    }}
-                  >
-                    <Typography textAlign="center">{page}</Typography>
-                  </MenuItem>
-                ))}
+                {pages.map((page) =>
+                  page === 'Quiz' ? (
+                    <MenuItem
+                      key={page}
+                      onClick={handleOpenQuizMenu}
+                    >
+                      <Typography textAlign="center">{page}</Typography>
+                    </MenuItem>
+                  ) : (
+                    <MenuItem key={page} onClick={() => handleNavigate(page)}>
+                      <Typography textAlign="center">{page}</Typography>
+                    </MenuItem>
+                  )
+                )}
               </Menu>
             </Box>
 
             {/* Desktop Menu */}
-            <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+            <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 1 }}>
               {pages.map((page) => (
                 <Button
                   key={page}
-                  onClick={() => handleNavigate(page)}
+                  onClick={page === 'Quiz' ? handleOpenQuizMenu : () => handleNavigate(page)}
                   sx={{
                     my: 1,
                     mx: 0.5,
-                    color: page === 'Lesson2' && isLoading ? 'gray' : 'white',
-                    pointerEvents: page === 'Lesson2' && isLoading ? 'none' : 'auto',
+                    color: 'white',
+                    fontSize: '1rem',
+                    textTransform: 'capitalize',
+                    '&:hover': {
+                      bgcolor: 'primary.light',
+                      color: 'primary.contrastText',
+                      transform: 'scale(1.05)', // Slight scaling for better UX
+                    },
+                    '&:active': {
+                      transform: 'scale(0.98)', // Click feedback
+                    },
                   }}
                 >
                   {page}
@@ -210,29 +230,125 @@ export default function ResponsiveAppBar() {
               ))}
             </Box>
 
+            {/* 🔹 Admin Button - Only Shows for Admins */}
+            {isAdmin && (
+              <Button
+                onClick={() => navigate('/admin/UserManagement')}
+                sx={{
+                  my: 1,
+                  mx: 1.5,
+                  color: 'white',
+                  fontSize: '1rem',
+                  bgcolor: 'red',
+                  '&:hover': {
+                    bgcolor: 'darkred',
+                  },
+                }}
+              >
+                Admin Panel
+              </Button>
+            )}
+
+            {/* Quiz Dropdown */}
+            <Menu
+              id="quiz-menu"
+              anchorEl={anchorElQuiz}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              keepMounted
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              open={Boolean(anchorElQuiz)}
+              onClose={handleCloseQuizMenu}
+              sx={{
+                mt: 1.5,
+                '& .MuiPaper-root': {
+                  borderRadius: 2,
+                  minWidth: 150,
+                  boxShadow: '0px 5px 10px rgba(0,0,0,0.2)',
+                  bgcolor: 'background.paper',
+                  overflow: 'hidden',
+                },
+              }}
+            >
+              <MenuItem
+                onClick={() => handleQuizNavigate('Quiz')}
+                sx={{
+                  px: 2,
+                  py: 1,
+                  transition: 'background-color 0.1s ease-out',
+                  borderRadius: 1,
+                  '&:hover': {
+                    bgcolor: 'primary.light',
+                    color: 'primary.contrastText',
+                  },
+                }}
+              >
+                Quiz
+              </MenuItem>
+
+              <MenuItem
+                onClick={() => handleQuizNavigate('Scoreboard')}
+                sx={{
+                  px: 2,
+                  py: 1,
+                  transition: 'background-color 0.1s ease-out',
+                  borderRadius: 1,
+                  '&:hover': {
+                    bgcolor: 'primary.light',
+                    color: 'primary.contrastText',
+                  },
+                }}
+              >
+                Scoreboard
+              </MenuItem>
+            </Menu>
+
             {/* User Menu */}
-            <Box sx={{ flexGrow: 0, display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {/* Theme Toggle */}
               <ThemeToggle />
 
-              <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu}>
-                  <StarIcon sx={{ color: 'gold', fontSize: '2rem' }} />
+              {/* User Menu */}
+              <Tooltip title="User Settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 1.5 }}>
+                  <StarIcon sx={{ color: 'gold', fontSize: '2.2rem' }} />
                 </IconButton>
               </Tooltip>
 
               <Menu
-                sx={{ mt: '45px' }}
                 id="menu-appbar"
                 anchorEl={anchorElUser}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                keepMounted
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                sx={{
+                  mt: 1.5,
+                  '& .MuiPaper-root': {
+                    borderRadius: 2,
+                    minWidth: 180,
+                    boxShadow: '0px 5px 10px rgba(0,0,0,0.2)',
+                    bgcolor: 'background.paper',
+                    overflow: 'hidden',
+                  },
+                }}
               >
                 {settings.map((setting) => (
-                  <MenuItem key={setting} onClick={() => handleSetting(setting)}>
-                    <Typography textAlign="center">{setting}</Typography>
+                  <MenuItem
+                    key={setting}
+                    onClick={() => handleSetting(setting)}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      borderRadius: 1,
+                      '&:hover': {
+                        bgcolor: 'primary.light',
+                        color: 'primary.contrastText',
+                      },
+                    }}
+                  >
+                    <Typography textAlign="center" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                      {setting}
+                    </Typography>
                   </MenuItem>
                 ))}
               </Menu>
@@ -241,10 +357,7 @@ export default function ResponsiveAppBar() {
         </Container>
       </AppBar>
 
-      {/* Only show LoginModal if user is not logged in */}
       {!isLoggedIn && <LoginModal open={isLoginOpen} onClose={() => setIsLoginOpen(false)} />}
-
-      {/* Feedback Modal */}
       <FeedbackModal open={isFeedbackOpen} onClose={handleFeedbackClose} />
     </>
   );

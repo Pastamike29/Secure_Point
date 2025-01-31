@@ -26,12 +26,6 @@
                                    <Button variant="outlined" onClick={() => navigate('/LoginPage')} sx={{ my: 1, width: '70%' }} >
                                        TTB Username
                                    </Button>
-                                   {/* <Button variant="outlined" sx={{ my: 1, width: '70%' }} startIcon={<GoogleIcon />} >
-                                        Google
-                                   </Button>
-                                   <Button variant="outlined" sx={{ my: 1, width: '70%' }} startIcon={<FacebookIcon />}>
-                                        Facebook
-                                   </Button> */}
                               </Box>
 
                               <Box textAlign="center">
