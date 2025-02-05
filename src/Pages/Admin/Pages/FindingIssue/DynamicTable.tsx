@@ -20,8 +20,8 @@ import {
   DialogContent,
   Button,
   DialogActions,
+  SelectChangeEvent,
 } from '@mui/material';
-import { parse, format, isValid } from 'date-fns';
 import { Edit, Delete, Close } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -29,7 +29,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { debounce } from 'lodash'; // Ensure you install lodash (npm install lodash)
+import { debounce } from 'lodash';
 
 
 interface FindingIssue {
@@ -47,15 +47,21 @@ interface DynamicTableProps {
 const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
   onDeleteIssue, }) => {
 
-  const [localIssues, setLocalIssues] = useState<FindingIssue[]>([]);
-  const [filteredIssues, setFilteredIssues] = useState<FindingIssue[]>(issues);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({
-    key: '',
-    direction: 'asc',
+    key: '', // Default: No sorting
+    direction: 'asc', // Default sorting direction
   });
 
+  const riskRatingPriority = {
+    "Critical": 1,
+    "High": 2,
+    "Medium": 3,
+    "Low": 4,
+    "Informative": 5
+  };
+
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(100); // Change this from 10 to 100
   const [applicationNumberFilter, setApplicationNumberFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [foundDateFilter, setFoundDateFilter] = useState('');
@@ -63,17 +69,20 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
   const [monthFilter, setMonthFilter] = useState('');
   const [riskRatingFilter, setRiskRatingFilter] = useState('');
   const [totalIssues, setTotalIssues] = useState(0); // ✅ Corrected state declaration
-
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const prevIssuesRef = useRef<FindingIssue[]>([]);
+  const [allIssues, setAllIssues] = useState<FindingIssue[]>([]); // ✅ Store all fetched issues
+  const [localIssues, setLocalIssues] = useState<FindingIssue[]>([]);
+  const [filteredIssues, setFilteredIssues] = useState<FindingIssue[]>(issues);
   const [editingIssue, setEditingIssue] = useState<FindingIssue | null>(null);
-  const currentPageIssues = localIssues; // ✅ Directly use API-fetched issues
+  const currentPageIssues = filteredIssues;
   const [loading, setLoading] = useState(false); // Track loading state
-
-
-  useEffect(() => {
-    console.log("Current page issues:", currentPageIssues); // Debug log
-  }, [currentPageIssues]);
-
+  const [uniqueApplicationNumbers, setUniqueApplicationNumbers] = useState<string[]>([]);
+  const [uniqueFoundDates, setUniqueFoundDates] = useState<string[]>([]);
+  const [uniqueRiskRatings, setUniqueRiskRatings] = useState<string[]>([]);
+  const [uniqueYears, setUniqueYears] = useState<number[]>([]);
+  const [uniqueMonths, setUniqueMonths] = useState<number[]>([]);
+  const uniqueValuesFetchedRef = useRef(false); // ✅ Prevents multiple fetches
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -134,54 +143,134 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
     { value: 'Critical', label: 'Critical' },
   ];
 
-  const fetchFindingIssues = useCallback(
-    async (currentPage = 0, currentRowsPerPage = rowsPerPage, searchQuery?: string) => {
-      try {
-        setLoading(true);
-        
-        // ✅ Ensure latest search query is sent
-        const finalSearchQuery = searchQuery !== undefined ? searchQuery : searchTerm;
-  
-        console.log(`🚀 Fetching data for page=${currentPage}, rowsPerPage=${currentRowsPerPage}, search="${finalSearchQuery}"`);
-  
-        const response = await axios.get(`http://localhost:5000/findingIssue`, {
-          params: {
-            page: currentPage + 1,
-            limit: currentRowsPerPage,
-            search: finalSearchQuery || '', // ✅ Ensures an empty string is sent when no search term
-          },
-        });
-  
-        const { finding_issues, total_issues } = response.data;
-        console.log(`✅ Received ${finding_issues.length} issues from API`);
-  
-        setLocalIssues(finding_issues);
-        setFilteredIssues(finding_issues);
-        setTotalIssues(total_issues);
-        setPage(currentPage);
-      } catch (error) {
-        console.error('❌ Error fetching finding issues:', error);
-        setLocalIssues([]);
-        setFilteredIssues([]);
-      } finally {
-        setLoading(false);
+
+  const fetchFindingIssues = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('http://localhost:5000/findingIssue', {
+        params: {
+          limit: 10000, // ✅ Fetch all issues at once (adjustable)
+          search: searchTerm,
+          applicationNumber: applicationNumberFilter,
+          foundDate: foundDateFilter,
+          riskRating: riskRatingFilter,
+          year: yearFilter,
+          month: monthFilter,
+        },
+      });
+
+      const { finding_issues } = response.data;
+
+      if (JSON.stringify(allIssues) !== JSON.stringify(finding_issues)) {
+        setAllIssues(finding_issues);
+        applyFilters(finding_issues); // ✅ Apply filters immediately
       }
-    },
-    [rowsPerPage, searchTerm]
-  );
-  
+    } catch (error) {
+      console.error('Error fetching issues:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchTerm, applicationNumberFilter, foundDateFilter, riskRatingFilter, yearFilter, monthFilter]);
 
+  const applyFilters = (issues: FindingIssue[]) => {
+    let filtered = [...issues];
+
+    if (searchTerm) {
+      filtered = filtered.filter((issue) =>
+        Object.values(issue).some((value) =>
+          value ? String(value).toLowerCase().includes(searchTerm.toLowerCase()) : false
+        )
+      );
+    }
+
+    if (applicationNumberFilter) {
+      filtered = filtered.filter((issue) =>
+        String(issue['Application Number']).toLowerCase().includes(applicationNumberFilter.toLowerCase())
+      );
+    }
+
+    if (foundDateFilter) {
+      filtered = filtered.filter((issue) => {
+        const foundDate = new Date(issue['Found Date']);
+        const filterDate = new Date(foundDateFilter);
+        return (
+          foundDate.getFullYear() === filterDate.getFullYear() &&
+          foundDate.getMonth() === filterDate.getMonth() &&
+          foundDate.getDate() === filterDate.getDate()
+        );
+      });
+    }
+
+    if (riskRatingFilter) {
+      filtered = filtered.filter((issue) =>
+        issue['Risk Rating']?.toLowerCase().includes(riskRatingFilter.toLowerCase())
+      );
+    }
+
+    if (yearFilter) {
+      filtered = filtered.filter((issue) =>
+        issue['Found Date'] ? new Date(issue['Found Date']).getFullYear() === parseInt(yearFilter) : false
+      );
+    }
+
+    if (monthFilter) {
+      filtered = filtered.filter((issue) =>
+        issue['Found Date'] ? new Date(issue['Found Date']).getMonth() + 1 === parseInt(monthFilter) : false
+      );
+    }
+
+    // ✅ Sorting Logic
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        let valueA = a[sortConfig.key] || '';
+        let valueB = b[sortConfig.key] || '';
+
+        if (sortConfig.key === "Found Date" || sortConfig.key === "Overdue Date") {
+          valueA = valueA ? new Date(valueA).getTime() : 0;
+          valueB = valueB ? new Date(valueB).getTime() : 0;
+        } else if (sortConfig.key === "Year") {
+          valueA = a["Found Date"] ? new Date(a["Found Date"]).getFullYear() : 0;
+          valueB = b["Found Date"] ? new Date(b["Found Date"]).getFullYear() : 0;
+        } else if (sortConfig.key === "Month") {
+          valueA = a["Found Date"] ? new Date(a["Found Date"]).getMonth() + 1 : 0;
+          valueB = b["Found Date"] ? new Date(b["Found Date"]).getMonth() + 1 : 0;
+        } else if (sortConfig.key === "Risk Rating") {
+          valueA = riskRatingPriority[valueA] || 99;
+          valueB = riskRatingPriority[valueB] || 99;
+        }
+
+        return sortConfig.direction === "asc" ? valueA - valueB : valueB - valueA;
+      });
+    }
+
+    setFilteredIssues(filtered);
+    setLocalIssues(filtered.slice(page * rowsPerPage, (page + 1) * rowsPerPage));
+  };
 
 
   useEffect(() => {
-    console.log(`Current state: page=${page}, rowsPerPage=${rowsPerPage}, searchTerm="${searchTerm}"`);
-    setLocalIssues(issues);
+    const fetchUniqueValues = async () => {
+      if (uniqueValuesFetchedRef.current) return; // ✅ Prevent duplicate fetches
 
-  }, [page, rowsPerPage, searchTerm]), [issues];
+      try {
+        const response = await axios.get('http://localhost:5000/uniqueValues');
+        const data = response.data;
 
-  useEffect(() => {
-    setFilteredIssues(localIssues);
-  }, [localIssues]);
+        setUniqueApplicationNumbers(data.application_numbers || []);
+        setUniqueFoundDates(data.found_dates || []);
+        setUniqueRiskRatings(data.risk_ratings || []);
+        setUniqueYears(data.years || []);
+        setUniqueMonths(data.months || []);
+
+        uniqueValuesFetchedRef.current = true; // ✅ Mark as fetched
+      } catch (error) {
+        console.error('Error fetching unique values:', error);
+      }
+    };
+
+    fetchUniqueValues();
+  }, []);  // ✅ Runs only once on mount
+
 
 
   const handleEditSave = async () => {
@@ -212,8 +301,6 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
     if (window.confirm('Are you sure you want to delete this issue?')) {
       await onDeleteIssue(issueId);
 
-      // Refresh data and reset to the first page
-      await fetchFindingIssues(0, rowsPerPage);
     }
   };
 
@@ -250,10 +337,30 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
     }
   };
 
+  const handleFilterChange = (event: SelectChangeEvent<string>, filterType: string) => {
+    const { value } = event.target;
 
-  useEffect(() => {
-    setFilteredIssues(localIssues);
-  }, [localIssues]);
+    switch (filterType) {
+      case 'applicationNumber':
+        setApplicationNumberFilter(value);
+        break;
+      case 'foundDate':
+        setFoundDateFilter(value);
+        break;
+      case 'riskRating':
+        setRiskRatingFilter(value);
+        break;
+      case 'year':
+        setYearFilter(value);
+        break;
+      case 'month':
+        setMonthFilter(value);
+        break;
+      default:
+        break;
+    }
+  };
+
 
   useEffect(() => {
     const formattedIssues = issues.map((issue) => ({
@@ -266,23 +373,24 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
         : null,
     }));
 
-    setLocalIssues(formattedIssues);
+    setLocalIssues(formattedIssues); // Ensure issues are properly formatted first
   }, [issues]);
 
+
   useEffect(() => {
-    let filtered = localIssues.filter((issue) => {
-      return Object.values(issue).some((value) =>
-        value
-          ? String(value).toLowerCase().includes(searchTerm.toLowerCase()) // Apply search term filter
-          : false
+    let filtered = localIssues;
+
+    if (searchTerm) {
+      filtered = filtered.filter((issue) =>
+        Object.values(issue).some((value) =>
+          value ? String(value).toLowerCase().includes(searchTerm.toLowerCase()) : false
+        )
       );
-    });
+    }
 
     if (applicationNumberFilter) {
       filtered = filtered.filter((issue) =>
-        String(issue['Application Number'])
-          .toLowerCase()
-          .includes(applicationNumberFilter.toLowerCase())
+        String(issue['Application Number']).toLowerCase().includes(applicationNumberFilter.toLowerCase())
       );
     }
 
@@ -298,66 +406,44 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
       });
     }
 
-    console.log(`✅ Filtered issues count: ${filtered.length}`);
+    if (riskRatingFilter) {
+      filtered = filtered.filter((issue) =>
+        issue['Risk Rating']?.toLowerCase().includes(riskRatingFilter.toLowerCase())
+      );
+    }
+
     setFilteredIssues(filtered);
-    setPage(0); // Reset pagination on new search results
-  }, [searchTerm, applicationNumberFilter, foundDateFilter, localIssues]);
+  }, [
+    searchTerm,
+    applicationNumberFilter,
+    foundDateFilter,
+    riskRatingFilter,
+    localIssues, // ✅ Keep this, but make sure it's not being overwritten unexpectedly
+  ]);
 
 
-
-  const handleChangePage = async (event: unknown, newPage: number) => {
-    setPage(newPage);
-    await fetchFindingIssues(newPage, rowsPerPage);
-  };
-
-  const handleChangeRowsPerPage = async (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const newRowsPerPage = parseInt(event.target.value, 10);
-    setRowsPerPage(newRowsPerPage);
-    setPage(0); // Reset to the first page when rows per page changes
-    await fetchFindingIssues(0, newRowsPerPage);
-  };
-
-  const debouncedFetchIssues = useCallback(debounce((searchValue: string) => {
-    fetchFindingIssues(0, rowsPerPage, searchValue);
-  }, 500), [rowsPerPage]); // ✅ Calls API only after 500ms of inactivity
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const searchValue = event.target.value.trim();
-    setSearchTerm(searchValue);
-    debouncedFetchIssues(searchValue);
+    setSearchTerm(event.target.value); // ✅ Update state immediately
+    fetchFindingIssues(); // ✅ Fetch immediately on page change
+    setPage(0);
   };
 
-  const uniqueApplicationNumbers = Array.from(
-    new Set(issues.map((issue) => issue['Application Number']))
-  ).sort();
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+    setLocalIssues(filteredIssues.slice(newPage * rowsPerPage, (newPage + 1) * rowsPerPage)); // ✅ Paginate filtered data
+  };
 
 
-  const uniqueFoundDates = Array.from(
-    new Set(issues.map((issue) => issue['Found Date'])))
-    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-    .map((date) => new Date(date).toLocaleDateString()); // Keep the locale formatting for UI display
+  // Handle rows per page changes
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const newRowsPerPage = parseInt(event.target.value, 100);
+    setRowsPerPage(newRowsPerPage);
+    setFilteredIssues(localIssues.slice(0, newRowsPerPage)); // Reset filtered data
+  };
 
-  const uniqueYears = Array.from(
-    new Set(issues.map((issue) => new Date(issue['Found Date']).getFullYear()))
-  ).sort();
 
-  const uniqueMonths = Array.from(
-    new Set(
-      issues
-        .map((issue) => {
-          const foundDate = issue['Found Date'];
-          if (!foundDate) return null; // Skip if Found Date is missing
-          const parsedDate = new Date(foundDate);
-          return isValid(parsedDate) ? parsedDate.getMonth() : null; // Extract numeric month if valid
-        })
-        .filter((month) => month !== null) // Filter out invalid months
-    )
-  )
-    .sort((a, b) => a - b) // Sort months numerically
-    .map((month) => ({
-      value: month + 1, // 1-based month value
-      label: monthNames[month], // Get month name
-    }));
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!scrollContainerRef.current) return;
@@ -413,6 +499,15 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
     setEditingIssue(null);
   };
 
+  const handleSort = (key: string) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
+
+
   return (
     <div>
       <TextField
@@ -428,12 +523,12 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
           <Typography variant="h6">Application Number</Typography>
           <Select
             value={applicationNumberFilter}
-            onChange={(e) => setApplicationNumberFilter(e.target.value)}
+            onChange={(e) => handleFilterChange(e, 'applicationNumber')}
             displayEmpty
           >
             <MenuItem value="">All</MenuItem>
-            {uniqueApplicationNumbers.map((number, index) => (
-              <MenuItem key={index} value={number}>
+            {uniqueApplicationNumbers.map((number) => (
+              <MenuItem key={number} value={number}>
                 {number}
               </MenuItem>
             ))}
@@ -444,45 +539,13 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
           <Typography variant="h6">Found Date</Typography>
           <Select
             value={foundDateFilter}
-            onChange={(e) => setFoundDateFilter(e.target.value)}
+            onChange={(e) => handleFilterChange(e, 'foundDate')}
             displayEmpty
           >
             <MenuItem value="">All</MenuItem>
-            {uniqueFoundDates.map((date, index) => (
-              <MenuItem key={index} value={date}>
+            {uniqueFoundDates.map((date) => (
+              <MenuItem key={date} value={date}>
                 {date}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: 200 }}>
-          <Typography variant="h6">Years</Typography>
-          <Select
-            value={yearFilter}
-            onChange={(e) => setYearFilter(e.target.value)}
-            displayEmpty
-          >
-            <MenuItem value="">All</MenuItem>
-            {uniqueYears.map((year, index) => (
-              <MenuItem key={index} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: 200 }}>
-          <Typography variant="h6">Months</Typography>
-          <Select
-            value={monthFilter}
-            onChange={(e) => setMonthFilter(e.target.value)}
-            displayEmpty
-          >
-            <MenuItem value="">All</MenuItem>
-            {uniqueMonths.map((month, index) => (
-              <MenuItem key={index} value={month.value}>
-                {month.label}
               </MenuItem>
             ))}
           </Select>
@@ -492,13 +555,45 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
           <Typography variant="h6">Risk Rating</Typography>
           <Select
             value={riskRatingFilter}
-            onChange={(e) => setRiskRatingFilter(e.target.value)}
+            onChange={(e) => handleFilterChange(e, 'riskRating')}
             displayEmpty
           >
             <MenuItem value="">All</MenuItem>
-            {riskRatingOptions.map((option, index) => (
-              <MenuItem key={index} value={option.value}>
-                {option.label}
+            {uniqueRiskRatings.map((risk) => (
+              <MenuItem key={risk} value={risk}>
+                {risk}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 200 }}>
+          <Typography variant="h6">Year</Typography>
+          <Select
+            value={yearFilter}
+            onChange={(e) => handleFilterChange(e, 'year')}
+            displayEmpty
+          >
+            <MenuItem value="">All</MenuItem>
+            {uniqueYears.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 200 }}>
+          <Typography variant="h6">Month</Typography>
+          <Select
+            value={monthFilter}
+            onChange={(e) => handleFilterChange(e, 'month')}
+            displayEmpty
+          >
+            <MenuItem value="">All</MenuItem>
+            {uniqueMonths.map((month) => (
+              <MenuItem key={month} value={month}>
+                {monthNames[month - 1]}
               </MenuItem>
             ))}
           </Select>
@@ -510,8 +605,9 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
           <TableHead>
             <TableRow>
               {validColumns.map((column) => (
-                <TableCell key={column}>{column}</TableCell>
-              ))}
+                <TableCell key={column} onClick={() => handleSort(column)} style={{ cursor: 'pointer' }}>
+                  {column} {sortConfig.key === column ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                </TableCell>))}
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -654,16 +750,13 @@ const DynamicTable: React.FC<DynamicTableProps> = ({ issues,
       </Dialog>
 
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={totalIssues}  // ✅ Use the correct variable name
+        count={totalIssues} // Use total count from API
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-
-
 
     </div >
   );

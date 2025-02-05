@@ -45,7 +45,7 @@ import FeedbackModal from './Pages/User/page/Page/FeedbackModal'
 import QuizPage from './Pages/Quiz/Page/QuizPage'
 import ScoreBoard from './Pages/Quiz/Page/ScoreBoard'
 import LoginPage from './Login/LoginPage'
-import {ProtectedRoute, ProtectedAdminRoute, GuestRoute} from './Login/Component/ProtectedRoute'
+import { ProtectedRoute, ProtectedAdminRoute, GuestRoute } from './Login/Component/ProtectedRoute'
 import UpdateProfile from './Pages/User/page/Page/UpdateProfile'
 import ProfilePage from './Pages/User/page/Page/ProfilePage'
 import AdminMain from './Login/AdminMain'
@@ -142,12 +142,12 @@ export default function App() {
                       <Route path="FindingIssueManagement" element={<FindingIssue />} />
                       <Route path="CodeExampleManagement" element={<CodeExampleManagement />} />
                       <Route path="LessonPageManagement" element={<LessonPageManagement />} />
-                      <Route path="FindingIssue" element={<FindingIssue />} />
+
                     </Routes>
                   </ProtectedAdminRoute>
                 }
               />
-
+              <Route path="/FindingIssue" element={<FindingIssue />} />
 
 
               {/* Fallback for unmatched routes */}

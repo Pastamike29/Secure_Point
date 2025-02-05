@@ -436,7 +436,7 @@ export default function LessonPageManagement() {
       <AdminDashboardLayout>
         <Container>
           <Typography variant="h4" gutterBottom>
-            Admin Panel - Manage Lessons
+              Lesson Management
           </Typography>
 
           <Button
