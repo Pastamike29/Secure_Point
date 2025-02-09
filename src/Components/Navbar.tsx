@@ -50,7 +50,7 @@ export default function ResponsiveAppBar() {
   const handleNavigate = (page: string) => {
     switch (page) {
       case 'Lesson':
-        navigate('/LessonPage/Broken Access Control');
+        navigate('/LessonPage');
         break;
       case 'Code Example':
         navigate('/vulnerabilities/Insecure SSL');

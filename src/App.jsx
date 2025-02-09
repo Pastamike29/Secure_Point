@@ -62,6 +62,7 @@ import FeedbackManagement from './Pages/Admin/Pages/Feedback/FeedbackManagement'
 import TicketManagement from './Pages/Admin/Pages/TicketManagement'
 import LessonPageManagement from './Pages/Admin/Pages/LessonPageManagement'
 import UserManagement from './Pages/Admin/Pages/UserManagement'
+import ResetPassword from './Login/ResetPassword'
 export default function App() {
 
   return (
@@ -105,6 +106,7 @@ export default function App() {
 
 
               <Route path="/RegisterPage" element={<RegisterPage />} />
+              <Route path="/ResetPassword" element={<ResetPassword />} />
               <Route
                 path="/LoginPage"
                 element={

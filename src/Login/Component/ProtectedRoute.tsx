@@ -22,7 +22,7 @@ export const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }
 
   if (isAuthenticated) {
     // Redirect to respective home page based on role
-    return <Navigate to={role === 'admin' ? '/admin/Usermanagement' : '/'} replace />;
+    return <Navigate to={role === 'admin' ? '/admin/UserManagement' : '/'} replace />;
   }
 
   return <>{children}</>;
@@ -32,10 +32,15 @@ export const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }
 export const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, role } = useAuth();
 
-  if (!isAuthenticated || role !== 'admin') {
-    return <Navigate to="/404" replace />;  // Redirect to your custom 404 page or login page
+  if (!isAuthenticated) {
+    return <Navigate to="/LoginPage" replace />;  // Redirect to login if not authenticated
+  }
+
+  if (role !== 'admin') {
+    return <Navigate to="/404" replace />;  // Redirect non-admins to 404
   }
 
 
-  return <>{children}</>;
+  return <>{children}</>; // ✅ Render children if user is an admin
+
 };

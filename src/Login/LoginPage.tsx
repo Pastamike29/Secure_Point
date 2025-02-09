@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Box, Button, Modal, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Modal, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -25,6 +25,7 @@ const LoginPage = () => {
     const intervalRef = useRef<NodeJS.Timeout | null>(null); // Prevent multiple intervals
     const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
     const [forgotEmail, setForgotEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // 🔹 Loading state for forgot password button
 
     // Track failed login attempts
     const [currentAttempts, setCurrentAttempts] = useState(() => {
@@ -143,33 +144,40 @@ const LoginPage = () => {
     };
 
     // Handle Forgot Password Request
-    // Handle Forgot Password Request
     const handleForgotPassword = async () => {
         if (!forgotEmail) {
             toast.error('Please enter your email.');
             return;
         }
 
+        setIsLoading(true); // 🔹 Start loading
+
         try {
             const response = await axios.post('http://localhost:5000/forgot-password', { email: forgotEmail });
 
-            // Check if the response is successful
             if (response.status === 200) {
                 toast.success('Password reset link sent to your email.', {
                     position: 'top-right',
                     autoClose: 3000,
                 });
-                setIsForgotPasswordOpen(false); // Close modal after request
+                setIsForgotPasswordOpen(false);
             }
         } catch (error) {
-            // If email is not found in the database
             if (error.response?.status === 404) {
                 toast.error('Please use a correct email. This email is not registered.');
             } else {
                 toast.error('Failed to send reset email. Please try again later.');
             }
+        } finally {
+            setIsLoading(false); // 🔹 Stop loading
         }
     };
+
+    useEffect(() => {
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, []);
 
     // Prevent multiple intervals and ensure 1s updates
     useEffect(() => {
@@ -301,7 +309,7 @@ const LoginPage = () => {
                         onClick={handleForgotPassword}
                         sx={{ width: '100%' }}
                     >
-                        Send Reset Link
+                        {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Send Reset Link'}
                     </Button>
                 </Box>
             </Modal>
