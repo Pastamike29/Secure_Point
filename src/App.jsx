@@ -54,7 +54,6 @@ import CodeExampleManagement from './Pages/Admin/Pages/CodeExampleManagement'
 import { UserProvider } from './Login/Component/UserAuthen'
 import { AuthProvider } from './Login/Component/AuthContext'
 import DynamicVulPage from './Pages/CodeExample/Page/DynamicVulPage'
-import FindingIssue from './Pages/Admin/Pages/FindingIssue/FindingIssue'
 
 import Chatbot from './Components/Chatbot'
 import DynamicLessonPage from './Pages/lessons/DynamicLessonPage'
@@ -63,6 +62,8 @@ import TicketManagement from './Pages/Admin/Pages/TicketManagement'
 import LessonPageManagement from './Pages/Admin/Pages/LessonPageManagement'
 import UserManagement from './Pages/Admin/Pages/UserManagement'
 import ResetPassword from './Login/ResetPassword'
+import NotFoundPage from './Notfound'
+import FindingIssueManagement from './Pages/Admin/Pages/FindingIssue/FindingIssueManagement'
 export default function App() {
 
   return (
@@ -141,7 +142,7 @@ export default function App() {
                       <Route path="FeedbackManagement" element={<FeedbackManagement />} />
                       <Route path="TicketManagement" element={<TicketManagement />} />
                       <Route path="ApplicationManagement" element={<ApplicationManagement />} />
-                      <Route path="FindingIssueManagement" element={<FindingIssue />} />
+                      <Route path="FindingIssueManagement" element={<FindingIssueManagement />} />
                       <Route path="CodeExampleManagement" element={<CodeExampleManagement />} />
                       <Route path="LessonPageManagement" element={<LessonPageManagement />} />
 
@@ -149,11 +150,10 @@ export default function App() {
                   </ProtectedAdminRoute>
                 }
               />
-              <Route path="/FindingIssue" element={<FindingIssue />} />
 
 
               {/* Fallback for unmatched routes */}
-              <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+              <Route path="*" element={<NotFoundPage/>} />
 
             </Routes>
             <Chatbot />

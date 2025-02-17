@@ -29,7 +29,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { toast } from 'react-toastify';
-import { Close, UploadFile } from '@mui/icons-material';
+import { Close, CloudUpload, Delete, Edit, UploadFile } from '@mui/icons-material';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminDashboardLayout from '../Component/AdminDashboardLayout';
 import { SelectChangeEvent } from '@mui/material';
@@ -436,7 +436,7 @@ export default function LessonPageManagement() {
       <AdminDashboardLayout>
         <Container>
           <Typography variant="h4" gutterBottom>
-              Lesson Management
+            Lesson Management
           </Typography>
 
           <Button
@@ -478,7 +478,7 @@ export default function LessonPageManagement() {
 
           <Button
             variant="contained"
-            startIcon={<UploadFile />}
+            startIcon={<CloudUpload />}
             onClick={handleDownloadExcelTemplate}
             sx={{ mb: 2, ml: 2 }}
           >
@@ -614,20 +614,18 @@ export default function LessonPageManagement() {
                       </TableCell>
                       <TableCell>{lesson.create_at || 'N/A'}</TableCell>
                       <TableCell>
-                        <Button
-                          variant="text"
+                        <IconButton
                           color="primary"
                           onClick={() => handleEditLesson(lesson._id)}
                         >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="text"
+                          <Edit />
+                        </IconButton>
+                        <IconButton
                           color="error"
                           onClick={() => handleDeleteLesson(lesson._id)}
                         >
-                          Delete
-                        </Button>
+                          <Delete />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   ))
@@ -754,7 +752,7 @@ export default function LessonPageManagement() {
               </AccordionSummary>
               <AccordionDetails>
                 <TextField
-                  label="Issue Name"
+                  label="Issue Name **"
                   fullWidth
                   value={newLesson.issueName}
                   onChange={(e) => handleSingleFieldChange('issueName', e.target.value)}
@@ -762,7 +760,7 @@ export default function LessonPageManagement() {
                 />
 
                 <TextField
-                  label="Sub Issue Name"
+                  label="Sub Issue Name **"
                   fullWidth
                   value={newLesson.sub_issueName}
                   onChange={(e) => handleSingleFieldChange('sub_issueName', e.target.value)}
@@ -770,7 +768,7 @@ export default function LessonPageManagement() {
                 />
 
                 <TextField
-                  label="OWASP"
+                  label="OWASP **"
                   fullWidth
                   value={newLesson.owasp}
                   onChange={(e) => handleSingleFieldChange('owasp', e.target.value)}

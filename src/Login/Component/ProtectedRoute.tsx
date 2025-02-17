@@ -18,15 +18,15 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
 // GuestRoute for unauthenticated users only
 export const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, role } = useAuth();
-  console.log('GuestRoute - isAuthenticated:', isAuthenticated, 'role:', role); // Debugging
+  const storedUser = sessionStorage.getItem('user'); // ✅ Ensure it checks storage
 
-  if (isAuthenticated) {
-    // Redirect to respective home page based on role
+  if (isAuthenticated || storedUser) {
     return <Navigate to={role === 'admin' ? '/admin/UserManagement' : '/'} replace />;
   }
 
   return <>{children}</>;
 };
+
 
 // ProtectedAdminRoute for admin users only
 export const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -21,11 +21,12 @@ import {
   Paper,
   TablePagination,
 } from '@mui/material';
-import { UploadFile, Close, Edit, Delete } from '@mui/icons-material';
+import { UploadFile, Close, Edit, Delete, CloudDownload } from '@mui/icons-material';
 import AdminDashboardLayout from '../Component/AdminDashboardLayout';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DOMPurify from 'dompurify'; // Import dompurify
+import axios from 'axios';
 
 
 interface Vulnerability {
@@ -292,6 +293,33 @@ export default function CodeExampleManagement() {
     setPage(0); // Reset to first page
   };
 
+  const handleDownload = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/download-AddVul-CodeExample-template`, {
+        responseType: "blob", // Ensure we receive the file as binary data
+      });
+
+      // Create a Blob from the file data
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      // Create a download link
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "AddVul_CodeExample_Template.xlsx";
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      toast.success("Excel template downloaded successfully!");
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to download Excel template.");
+    }
+  };
+
   return (
     <AdminDashboardLayout title="Code Example Management">
       <Grid container spacing={3}>
@@ -304,8 +332,17 @@ export default function CodeExampleManagement() {
 
               <Button
                 variant="contained"
+                size="small"
+                onClick={handleOpenManualModal}
+              >
+                Add Manually
+              </Button>
+
+              <Button
+                variant="contained"
                 startIcon={<UploadFile />}
                 size="small"
+                sx={{mx:2}}
                 onClick={handleOpenModal}
               >
                 Upload CSV Files
@@ -313,12 +350,16 @@ export default function CodeExampleManagement() {
 
               <Button
                 variant="contained"
+                color="primary"
                 size="small"
-                onClick={handleOpenManualModal}
-                sx={{ mx: 3 }}
+                startIcon={<CloudDownload />}
+                onClick={handleDownload}
+                sx={{ mx: 2 }} //  margin
               >
-                Add Manually
+                Download Excel Template
               </Button>
+
+
 
               <Box mt={3}>
                 {loading ? (
@@ -457,21 +498,21 @@ export default function CodeExampleManagement() {
                 <DialogContent>
                   <TextField
                     fullWidth
-                    label="OWASP"
+                    label="OWASP YAER AND NAME *"
                     value={owasp}
                     onChange={(e) => setOwasp(e.target.value)}
                     margin="normal"
                   />
                   <TextField
                     fullWidth
-                    label="Issue Name"
+                    label="Issue Name *"
                     value={issueName}
                     onChange={(e) => setIssueName(e.target.value)}
                     margin="normal"
                   />
                   <TextField
                     fullWidth
-                    label="Sub Issue-Name"
+                    label="Sub Issue-Name *"
                     value={sub_issueName}
                     onChange={(e) => setSubIssueName(e.target.value)}
                     margin="normal"

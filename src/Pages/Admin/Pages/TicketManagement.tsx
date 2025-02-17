@@ -111,7 +111,7 @@ const TicketManagement: React.FC = () => {
                     Ticket Management
                 </Typography>
 
-                <Button
+                {/* <Button
                     variant="contained"
                     color="primary"
                     onClick={() => {
@@ -129,7 +129,7 @@ const TicketManagement: React.FC = () => {
                     }}
                 >
                     Create Ticket
-                </Button>
+                </Button> */}
 
                 <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                     <Table>
@@ -157,7 +157,7 @@ const TicketManagement: React.FC = () => {
                                         <IconButton onClick={() => handleEdit(ticket)} color="primary">
                                             <EditIcon />
                                         </IconButton>
-                                        <IconButton onClick={() => handleDelete(ticket.id)} color="secondary">
+                                        <IconButton onClick={() => handleDelete(ticket.id)} color="error">
                                             <DeleteIcon />
                                         </IconButton>
                                     </TableCell>

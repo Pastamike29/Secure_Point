@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, CircularProgress, Snackbar, Typography, Box, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, MenuItem } from '@mui/material';
-import { ArrowBack, ArrowForward, Close, UploadFile } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, Close, CloudUpload, UploadFile } from '@mui/icons-material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -11,7 +11,7 @@ import DynamicTable from './DynamicTable';
 import dayjs, { Dayjs } from 'dayjs'; // Import Dayjs for type definition
 
 
-const FindingIssue: React.FC = () => {
+const FindingIssueManagement: React.FC = () => {
     const [issues, setIssues] = useState<any[]>([]); // Define your data structure
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -329,20 +329,6 @@ const FindingIssue: React.FC = () => {
         <AdminDashboardLayout title="Finding Issue Management">
             <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
-                    <Button variant="contained" color="secondary" onClick={() => setDialogOpen(true)}>
-                        Upload CSV
-                    </Button>
-
-                    <Button
-                        variant="contained"
-                        startIcon={<UploadFile />}
-                        onClick={handleDownloadExcelTemplate}
-                        sx={{
-                            mx: 3,
-                        }}
-                    >
-                        Download Excel Template
-                    </Button>
 
                     <Button
                         variant="contained"
@@ -351,6 +337,23 @@ const FindingIssue: React.FC = () => {
                     >
                         Add Finding Issue
                     </Button>
+
+                    <Button variant="contained" color="primary" startIcon={<UploadFile />} 
+                     sx={{mx:2}} 
+                     onClick={() => setDialogOpen(true) 
+                     }>
+                        Upload CSV
+                    </Button>
+
+                    <Button
+                        variant="contained"
+                        startIcon={<CloudUpload />}
+                        onClick={handleDownloadExcelTemplate}
+                    >
+                        Download Excel Template
+                    </Button>
+
+
 
                 </Box>
 
@@ -557,4 +560,4 @@ const FindingIssue: React.FC = () => {
     );
 };
 
-export default FindingIssue;
+export default FindingIssueManagement;

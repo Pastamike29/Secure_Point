@@ -17,11 +17,13 @@ import {
   TextField,
   Select,
   MenuItem,
+  IconButton,
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import AdminDashboardLayout from '../Component/AdminDashboardLayout';
+import { Delete, Edit } from '@mui/icons-material';
 
 interface User {
   id: string;
@@ -38,6 +40,10 @@ const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
   const [formValues, setFormValues] = useState<{
     username: string;
     password: string;
@@ -73,6 +79,44 @@ const UserManagement: React.FC = () => {
       toast.error('Failed to fetch users');
     }
   };
+
+  const handleResetPassword = async () => {
+    try {
+      const token = getToken();
+      await axios.post(
+        'http://localhost:5000/admin/reset-user-password',
+        { email: resetEmail, new_password: newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success('Password has been reset successfully. User must change password on login.');
+      setPasswordDialogOpen(false);
+      setNewPassword('');
+      setResetEmail('');
+      fetchUsers();
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast.error('Failed to reset password.');
+    }
+  };
+
+
+  const handleSendResetLink = async (email: string) => {
+    try {
+      const token = getToken();
+      await axios.post(
+        'http://localhost:5000/admin/send-reset-link',
+        { email },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success('Reset link sent to user’s email.');
+    } catch (error) {
+      console.error('Error sending reset link:', error);
+      toast.error('Failed to send reset link.');
+    }
+  };
+
 
   const handleClickOpen = (user?: User) => {
     if (user) {
@@ -188,23 +232,48 @@ const UserManagement: React.FC = () => {
                   <TableCell>{user.quiz_amount}</TableCell>
                   <TableCell>{new Date(user.last_updated).toLocaleString()}</TableCell>
                   <TableCell>
-                    <Button
-                      variant="contained"
-                      color="secondary"
+                    <IconButton
+                      color="primary"
                       onClick={() => handleClickOpen(user)}
-                      style={{ marginRight: '8px' }}
                     >
-                      Edit
-                    </Button>
-                    <Button variant="contained" color="error" onClick={() => handleDelete(user.id)}>
-                      Delete
-                    </Button>
+                      <Edit />
+                    </IconButton>
+                    <IconButton 
+                     color="error" 
+                     onClick={() => handleDelete(user.id)}
+                     >
+                      <Delete />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Reset Password Dialog */}
+        <Dialog open={passwordDialogOpen} onClose={() => setPasswordDialogOpen(false)}>
+          <DialogTitle>Reset User Password</DialogTitle>
+          <DialogContent>
+            <Typography sx={{ mb: 2 }}>Enter a new password for {resetEmail}:</Typography>
+            <TextField
+              label="New Password"
+              type="password"
+              fullWidth
+              variant="outlined"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setPasswordDialogOpen(false)} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleResetPassword} color="primary">
+              Reset Password
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>{currentUser ? 'Edit User' : 'Add User'}</DialogTitle>

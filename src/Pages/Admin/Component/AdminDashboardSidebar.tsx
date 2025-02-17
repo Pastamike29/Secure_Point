@@ -176,7 +176,7 @@ export default function AdminDashboardSidebar() {
                     opacity: 0.7,
                   },
                 }}
-                onClick={() => handleNavigation('/admin/FindingIssue')}
+                onClick={() => handleNavigation('/admin/FindingIssueManagement')}
               >
                 Finding Issue Management
               </Typography>
