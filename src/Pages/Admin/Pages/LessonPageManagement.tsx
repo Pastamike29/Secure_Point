@@ -232,8 +232,8 @@ export default function LessonPageManagement() {
       const fileSizeKB = file.size / 1024; // Convert size to KB
 
       // Check if file size exceeds 100KB
-      if (fileSizeKB > 100) {
-        toast.error('You uploaded a file over 100KB. Please upload an image less than 100KB.');
+      if (fileSizeKB > 200) {
+        toast.error('You uploaded a file over 200KB. Please upload an image less than 100KB.');
         return; // Prevent upload if size exceeds the limit
       }
 
@@ -808,7 +808,7 @@ export default function LessonPageManagement() {
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  * Please upload only image files smaller than 100 KB.
+                  * Please upload only image files smaller than 200 KB.
                 </Typography>
                 <Button
                   variant="outlined"

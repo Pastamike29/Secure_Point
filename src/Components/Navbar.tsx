@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import LoginModal from '../Login/LoginModal';
 import ThemeToggle from '../assets/Themes/ThemeToggle';
 import { useAuth } from '../Login/Component/AuthContext'; // 🔹 Import Auth Context
+import SearchBar from './SearchBar';
 
 export default function ResponsiveAppBar() {
   const pages = ['Lesson', 'Code Example', 'Overview', 'Quiz'];
@@ -301,7 +302,10 @@ export default function ResponsiveAppBar() {
                 Scoreboard
               </MenuItem>
             </Menu>
-
+              
+              <Box>
+                <SearchBar />
+              </Box>
             {/* User Menu */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               {/* Theme Toggle */}

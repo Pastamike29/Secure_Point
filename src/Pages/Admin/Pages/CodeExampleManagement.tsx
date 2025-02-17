@@ -20,13 +20,15 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  InputAdornment,
 } from '@mui/material';
-import { UploadFile, Close, Edit, Delete, CloudDownload } from '@mui/icons-material';
+import { UploadFile, Close, Edit, Delete, CloudDownload, Search } from '@mui/icons-material';
 import AdminDashboardLayout from '../Component/AdminDashboardLayout';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DOMPurify from 'dompurify'; // Import dompurify
 import axios from 'axios';
+import CodeExampleSearchBar from '../Component/CodeExampleSearchbar';
 
 
 interface Vulnerability {
@@ -53,6 +55,24 @@ export default function CodeExampleManagement() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+
+  //searchbar
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredVulnerabilities, setFilteredVulnerabilities] = useState<Vulnerability[]>([]);
+
+  // Handle Search Data Received from Search Bar
+  const handleSearchResults = (results: Vulnerability[]) => {
+    if (results.length > 0) {
+      setFilteredVulnerabilities(results);
+    } else {
+      setFilteredVulnerabilities(vulnerabilities); // Reset to full data if search is cleared
+    }
+    setPage(0);
+  };
+  const paginatedVulnerabilities = filteredVulnerabilities.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   const sanitizeInput = (input: string) => DOMPurify.sanitize(input);
 
@@ -201,6 +221,7 @@ export default function CodeExampleManagement() {
       recommendation: sanitizedRecommendation,
     };
 
+
     // Handle PUT request
     fetch(`http://localhost:5000/vulnerabilities/${selectedVulnerability?._id}`, {
       method: 'PUT',
@@ -269,6 +290,7 @@ export default function CodeExampleManagement() {
 
       // Set vulnerabilities and update total count
       setVulnerabilities(data.data);
+      setFilteredVulnerabilities(data.data); // Initialize filtered list with full data
       setTotalCount(data.total || 0); // Total count from the backend
     } catch (error) {
       console.error('Failed to fetch vulnerabilities:', error);
@@ -320,46 +342,29 @@ export default function CodeExampleManagement() {
     }
   };
 
+
   return (
     <AdminDashboardLayout title="Code Example Management">
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Card sx={{ width: '90%' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Add Vulnerability
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                <Button variant="contained" onClick={handleOpenManualModal}>
+                  Add Manually
+                </Button>
 
-              <Button
-                variant="contained"
-                size="small"
-                onClick={handleOpenManualModal}
-              >
-                Add Manually
-              </Button>
+                <Button variant="contained" startIcon={<UploadFile />} onClick={handleOpenModal}>
+                  Upload CSV Files
+                </Button>
 
-              <Button
-                variant="contained"
-                startIcon={<UploadFile />}
-                size="small"
-                sx={{mx:2}}
-                onClick={handleOpenModal}
-              >
-                Upload CSV Files
-              </Button>
+                <Button variant="contained" color="primary" startIcon={<CloudDownload />} onClick={handleDownload}>
+                  Download Excel Template
+                </Button>
 
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                startIcon={<CloudDownload />}
-                onClick={handleDownload}
-                sx={{ mx: 2 }} //  margin
-              >
-                Download Excel Template
-              </Button>
-
-
+                {/* 🔹 Fixed Search Bar Alignment */}
+                <CodeExampleSearchBar onSearch={handleSearchResults} />
+              </Box>
 
               <Box mt={3}>
                 {loading ? (
@@ -378,7 +383,7 @@ export default function CodeExampleManagement() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {vulnerabilities.map((vul) => (
+                        {filteredVulnerabilities.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((vul) => (
                           <TableRow key={vul._id}>
                             <TableCell>{vul.owasp || 'N/A'}</TableCell>
                             <TableCell>{vul.issueName || 'N/A'}</TableCell>
@@ -406,12 +411,12 @@ export default function CodeExampleManagement() {
                     <TablePagination
                       rowsPerPageOptions={[10, 25, 50]}
                       component="div"
-                      count={totalCount}
+                      count={filteredVulnerabilities.length}
                       rowsPerPage={rowsPerPage}
                       page={page}
-                      onPageChange={handlePageChange}
-                      onRowsPerPageChange={handleRowsPerPageChange}
-                    />
+                      onPageChange={(_, newPage) => setPage(newPage)}
+                      onRowsPerPageChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
+                    />  
                   </TableContainer>
                 )}
               </Box>
