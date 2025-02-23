@@ -64,6 +64,7 @@ import UserManagement from './Pages/Admin/Pages/UserManagement'
 import ResetPassword from './Login/ResetPassword'
 import NotFoundPage from './Notfound'
 import FindingIssueManagement from './Pages/Admin/Pages/FindingIssue/FindingIssueManagement'
+import QuizManagement from './Pages/Admin/Pages/QuizManagement'
 export default function App() {
 
   return (
@@ -150,10 +151,11 @@ export default function App() {
                   </ProtectedAdminRoute>
                 }
               />
+              <Route path="/QuizManagement" element={<QuizManagement />} />
 
 
               {/* Fallback for unmatched routes */}
-              <Route path="*" element={<NotFoundPage/>} />
+              <Route path="*" element={<NotFoundPage />} />
 
             </Routes>
             <Chatbot />

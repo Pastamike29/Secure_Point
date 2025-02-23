@@ -137,6 +137,26 @@ export default function AdminDashboardSidebar() {
                     opacity: 0.7,
                   },
                 }}
+                onClick={() => handleNavigation('/admin/QuizManagement')}
+              >
+                Quiz Management
+              </Typography>
+            </Box>
+          </List>
+
+          <Divider />
+
+          <List>
+            <Box>
+              <Typography
+                sx={{
+                  cursor: 'pointer',
+                  ml: 3,
+                  my: 1.5,
+                  ':hover': {
+                    opacity: 0.7,
+                  },
+                }}
                 onClick={() => handleNavigation('/admin/LessonPageManagement')}
               >
                 Lesson Management  

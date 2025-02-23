@@ -1,39 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Button,
-  Typography,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormControl,
-  Container,
-  IconButton,
+  Box, Button, Typography, Radio, RadioGroup,
+  FormControlLabel, FormControl, Container, IconButton,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close'; // Import the close icon
+import CloseIcon from '@mui/icons-material/Close';
 import FitImage from '../../../Components/FitImage';
 import { useUser } from '../../../Login/Component/UserAuthen';
-import choices from '../components/choices';
-import axios from 'axios'; // Import Axios
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ResultModal from './ResultModal'; // Import the new ResultModal component
+import ResultModal from './ResultModal';
+
+interface Quiz {
+  id: string;
+  question: string;
+  options: string[];
+  answer: string;
+  image: string;
+}
 
 const QuizPage = () => {
-  const { user } = useUser(); // Get the logged-in user from context
+  const { user } = useUser();
+  const [quizData, setQuizData] = useState<Quiz[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [score, setScore] = useState(0);
-  const [showModal, setShowModal] = useState(false); // Track if the result modal should be shown
-  const [error, setError] = useState(''); // To track any errors
+  const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState('');
 
   const navigate = useNavigate();
-  const username = user || ''; // Default to empty string if user is not logged in
+  const username = user?.username || '';
 
+  // ✅ Fetch Quiz Data from Backend
   useEffect(() => {
-    console.log('Logged in username:', username); // Log the username being used
-  }, [username]);
+    const fetchQuizData = async () => {
+      try {
+        const response = await axios.get<Quiz[]>('http://localhost:5000/getQuizzes');
+        setQuizData(response.data);
+      } catch (error) {
+        console.error('Error fetching quiz data:', error);
+        setError('Failed to load quiz questions.');
+      }
+    };
+    fetchQuizData();
+  }, []);
 
-  const handleAnswerChange = (event) => {
+  const handleAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedAnswer(event.target.value);
   };
 
@@ -43,21 +54,16 @@ const QuizPage = () => {
       return;
     }
 
-
     const scoreData = {
       username: user.username,
-      score: score, // Use actual score
+      score: score,
     };
 
     try {
       const response = await axios.post('http://localhost:5000/submitQuiz', scoreData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
-      console.log("Data being sent:", scoreData);
-
-      console.log('Quiz score saved:', response.data.message);
+      console.log("Quiz score saved:", response.data.message);
     } catch (error) {
       console.error('Error saving score:', error.response?.data.error || error.message);
       setError('Failed to submit score. Please try again later.');
@@ -65,95 +71,96 @@ const QuizPage = () => {
   };
 
   const handleNextQuestion = () => {
-    if (selectedAnswer === choices[currentQuestion].answer) {
+    if (quizData.length === 0) return;
+
+    if (selectedAnswer === quizData[currentQuestion].answer) {
       setScore(score + 1);
     }
 
-    if (currentQuestion + 1 < choices.length) {
+    if (currentQuestion + 1 < quizData.length) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer('');
     } else {
-      handleSubmitScore(); // Submit the score when the last question is reached
-      setShowModal(true);  // Show the result modal when quiz is completed
+      handleSubmitScore();
+      setShowModal(true);
     }
   };
 
   const handleFinish = () => {
-    navigate('/'); // Navigate to homepage
+    navigate('/');
   };
 
   const handleGotoScoreboard = () => {
-    navigate('/ScoreBoard'); // Navigate to scoreboard
+    navigate('/ScoreBoard');
   };
 
   const handleCloseModal = () => {
-    setShowModal(false); // Close the modal when finished
+    setShowModal(false);
   };
 
   return (
     <Container maxWidth="xl">
       <Box sx={{ display: 'flex', py: 20, height: '60vh', width: '90vw', position: 'relative' }}>
-
-        {/* Close Button at the Top-Right Corner */}
-        <IconButton
-          onClick={handleFinish} // Navigates back to the homepage
-          sx={{ position: 'absolute', top: 50, right: 20 }}
-        >
+        <IconButton onClick={handleFinish} sx={{ position: 'absolute', top: 50, right: 20 }}>
           <CloseIcon />
         </IconButton>
 
-        {/* Conditionally render the image only when the quiz is not finished */}
-        
-          <Box>
-            <Box width="40%">
-              <FitImage src={choices[currentQuestion].image} /> {/* Dynamic image */}
+        {quizData.length > 0 ? (
+          <>
+            <Box width="50%">
+              <FitImage src={quizData[currentQuestion].image} />
             </Box>
-          </Box>
-        
 
-        <Box sx={{ mt: 10, textAlign: 'center', width: '60%' }}>
-          <Box>
-            <Typography variant="h4" gutterBottom>
-              Quiz {currentQuestion + 1} of {choices.length}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              {choices[currentQuestion].question}
-            </Typography>
-            <FormControl component="fieldset">
-              <RadioGroup value={selectedAnswer} onChange={handleAnswerChange}>
-                {choices[currentQuestion].options.map((option, index) => (
-                  <FormControlLabel
-                    key={index}
-                    value={option}
-                    control={<Radio />}
-                    label={option}
-                  />
-                ))}
-              </RadioGroup>
-            </FormControl>
-          </Box>
-          <Box sx={{ p: 5 }}>
-            {currentQuestion + 1 === choices.length ? (
-              // Show "Finish" button only when on the last question
-              <Button variant='contained' onClick={handleNextQuestion} disabled={!selectedAnswer}>
-                Finish
-              </Button>
-            ) : (
-              // Show "Next" button for other questions
-              <Button variant='contained' onClick={handleNextQuestion} disabled={!selectedAnswer}>
-                Next
-              </Button>
-            )}
-          </Box>
-        </Box>
+            <Box sx={{ mt: 10, textAlign: 'center', width: '60%' }}>
+              <Typography variant="h4" gutterBottom>
+                Quiz {currentQuestion + 1} of {quizData.length}
+              </Typography>
+
+              {/* ✅ Auto line-breaks for long questions */}
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  whiteSpace: "pre-wrap",  // ✅ Allows text wrapping
+                  wordBreak: "break-word", // ✅ Breaks long words
+                  maxWidth: "100%",        // ✅ Ensures it fits in the container
+                  textAlign: "center",
+                }}
+              >
+                {quizData[currentQuestion].question}
+              </Typography>
+
+              <FormControl component="fieldset">
+                <RadioGroup value={selectedAnswer} onChange={handleAnswerChange}>
+                  {quizData[currentQuestion].options.map((option, index) => (
+                    <FormControlLabel key={index} value={option} control={<Radio />} label={option} />
+                  ))}
+                </RadioGroup>
+              </FormControl>
+
+              <Box sx={{ p: 5 }}>
+                {currentQuestion + 1 === quizData.length ? (
+                  <Button variant='contained' onClick={handleNextQuestion} disabled={!selectedAnswer}>
+                    Finish
+                  </Button>
+                ) : (
+                  <Button variant='contained' onClick={handleNextQuestion} disabled={!selectedAnswer}>
+                    Next
+                  </Button>
+                )}
+              </Box>
+            </Box>
+          </>
+        ) : (
+          <Typography variant="h6" color="error">Loading quiz questions...</Typography>
+        )}
       </Box>
 
-      {/* Result Modal */}
       <ResultModal
         open={showModal}
         handleClose={handleCloseModal}
         score={score}
-        totalQuestions={choices.length}
+        totalQuestions={quizData.length}
         handleFinish={handleFinish}
         handleGotoScoreboard={handleGotoScoreboard}
         error={error}

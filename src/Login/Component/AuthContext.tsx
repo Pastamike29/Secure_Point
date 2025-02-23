@@ -14,20 +14,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [role, setRole] = useState<string | null>(null);
   const [logoutTimeout, setLogoutTimeout] = useState<NodeJS.Timeout | null>(null);
 
+  // ✅ Runs on page load - Ensures timeout starts if the user is logged in
   useEffect(() => {
-    const storedRole = localStorage.getItem('userRole'); // 🔹 Load stored role
-    if (storedRole) {
+    const storedRole = sessionStorage.getItem('userRole');
+    const storedToken = document.cookie.split('; ').find(row => row.startsWith('token='));
+
+    if (storedRole && storedToken) {
       setIsAuthenticated(true);
       setRole(storedRole);
+      startAutoLogout();
     }
+
   }, []);
 
+  const startAutoLogout = useCallback(() => {
+    if (logoutTimeout) {
+      clearTimeout(logoutTimeout);
+    }
+
+    const timeout = setTimeout(() => {
+      logout();
+    }, 300000); // 5 minutes (300,000 ms)
+
+    setLogoutTimeout(timeout);
+  }, [logoutTimeout]);
 
   const logout = useCallback(() => {
     setIsAuthenticated(false);
     setRole(null);
+
     localStorage.removeItem('userRole'); // 🔹 Remove role on logout
     localStorage.removeItem('token'); // 🔹 Ensure token is also cleared
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // ❌ Expire token
 
     if (logoutTimeout) {
       clearTimeout(logoutTimeout);
@@ -41,13 +59,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRole(userRole);
     localStorage.setItem('userRole', userRole);
 
-    // Redirect based on role
-    if (userRole === 'admin') {
-      window.location.href = '/admin/UserManagement';  // 🔹 Admins go to /admin
-    } else {
-      window.location.href = '/LoginPage'; // 🔹 Normal users go to /LoginPage
-    }
-
     if (logoutTimeout) {
       clearTimeout(logoutTimeout);
     }
@@ -55,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Auto-logout after 1 hour
     const timeout = setTimeout(() => {
       logout();
-    }, 3600000);
+    }, 300000);
 
     setLogoutTimeout(timeout);
   };

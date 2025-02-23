@@ -14,7 +14,7 @@ import { Search } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 const SearchBar: React.FC = () => {
-  const theme = useTheme(); // Get current theme
+  const theme = useTheme();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredResults, setFilteredResults] = useState<{ name: string; type: 'lesson' | 'code'; path: string }[]>([]);
@@ -29,7 +29,6 @@ const SearchBar: React.FC = () => {
     }
   }, [searchQuery]);
 
-  // Fetch search results from backend
   const fetchSearchResults = async (query: string) => {
     try {
       const response = await fetch(`http://localhost:5000/api/search?query=${encodeURIComponent(query)}`);
@@ -46,7 +45,6 @@ const SearchBar: React.FC = () => {
     }
   };
 
-  // Handle selecting a search result
   const handleSelectResult = (path: string) => {
     navigate(path);
     setFilteredResults([]);
@@ -55,7 +53,7 @@ const SearchBar: React.FC = () => {
   };
 
   return (
-    <Box sx={{ position: 'relative', width: '300px' ,ml:3,mr:5}}> {/* Increased width for better UX */}
+    <Box sx={{ position: 'relative', width: '320px', ml: 3, mr: 5 }}>
       <TextField
         fullWidth
         value={searchQuery}
@@ -63,22 +61,22 @@ const SearchBar: React.FC = () => {
         placeholder="Search for lessons or vulnerabilities..."
         variant="outlined"
         sx={{
-          bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'white',
-          borderRadius: '25px', // Soft rounded corners
-          boxShadow: theme.palette.mode === 'dark' ? '0px 2px 8px rgba(255, 255, 255, 0.1)' : '0px 2px 8px rgba(0, 0, 0, 0.1)',
+          bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'white',
+          borderRadius: '12px',
+          boxShadow: theme.palette.mode === 'dark' ? '0px 2px 10px rgba(255, 255, 255, 0.05)' : '0px 2px 10px rgba(0, 0, 0, 0.1)',
+          transition: '0.3s',
           '& .MuiOutlinedInput-root': {
             height: '50px',
             paddingRight: '10px',
-            transition: '0.3s',
             '& fieldset': {
-              borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.1)',
+              borderColor: 'transparent',
             },
             '&:hover fieldset': {
               borderColor: theme.palette.primary.main,
             },
             '&.Mui-focused fieldset': {
               borderColor: theme.palette.primary.main,
-              boxShadow: `0px 0px 10px ${theme.palette.primary.main}`,
+              boxShadow: `0px 0px 12px ${theme.palette.primary.main}`,
             },
           },
           input: {
@@ -106,10 +104,11 @@ const SearchBar: React.FC = () => {
             zIndex: 20,
             maxHeight: 250,
             overflowY: 'auto',
-            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'white',
-            borderRadius: '15px',
-            boxShadow: theme.palette.mode === 'dark' ? '0px 4px 10px rgba(255, 255, 255, 0.1)' : '0px 4px 10px rgba(0, 0, 0, 0.15)',
-            backdropFilter: 'blur(10px)', // Glassmorphism effect
+            bgcolor: theme.palette.mode === 'dark' ? 'rgba(25, 25, 25, 0.9)' : 'white',
+            borderRadius: '12px',
+            boxShadow: theme.palette.mode === 'dark' ? '0px 4px 15px rgba(255, 255, 255, 0.1)' : '0px 4px 15px rgba(0, 0, 0, 0.15)',
+            backdropFilter: 'blur(12px)',
+            border: theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(0, 0, 0, 0.1)',
           }}
         >
           <List>
@@ -119,8 +118,9 @@ const SearchBar: React.FC = () => {
                   onClick={() => handleSelectResult(item.path)}
                   sx={{
                     transition: '0.2s',
+                    borderRadius: '8px',
                     '&:hover': {
-                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
                     },
                   }}
                 >

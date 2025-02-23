@@ -7,7 +7,7 @@ const choices = [
          'Data encryption',
          'DDoS attack',
          'Server crash',
-       ],
+       ], 
        answer: 'User session hijacking',
        image: 'https://firebasestorage.googleapis.com/v0/b/p-c58c4.firebasestorage.app/o/Secure_P_Project%2Fquiz_1.png?alt=media&token=85d87547-3467-4189-9c64-8ab9ed25d28b',
      },
