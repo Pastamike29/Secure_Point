@@ -151,7 +151,7 @@ const QuizManagement: React.FC = () => {
           <AdminDashboardLayout>
                <Container>
                     <Typography variant="h4" sx={{ mt: 3, mb: 2 }}>Quiz Admin Panel</Typography>
-                    <Button variant="contained" color="primary" sx={{my:3}} onClick={handleOpen}>Add New Quiz</Button>
+                    <Button variant="contained" color="primary" sx={{ my: 3 }} onClick={handleOpen}>Add New Quiz</Button>
 
                     <List>
                          {quizzes.map((quiz) => (
@@ -234,7 +234,21 @@ const QuizManagement: React.FC = () => {
                                    </Button>
                               </Box>
 
-                              <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 2 }} disabled={loading}>
+                              <Button
+                                   variant="contained"
+                                   color="primary"
+                                   onClick={handleSubmit}
+                                   sx={{
+                                        mt: 3,
+                                        width: "100%", // ✅ Makes button take full width
+                                        display: "flex", // ✅ Ensures proper centering of content
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        py: 1, // ✅ Adds padding for a better look
+                                   }}
+                                   disabled={loading}
+                                   fullWidth // ✅ Ensures the button takes the full width
+                              >
                                    {loading ? <CircularProgress size={24} sx={{ color: "white" }} /> : editId ? "Update Quiz" : "Create Quiz"}
                               </Button>
                          </Box>

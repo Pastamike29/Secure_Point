@@ -24,6 +24,7 @@
     "dompurify": "^3.2.3",
     "emailjs-com": "^3.2.0",
     "flowise-embed-react": "^1.0.6",
+    "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "luxon": "^3.5.0",

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
-  Avatar,
   Button,
   Card,
   CardContent,
@@ -10,14 +9,21 @@ import {
   LinearProgress
 } from '@mui/material';
 import { toast } from 'react-toastify';
-import { User } from '../../../../Login/Component/UserAuthen'; // Adjust the import path as necessary
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import ResponsiveAppBar from '../../../../Components/Navbar';
+import Cookies from 'js-cookie'; // ✅ Import Cookies
+
+interface User {
+  username: string;
+  email: string;
+  birthDate: string | null;
+}
 
 const ProfilePage: React.FC = () => {
   const [userData, setUserData] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true); // ✅ Added loading state
   const navigate = useNavigate();
 
   const handleUpdateProfile = () => {
@@ -26,27 +32,33 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('auth_token'); // ✅ Read token from cookies
+
       if (!token) {
-        toast.error('User is not logged in');
+        toast.error('Session expired. Please log in again.');
+        navigate('/LoginPage'); // ✅ Redirect to login if no token
         return;
       }
 
       try {
+        console.log('Fetching user profile...'); // ✅ Debugging log
         const response = await axios.get('http://localhost:5000/user/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true, // ✅ Ensures cookies are sent
         });
+
+        console.log('User Data:', response.data); // ✅ Debugging log
         setUserData(response.data);
       } catch (error) {
         console.error('Error fetching user profile:', error);
-        toast.error('Failed to fetch user data');
+        toast.error('Failed to fetch user data. Please log in again.');
+        navigate('/LoginPage'); // ✅ Redirect if API request fails
+      } finally {
+        setLoading(false); // ✅ Stop loading after API call
       }
     };
 
     fetchUserProfile();
-  }, []);
+  }, [navigate]);
 
   return (
     <>
@@ -62,13 +74,17 @@ const ProfilePage: React.FC = () => {
           p: 2,
         }}
       >
-        {!userData ? (
+        {loading ? ( // ✅ Show loading indicator
           <Box sx={{ width: '50%', maxWidth: 400 }}>
             <LinearProgress />
             <Typography variant="subtitle1" align="center" sx={{ mt: 2 }}>
               Loading your profile...
             </Typography>
           </Box>
+        ) : !userData ? ( // ✅ Show error if no data
+          <Typography variant="h6" color="error">
+            Failed to load profile. Please try again.
+          </Typography>
         ) : (
           <Card
             sx={{
@@ -82,18 +98,6 @@ const ProfilePage: React.FC = () => {
             }}
           >
             <Box sx={{ mb: 2 }}>
-              {/* <Avatar
-              alt="Profile Picture"
-              src={userData.profileImage || '/default-profile.png'}
-              sx={{
-                width: 120,
-                height: 120,
-                mx: 'auto',
-                mb: 2,
-                border: '2px solid',
-                borderColor: 'primary.main',
-              }}
-            /> */}
               <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
                 {userData.username}
               </Typography>

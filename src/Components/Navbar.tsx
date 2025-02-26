@@ -17,6 +17,7 @@ import LoginModal from '../Login/LoginModal';
 import ThemeToggle from '../assets/Themes/ThemeToggle';
 import { useAuth } from '../Login/Component/AuthContext'; // 🔹 Import Auth Context
 import SearchBar from './SearchBar';
+import axios from 'axios';
 
 export default function ResponsiveAppBar() {
   const pages = ['Lesson', 'Code Example', 'Overview', 'Quiz'];
@@ -35,17 +36,26 @@ export default function ResponsiveAppBar() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('userRole'); // 🔹 Fetch user role from localStorage
+    const verifyAuth = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/auth/check', { withCredentials: true });
 
-    if (token) {
-      setIsLoggedIn(true);
-      if (userRole === 'admin') {
-        setIsAdmin(true);
+        if (response.status === 200) {
+          setIsLoggedIn(true);
+
+          // ✅ Check user role from cookie
+          const role = document.cookie.split('; ').find(row => row.startsWith('user_role='));
+          setIsAdmin(role?.split('=')[1] === 'admin'); // ✅ Fix role detection
+        }
+      } catch (error) {
+        console.error('Failed to verify authentication:', error);
+        setIsLoggedIn(false);
+        setIsAdmin(false);
       }
-    }
-  }, []);
+    };
 
+    verifyAuth();
+  }, [isAuthenticated]); // ✅ Ensures navbar updates after login  
 
 
   const handleNavigate = (page: string) => {
@@ -79,26 +89,59 @@ export default function ResponsiveAppBar() {
     handleCloseQuizMenu();
   };
 
-  const handleSetting = (setting: string) => {
+  const handleSetting = async (setting: string) => {
+    console.log('Clicked Setting:', setting); // ✅ Debugging Log
+
     switch (setting) {
       case 'Profile':
+        console.log('Navigating to ProfilePage...'); // ✅ Log before navigating
         navigate('/ProfilePage');
         break;
-      case 'Feedback':
-        setIsFeedbackOpen(true);
+      case "Feedback":
+        console.log("Opening Feedback Modal..."); // ✅ Debug Log
+        setIsFeedbackOpen(true); // ✅ This should trigger re-render
         break;
       case 'Logout':
-        localStorage.removeItem('token');
-        localStorage.removeItem('userRole'); // 🔹 Remove role when logging out
-        setIsLoggedIn(false);
-        setIsAdmin(false);
-        navigate('/');
+        try {
+          await axios.post(
+            "http://localhost:5000/auth/logout",
+            {},
+            { withCredentials: true }
+          );
+          console.log("Successfully logged out!");
+          document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie = "user_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          setIsLoggedIn(false);
+          setIsAdmin(false);
+          navigate("/LoginPage");
+        } catch (error) {
+          console.error("Logout failed:", error);
+        }
         break;
       default:
         break;
     }
-    setAnchorElUser(null);
   };
+
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
+
+      console.log('Successfully logged out!');
+
+      // ✅ Clear Cookies on frontend (For extra safety, but backend is main)
+      document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie = "user_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+      navigate('/LoginPage');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
 
 
   const handleFeedbackClose = () => {
@@ -302,10 +345,10 @@ export default function ResponsiveAppBar() {
                 Scoreboard
               </MenuItem>
             </Menu>
-              
-              <Box>
-                <SearchBar />
-              </Box>
+
+            <Box>
+              <SearchBar />
+            </Box>
             {/* User Menu */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               {/* Theme Toggle */}

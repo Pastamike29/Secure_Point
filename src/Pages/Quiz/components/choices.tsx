@@ -51,7 +51,7 @@ const choices = [
        question: 'Which one does not related to OWASP A04:2021 - Insecure Design',
        options: [
          'Does not manage expire session',
-         'Designing a system without considering SQL Injection vulnerabilities ',
+         'Designing a system without considering SQL Injection vulnerabilities',
          'Does not design Threat Modeling before developed application',
          'Stored confidential information by unencryption',
          'Incorporate security into each phase of the software development lifecycle (SDLC)',

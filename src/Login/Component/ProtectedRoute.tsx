@@ -1,46 +1,88 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from './AuthContext';
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
-// ProtectedRoute for general logged-in users
+// ✅ ProtectedRoute for general logged-in users
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const isLoggedIn = !!sessionStorage.getItem('user'); // Check sessionStorage for user data
+  const token = Cookies.get('auth_token');
 
-  if (!isLoggedIn) {
-    // Redirect to login if not logged in
+  if (!token) {
     return <Navigate to="/LoginPage" />;
   }
 
-  // If logged in, render the requested page (children)
   return <>{children}</>;
 };
 
-// GuestRoute for unauthenticated users only
+// ✅ GuestRoute for unauthenticated users only
 export const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, role } = useAuth();
-  const storedUser = sessionStorage.getItem('user'); // ✅ Ensure it checks storage
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  if (isAuthenticated || storedUser) {
-    return <Navigate to={role === 'admin' ? '/admin/UserManagement' : '/'} replace />;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/auth/check', { withCredentials: true });
+
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+          setUserRole(Cookies.get('user_role'));
+        }
+      } catch (error) {
+        console.error("Authentication check failed", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to={userRole === 'admin' ? '/admin/UserManagement' : '/'} replace />;
   }
 
   return <>{children}</>;
 };
 
 
-// ProtectedAdminRoute for admin users only
+// ✅ ProtectedAdminRoute for admin users only
 export const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, role } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/LoginPage" replace />;  // Redirect to login if not authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/auth/check', { withCredentials: true });
+
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+          setUserRole(Cookies.get('user_role')); // Get from non-HttpOnly cookie
+        }
+      } catch (error) {
+        console.error("Authentication check failed", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Prevents premature redirection
   }
 
-  if (role !== 'admin') {
-    return <Navigate to="/404" replace />;  // Redirect non-admins to 404
+  if (!isAuthenticated || userRole !== 'admin') {
+    return <Navigate to="/LoginPage" replace />;
   }
 
-
-  return <>{children}</>; // ✅ Render children if user is an admin
-
+  return <>{children}</>;
 };

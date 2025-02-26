@@ -107,29 +107,9 @@ const TicketManagement: React.FC = () => {
     return (
         <AdminDashboardLayout>
             <Box sx={{ padding: 4 }}>
-                <Typography variant="h4" gutterBottom>
+                <Typography variant="h5" gutterBottom>
                     Ticket Management
                 </Typography>
-
-                {/* <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                        setFormData({
-                            application_number: '',
-                            employee_id: '',
-                            application_name: '',
-                            name: '',
-                            finding_issue: '',
-                            email: '',
-                            message: '',
-                        });
-                        setEditingTicket(null);
-                        setDialogOpen(true);
-                    }}
-                >
-                    Create Ticket
-                </Button> */}
 
                 <TableContainer component={Paper} sx={{ marginTop: 4 }}>
                     <Table>

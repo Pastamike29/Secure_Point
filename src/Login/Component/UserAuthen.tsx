@@ -1,30 +1,29 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
 
-// Define the shape of your user data
 export interface User {
   username: string;
   email: string;
-  role: string;  // Role field
+  role: string;
   birthDate: string | null;
-  quiz_amount: number;      // Field to track the number of quizzes submitted
+  quiz_amount: number;
 }
 
-// Create a context with a default value
 const UserContext = createContext<{ user: User | null; setUser: React.Dispatch<React.SetStateAction<User | null>> } | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-      const storedUser = localStorage.getItem('user');
-      return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-      if (user) {
-          localStorage.setItem('user', JSON.stringify(user));
+      const token = Cookies.get('auth_token'); 
+      const role = Cookies.get('user_role'); 
+
+      if (token && role) {
+          setUser({ username: "", email: "", role, birthDate: null, quiz_amount: 0 });
       } else {
-          localStorage.removeItem('user');
+          setUser(null);
       }
-  }, [user]);
+  }, []);
 
   return (
       <UserContext.Provider value={{ user, setUser }}>
@@ -33,8 +32,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-
-// Custom hook to use the UserContext
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {

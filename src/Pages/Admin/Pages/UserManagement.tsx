@@ -204,8 +204,9 @@ const UserManagement: React.FC = () => {
   }, []);
 
   return (
-    <AdminDashboardLayout title="User Management">
+    <AdminDashboardLayout>
       <Container>
+        <Typography variant='h5'>User Management</Typography>
         <Button variant="contained" color="primary" onClick={() => handleClickOpen()} sx={{ my: 2 }}>
           Add User
         </Button>
