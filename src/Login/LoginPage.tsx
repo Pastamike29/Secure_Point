@@ -47,7 +47,9 @@ const LoginPage = () => {
     const attemptLogin = async () => {
         try {
             const response = await axios.post(
-                'http://localhost:5000/auth/login',
+                process.env.NODE_ENV === 'production'
+                    ? 'https://your-production-api.com/auth/login'
+                    : 'http://localhost:5000/auth/login',
                 { email, password },
                 {
                     withCredentials: true,
@@ -57,57 +59,75 @@ const LoginPage = () => {
 
             console.log("Login Response:", response);
 
-            // ✅ Wait for cookies to be set
-            setTimeout(() => {
-                const userRole = Cookies.get('user_role');
+            // ✅ Read role from JSON response instead of cookies
+            const userRole = response.data.role;
 
-                if (!userRole) {
-                    toast.error('Login failed. No role found.');
-                    return;
-                }
+            if (!userRole) {
+                toast.error('Login failed. No role found.');
+                handleFailedAttempt(false); // ✅ Call failed attempt handler
+                return;
+            }
 
-                toast.success('Login successful!');
-                navigate(userRole === 'admin' ? '/admin/UserManagement' : '/');
-            }, 500); // ✅ Add slight delay
+            // ✅ Reset failed login attempts on success
+            setCurrentAttempts(0);
+            Cookies.set('currentAttempts', '0', { expires: 1, path: '/' });
 
+            toast.success('Login successful!');
+            navigate(userRole === 'admin' ? '/admin/UserManagement' : '/');
         } catch (error) {
             console.error("Login Error:", error.response ? error.response.data : error.message);
-            toast.error(error.response?.data?.error || "Login failed. Please try again.");
+
+            // ✅ Always call `handleFailedAttempt()` on login failure
+            handleFailedAttempt();
         }
     };
 
-    // ✅ Handle failed login attempt logic
-    const handleFailedAttempt = () => {
+
+    // Handles failed login attempt logic
+    const handleFailedAttempt = (showToast = true) => {
+        const storedAttempts = Cookies.get('currentAttempts');
+        const currentAttempts = storedAttempts ? parseInt(storedAttempts, 10) : 0;
         const newAttempts = currentAttempts + 1;
-        setCurrentAttempts(newAttempts);
-        Cookies.set('currentAttempts', newAttempts.toString());
-
+    
+        Cookies.set('currentAttempts', newAttempts.toString(), { expires: 1, path: '/' }); // ✅ Store in Cookies
+    
         if (newAttempts >= 3) {
-            const lockoutDuration = 30; // 30 seconds
+            const lockoutDuration = 30; // Lockout time in seconds
             const lockoutEndTime = Date.now() + lockoutDuration * 1000;
-            Cookies.set('lockoutEndTime', lockoutEndTime.toString());
-
+            Cookies.set('lockoutEndTime', lockoutEndTime.toString(), { expires: 1, path: '/' }); // ✅ Store lockout time in Cookies
+    
             setLockoutTime(lockoutDuration);
-            toast.error(`Too many failed attempts. Please wait ${lockoutDuration} seconds before trying again.`);
-
+    
+            // ✅ Show lockout message only once
+            if (showToast) {
+                toast.error(`Too many failed attempts. Please wait ${lockoutDuration} seconds before trying again.`);
+            }
+    
+            // Ensure only ONE interval is running
             if (intervalRef.current) clearInterval(intervalRef.current);
-
+    
             intervalRef.current = setInterval(() => {
                 setLockoutTime((prevTime) => {
-                    if (!prevTime || prevTime <= 1) {
+                    if (prevTime === null || prevTime <= 1) {
                         clearInterval(intervalRef.current!);
                         Cookies.remove('lockoutEndTime');
-                        setCurrentAttempts(0);
-                        Cookies.set('currentAttempts', '0');
+                        Cookies.set('currentAttempts', '0', { expires: 1, path: '/' }); // ✅ Reset attempts
                         return null;
                     }
                     return prevTime - 1;
                 });
             }, 1000);
         } else {
-            toast.error('Invalid email or password', { position: 'top-right', autoClose: 3000 });
+            // ✅ Prevent duplicate error toast
+            if (showToast) {
+                toast.error('Invalid email or password', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                });
+            }
         }
     };
+    
 
     // ✅ Handle "Enter" key for login
     useEffect(() => {
@@ -131,7 +151,7 @@ const LoginPage = () => {
             width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4,
         }}>
 
-            <Typography variant="h4" sx={{mb:5}} gutterBottom>Sign in</Typography>
+            <Typography variant="h4" sx={{ mb: 5 }} gutterBottom>Sign in</Typography>
             <IconButton
                 sx={{ position: 'absolute', top: 10, right: 8 }}
                 onClick={() => navigate('/')}
