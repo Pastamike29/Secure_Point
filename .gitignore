@@ -27,3 +27,6 @@ dist-ssr
 yarn.lock
 package.json
 package-lock.json
+docker-compose.yml
+Dockerfile
+Error.tsx
